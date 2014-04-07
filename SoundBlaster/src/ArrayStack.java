@@ -26,7 +26,7 @@ public class ArrayStack implements DStack {
 	public void push(double d) {
 		// Resize the array to 2 times its previous size if it is full
 		if (size == data.length) {
-			data = Arrays.copyOf(data, size * 2);
+			data = copyOf(data, size * 2);
 		}
 		
 		data[size++] = d;
@@ -41,7 +41,7 @@ public class ArrayStack implements DStack {
 		
 		// Resize the stack if it is 3/4 empty (extra credit)
 		if (size * 4 <= data.length)
-			data = Arrays.copyOf(data, data.length / 2);
+			data = copyOf(data, data.length / 2);
 		
 		return data[size];
 	}
@@ -54,4 +54,13 @@ public class ArrayStack implements DStack {
 		return data[size - 1];
 	}
 	
+	private double[] copyOf(double[] original, int newLength) {
+		double[] copy = new double[newLength];
+		
+		for (int i = newLength - 1; i >= 0; --i) {
+			copy[i] = original[i];
+		}
+		
+		return copy;
+	}
 }
