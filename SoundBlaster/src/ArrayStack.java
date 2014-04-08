@@ -57,7 +57,7 @@ public class ArrayStack implements DStack {
 	private double[] copyOf(double[] original, int newLength) {
 		double[] copy = new double[newLength];
 		
-		for (int i = newLength - 1; i >= 0; --i) {
+		for (int i = size - 1; i >= 0; --i) {
 			copy[i] = original[i];
 		}
 		
