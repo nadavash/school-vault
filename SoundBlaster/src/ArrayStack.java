@@ -40,7 +40,7 @@ public class ArrayStack implements DStack {
 		size--;
 		
 		// Resize the stack if it is 3/4 empty (extra credit)
-		if (size * 4 <= data.length)
+		if (size * 4 <= data.length && size > 10)
 			data = copyOf(data, data.length / 2);
 		
 		return data[size];
