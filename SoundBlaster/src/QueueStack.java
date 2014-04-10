@@ -42,11 +42,7 @@ public class QueueStack implements DStack {
     @Override
     public void push(double value) {
         // TODO write your push operation here
-    	if (queue.isEmpty()) {
-    		queue2.enqueue(value);
-    	} else {
-    		queue.enqueue(value);
-    	}
+    	queue.enqueue(value);
     }
 
     /**
@@ -57,22 +53,19 @@ public class QueueStack implements DStack {
      */
     @Override
     public double pop() {
-    	FIFOQueue to = queue2;
-    	FIFOQueue from = queue;
     	if (queue.isEmpty()) {
-    		to = queue;
-    		from = queue2;
-    	}
-    	
-    	if (from.isEmpty()) {
     		throw new EmptyStackException();
     	}
     	
-    	while (from.size() > 1) {
-    		to.enqueue(from.dequeue());
+    	while (queue.size() > 1) {
+    		queue.enqueue(queue2.dequeue());
     	}
     	
-    	return from.dequeue();
+    	FIFOQueue temp = queue;
+    	queue = queue2;
+    	queue2 = temp;
+    	
+    	return queue.dequeue();
     }
 
     // ////////////////////////////////////////////////////////////////
