@@ -27,8 +27,7 @@ public class ArrayStackTest {
 		stack.push(40);
 		stack.push(30);
 		
-		System.out.println(stack.pop());
-		//assertEquals("Pop does not pop the correct element.", 30.0, stack.pop(), 0.2);
+		assertEquals("Pop does not pop the correct element.", 30.0, stack.pop(), 0.2);
 		assertEquals("Pop does not pop the correct element.", 40.0, stack.pop(), 0.2);
 		assertEquals("Pop does not pop the correct element.", 50.0, stack.pop(), 0.2);
 		assertTrue("Stack isn't empty.", stack.isEmpty());
