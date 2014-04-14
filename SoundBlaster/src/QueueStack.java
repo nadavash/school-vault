@@ -58,14 +58,15 @@ public class QueueStack implements DStack {
     	}
     	
     	while (queue.size() > 1) {
-    		queue.enqueue(queue2.dequeue());
+    		queue2.enqueue(queue.dequeue());
     	}
     	
+    	double val = queue.dequeue();
     	FIFOQueue temp = queue;
     	queue = queue2;
     	queue2 = temp;
     	
-    	return queue.dequeue();
+    	return val;
     }
 
     // ////////////////////////////////////////////////////////////////

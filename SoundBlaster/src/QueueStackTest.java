@@ -1,18 +1,15 @@
-
 import static org.junit.Assert.*;
 
 import java.util.EmptyStackException;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 
-public class ListStackTest {
+public class QueueStackTest {
 
 	@Test
 	public void testPush() {
-		ListStack stack = new ListStack();
+		QueueStack stack = new QueueStack();
 		stack.push(50);
 		stack.push(40);
 		stack.push(30);
@@ -22,7 +19,7 @@ public class ListStackTest {
 
 	@Test
 	public void testPop() {
-		ListStack stack = new ListStack();
+		QueueStack stack = new QueueStack();
 		stack.push(50);
 		stack.push(40);
 		stack.push(30);
@@ -40,11 +37,11 @@ public class ListStackTest {
 
 	@Test
 	public void testPeek() {
-		ListStack stack = new ListStack();
-		try {
-			stack.peek();
-			fail("Empty stack exception not thrown.");
-		} catch (EmptyStackException e) { }
+		QueueStack stack = new QueueStack();
+//		try {
+//			stack.peek();
+//			fail("Empty stack exception not thrown.");
+//		} catch (EmptyStackException e) { }
 		
 		stack.push(50);
 		stack.push(40);
@@ -57,7 +54,7 @@ public class ListStackTest {
 	
 	@Test
 	public void testIsEmpty() {
-		ListStack stack = new ListStack();
+		QueueStack stack = new QueueStack();
 		assertTrue("Stack isn't empty", stack.isEmpty());
 		
 		stack.push(302.2);
@@ -67,8 +64,8 @@ public class ListStackTest {
 		assertTrue("Stack isn't empty", stack.isEmpty());
 	}
 	
-	private ListStack CreateFilledStack(int num) {
-		ListStack stack = new ListStack();
+	private QueueStack CreateFilledStack(int num) {
+		QueueStack stack = new QueueStack();
 		
 		for (int i = 0; i < num; ++i) {
 			stack.push(Math.random() * 50);
