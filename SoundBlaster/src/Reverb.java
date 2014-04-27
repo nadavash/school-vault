@@ -102,7 +102,7 @@ public class Reverb {
             // Since the first column consists of numbers which start
             // at 0 and increase by 1/sampleRate every time slice, we'll
             // just use numSteps to recalculate these numbers.
-            int numSteps = 0;
+//            int numSteps = 0;
 
             // Finally, we print the values in reverse order (by popping
             // them off the stack). The first column consists of numbers
@@ -110,10 +110,10 @@ public class Reverb {
             // we'll use numSteps/sampleRate to recalculate the appropriate
             // values. Print a tab for uniform spacing.
 
-            while (!s.isEmpty()) {
-                fileOut.println((double) numSteps / sampleRate + "\t" + s.pop());
-                numSteps++;
-            }
+//            while (!s.isEmpty()) {
+//                fileOut.println((double) numSteps / sampleRate + "\t" + s.pop());
+//                numSteps++;
+//            }
 
             //
             // Close the files
