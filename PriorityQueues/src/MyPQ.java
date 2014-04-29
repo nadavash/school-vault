@@ -7,59 +7,82 @@
  *
  */
 public class MyPQ implements PriorityQueue {
+	private ListNode head;
+	private int size;
 
-	/* (non-Javadoc)
-	 * @see PriorityQueue#isEmpty()
-	 */
 	@Override
 	public boolean isEmpty() {
 		// TODO Auto-generated method stub
-		return false;
+		return size == 0;
 	}
 
-	/* (non-Javadoc)
-	 * @see PriorityQueue#size()
-	 */
 	@Override
 	public int size() {
-		// TODO Auto-generated method stub
-		return 0;
+		return size;
 	}
 
-	/* (non-Javadoc)
-	 * @see PriorityQueue#findMin()
-	 */
 	@Override
 	public double findMin() {
-		// TODO Auto-generated method stub
-		return 0;
+		if (isEmpty())
+			throw new EmptyPQException();
+		
+		return head.value;
 	}
 
-	/* (non-Javadoc)
-	 * @see PriorityQueue#insert(double)
-	 */
 	@Override
 	public void insert(double x) {
-		// TODO Auto-generated method stub
-
+		size++;
+		
+		if (head == null) {
+			head = new ListNode(x);
+			return;
+		}
+		
+		if (head.value >= x) {
+			head = new ListNode(x, head);
+			return;
+		}
+		
+		ListNode current = head;
+		while (current.next != null) {
+			if (current.next.value >= x) {
+				current.next = new ListNode(x, current.next);
+				return;
+			}
+			current = current.next;
+		}
+		
+		current.next = new ListNode(x);
 	}
 
-	/* (non-Javadoc)
-	 * @see PriorityQueue#deleteMin()
-	 */
 	@Override
 	public double deleteMin() {
-		// TODO Auto-generated method stub
-		return 0;
+		if (isEmpty())
+			throw new EmptyPQException();
+		
+		double deleted = head.value;
+		head = head.next;
+		size--;
+		return deleted;
 	}
 
-	/* (non-Javadoc)
-	 * @see PriorityQueue#makeEmpty()
-	 */
 	@Override
 	public void makeEmpty() {
-		// TODO Auto-generated method stub
-
+		head = null;
+		size = 0;
 	}
 
+	private static class ListNode {
+		public double value;
+		public ListNode next;
+		
+		public ListNode(double value, ListNode next) {
+			this.value = value;
+			this.next = next;
+		}
+		
+		public ListNode(double value) {
+			this(value, null);
+		}
+	}
 }

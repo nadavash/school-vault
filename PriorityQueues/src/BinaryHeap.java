@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 /**
  * 
  * @author nadavash
@@ -28,6 +30,9 @@ public class BinaryHeap implements PriorityQueue {
 
 	@Override
 	public double findMin() {
+		if (isEmpty())
+			throw new EmptyPQException();
+		
 		return heapElements[ROOT_POSITION];
 	}
 
@@ -42,10 +47,10 @@ public class BinaryHeap implements PriorityQueue {
 	}
 	
 	// Percolates a specific value up from the specified hole position.
-	// Each value lower in priority above it get move down until no such
+	// Each value lower in priority above it get moved down until no such
 	// values exist.
 	private int percolateUp(int hole, double value) {
-		while (hole > 1 && value > heapElements[hole / 2]) {
+		while (hole > 1 && value < heapElements[hole / 2]) {
 			heapElements[hole] = heapElements[hole / 2];
 			hole /= 2;
 		}
@@ -58,9 +63,9 @@ public class BinaryHeap implements PriorityQueue {
 			throw new EmptyPQException();
 		
 		double res = heapElements[ROOT_POSITION];
-		int hole = percolateDown(1, heapElements[size]);
+		int hole = percolateDown(ROOT_POSITION, heapElements[size]);
 		heapElements[hole] = heapElements[size]; 
-		
+		size--;
 		return res;
 	}
 	
@@ -70,7 +75,7 @@ public class BinaryHeap implements PriorityQueue {
 		int target;
 		while (2 * hole <= size) {
 			left = 2 * hole;
-			right = hole + 1;
+			right = left + 1;
 			
 			if (right > size || heapElements[left] < heapElements[right])
 				target = left;
@@ -94,9 +99,10 @@ public class BinaryHeap implements PriorityQueue {
 	// Resizes heap and copies all values into a new heap with double the size.
 	private void resize() {
 		double[] copy = new double[heapElements.length * GROWTH_FACTOR];
-		for (int i = size - 1; i >= ROOT_POSITION; --i) {
+		for (int i = size; i >= ROOT_POSITION; --i) {
 			copy[i] = heapElements[i];
 		}
 		heapElements = copy;
 	}
+
 }
