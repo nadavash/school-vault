@@ -42,7 +42,8 @@ public class ThreeHeap implements PriorityQueue {
 	@Override
 	public void insert(double x) {
 		if (size == heapElements.length - 1)
-			resize();
+			heapElements = Helpers.copyOf(heapElements, 
+					heapElements.length * GROWTH_FACTOR);
 		
 		++size;
 		int pos = percolateUp(size, x);
@@ -102,28 +103,13 @@ public class ThreeHeap implements PriorityQueue {
 		size = 0;
 	}
 	
-	// Resizes heap and copies all values into a new heap with double the size.
-	private void resize() {
-		double[] copy = new double[heapElements.length * GROWTH_FACTOR];
-		for (int i = size; i >= ROOT_POSITION; --i) {
-			copy[i] = heapElements[i];
-		}
-		heapElements = copy;
-	}
-	
 	// Gets the minimum value index for the provided index range
 	private int getMin(int low, int high) {
 		int target = low;
-		for (int i = low + 1; i <= high; ++i) {
+		for (int i = low + 1; i <= size && i <= high; ++i) {
 			if (heapElements[i] < heapElements[target])
 				target = i;
 		}
 		return target;
 	}
-	
-	
-	public void printList() {
-		System.out.println(Arrays.toString(heapElements));
-	}
-
 }
