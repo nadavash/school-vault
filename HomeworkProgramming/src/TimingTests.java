@@ -12,6 +12,7 @@ public class TimingTests {
 	public static void main(String[] args) {
 		for (int i = 0; i < NUM_TESTS; ++i) {
 			long before = System.nanoTime();
+			@SuppressWarnings("unused")
 			int sumResult = testOne(TEST[i]);
 			long delta = System.nanoTime() - before;
 			System.out.print(delta + "\t");
