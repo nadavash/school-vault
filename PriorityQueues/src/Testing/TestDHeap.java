@@ -1,30 +1,33 @@
+package Testing;
 import static org.junit.Assert.*;
 
 import java.util.Random;
 
 import org.junit.Test;
 
+import PriorityQueues.DHeap;
 
-public class TestMyPQ {
+
+public class TestDHeap {
 
 	public static final double DELTA = 0.1;
 	public static final int LARGE = 10000;
 
 	/**
-	 * Test method for {@link MyPQ#MyPQ()}.
+	 * Test method for {@link DHeap#DHeap(4)}.
 	 */
 	@Test
-	public void testMyPQ() {
-		MyPQ heap = new MyPQ();
+	public void testDHeap() {
+		DHeap heap = new DHeap(100);
 		assertTrue("Contructor failed to create empty heap", heap.size() == 0 && heap.isEmpty());
 	}
 
 	/**
-	 * Test method for {@link MyPQ#isEmpty()}.
+	 * Test method for {@link DHeap#isEmpty()}.
 	 */
 	@Test
 	public void testIsEmpty() {
-		MyPQ heap = new MyPQ();
+		DHeap heap = new DHeap(100);
 		heap.insert(50.0);
 		
 		// Test for not empty
@@ -43,11 +46,11 @@ public class TestMyPQ {
 	}
 
 	/**
-	 * Test method for {@link MyPQ#size()}.
+	 * Test method for {@link DHeap#size()}.
 	 */
 	@Test
 	public void testSize() {
-		MyPQ heap = new MyPQ();
+		DHeap heap = new DHeap(100);
 		heap.insert(50.0);
 		
 		// Test for small list
@@ -65,18 +68,18 @@ public class TestMyPQ {
 	}
 
 	/**
-	 * Test method for {@link MyPQ#findMin()}.
+	 * Test method for {@link DHeap#findMin()}.
 	 */
 	@Test
 	public void testFindMin() {
-		MyPQ heap = new MyPQ();
+		DHeap heap = new DHeap(100);
 		heap.insert(3);
 		heap.insert(2);
 		heap.insert(1);
-
+		
 		assertEquals("findMind does not work for small heap", heap.findMin(), 1.0, DELTA);
 		heap.deleteMin();
-	
+		
 		assertEquals("findMin does not work after removing min element", heap.findMin(), 2.0, DELTA);
 
 		addMinElements(heap, LARGE, 1);
@@ -93,11 +96,11 @@ public class TestMyPQ {
 	}
 
 	/**
-	 * Test method for {@link MyPQ#insert(double)}.
+	 * Test method for {@link DHeap#insert(double)}.
 	 */
 	@Test
 	public void testInsert() {
-		MyPQ heap = new MyPQ();
+		DHeap heap = new DHeap(100);
 		addElements(heap, LARGE);
 		
 		assertTrue(heap.size() == LARGE);
@@ -106,13 +109,13 @@ public class TestMyPQ {
 	}
 
 	/**
-	 * Test method for {@link MyPQ#deleteMin()}.
+	 * Test method for {@link DHeap#deleteMin()}.
 	 */
 	@Test
 	public void testDeleteMin() {
-		MyPQ heap = new MyPQ();
+		DHeap heap = new DHeap(100);
 		addElements(heap, LARGE);
-		
+
 		// test for removal of elements in order;
 		double prev = heap.deleteMin();
 		double current;
@@ -131,11 +134,11 @@ public class TestMyPQ {
 	}
 
 	/**
-	 * Test method for {@link MyPQ#makeEmpty()}.
+	 * Test method for {@link DHeap#makeEmpty()}.
 	 */
 	@Test
 	public void testMakeEmpty() {
-		MyPQ heap = new MyPQ();
+		DHeap heap = new DHeap(100);
 		heap.makeEmpty();
 		
 		assertTrue("makeEmpty breaks empty heap", heap.isEmpty());
@@ -149,22 +152,21 @@ public class TestMyPQ {
 		assertTrue("makeEmpty does not work for large heap", heap.isEmpty());
 	}
 	
-	private void addElements(MyPQ heap, int numElements) {
+	private void addElements(DHeap heap, int numElements) {
 		addMinElements(heap, numElements, 0.0);
 	}
 	
-	private void addMinElements(MyPQ heap, int numElements, double min) {
-		Random r = new Random();
+	private static Random r = new Random(1);
+	private void addMinElements(DHeap heap, int numElements, double min) {
 		for (int i = numElements; i > 0; --i) {
 			heap.insert(Math.max(min,r.nextInt(100)));
 		}
 	}
 	
-	private void deleteElements(MyPQ heap, int numElements) {
+	private void deleteElements(DHeap heap, int numElements) {
 		for (int i = numElements; i > 0; --i) {
 			heap.deleteMin();
 		}
 	}
-
 
 }

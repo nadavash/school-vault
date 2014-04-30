@@ -1,10 +1,10 @@
+package PriorityQueues;
 
 /**
- * 
  * @author nadavash
  *
  */
-public class BinaryHeap implements PriorityQueue {
+public class ThreeHeap implements PriorityQueue {
 
 	public static final int STARTING_SIZE = 10;
 	public static final int GROWTH_FACTOR = 2;
@@ -13,7 +13,7 @@ public class BinaryHeap implements PriorityQueue {
 	private double[] heapElements;
 	private int size;
 	
-	public BinaryHeap() {
+	public ThreeHeap() {
 		heapElements = new double[STARTING_SIZE];
 	}
 	
@@ -47,12 +47,12 @@ public class BinaryHeap implements PriorityQueue {
 	}
 	
 	// Percolates a specific value up from the specified hole position.
-	// Each value lower in priority above it get moved down until no such
+	// Each value lower in priority above it get move down until no such
 	// values exist.
 	private int percolateUp(int hole, double value) {
-		while (hole > 1 && value < heapElements[hole / 2]) {
-			heapElements[hole] = heapElements[hole / 2];
-			hole /= 2;
+		while (hole > 1 && value < heapElements[(hole + 1) / 3]) {
+			heapElements[hole] = heapElements[(hole + 1) / 3];
+			hole = (hole + 1) / 3;
 		}
 		return hole;
 	}
@@ -63,24 +63,27 @@ public class BinaryHeap implements PriorityQueue {
 			throw new EmptyPQException();
 		
 		double res = heapElements[ROOT_POSITION];
-		int hole = percolateDown(ROOT_POSITION, heapElements[size]);
+		int hole = percolateDown(1, heapElements[size]);
 		heapElements[hole] = heapElements[size]; 
 		size--;
+		
 		return res;
 	}
 	
 	private int percolateDown(int hole, double value) {
-		int left;
-		int right;
-		int target;
-		while (2 * hole <= size) {
-			left = 2 * hole;
-			right = left + 1;
+		int left, right, middle, target;
+
+		while (3 * hole - 1 <= size) {
+			middle = hole * 3;
+			left = middle - 1;
+			right = middle + 1;
 			
-			if (right > size || heapElements[left] < heapElements[right])
+			if (middle > size)
 				target = left;
+			else if (right > size)
+				target = getMin(left, middle);
 			else
-				target = right;
+				target = getMin(left, right);
 			
 			if (heapElements[target] < value) {
 				heapElements[hole] = heapElements[target];
@@ -94,5 +97,15 @@ public class BinaryHeap implements PriorityQueue {
 	@Override
 	public void makeEmpty() {
 		size = 0;
+	}
+	
+	// Gets the minimum value index for the provided index range
+	private int getMin(int low, int high) {
+		int target = low;
+		for (int i = low + 1; i <= size && i <= high; ++i) {
+			if (heapElements[i] < heapElements[target])
+				target = i;
+		}
+		return target;
 	}
 }

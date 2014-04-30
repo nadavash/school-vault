@@ -1,3 +1,4 @@
+package PriorityQueues;
 /**
  * This exception signifies an invalid access on an empty heap.
  */

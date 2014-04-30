@@ -1,23 +1,27 @@
-import java.util.Arrays;
+package PriorityQueues;
 
 /**
  * 
- */
-
-/**
  * @author nadavash
  *
  */
-public class ThreeHeap implements PriorityQueue {
-
+public class DHeap implements PriorityQueue {
+	
 	public static final int STARTING_SIZE = 10;
 	public static final int GROWTH_FACTOR = 2;
 	public static final int ROOT_POSITION = 1;
+	public static final int DEFAULT_DIM = 2;
 	
 	private double[] heapElements;
 	private int size;
+	private int dim;
 	
-	public ThreeHeap() {
+	public DHeap() {
+		this(DEFAULT_DIM);
+	}
+	
+	public DHeap(int d) {
+		dim = d;
 		heapElements = new double[STARTING_SIZE];
 	}
 	
@@ -54,12 +58,14 @@ public class ThreeHeap implements PriorityQueue {
 	// Each value lower in priority above it get move down until no such
 	// values exist.
 	private int percolateUp(int hole, double value) {
-		while (hole > 1 && value < heapElements[(hole + 1) / 3]) {
-			heapElements[hole] = heapElements[(hole + 1) / 3];
-			hole = (hole + 1) / 3;
+		while (hole > 1 && 
+				value < heapElements[Helpers.getParentIndex(hole, dim)]) {
+			heapElements[hole] = heapElements[Helpers.getParentIndex(hole, dim)];
+			hole = Helpers.getParentIndex(hole, dim);
 		}
+		
 		return hole;
-	}
+	} 
 
 	@Override
 	public double deleteMin() {
@@ -67,34 +73,27 @@ public class ThreeHeap implements PriorityQueue {
 			throw new EmptyPQException();
 		
 		double res = heapElements[ROOT_POSITION];
-		int hole = percolateDown(1, heapElements[size]);
-		heapElements[hole] = heapElements[size]; 
+		int hole = percolateDown(ROOT_POSITION, heapElements[size]);
+		heapElements[hole] = heapElements[size];
 		size--;
 		
 		return res;
 	}
 	
 	private int percolateDown(int hole, double value) {
-		int left, right, middle, target;
-
-		while (3 * hole - 1 <= size) {
-			middle = hole * 3;
-			left = middle - 1;
-			right = middle + 1;
-			
-			if (middle > size)
-				target = left;
-			else if (right > size)
-				target = getMin(left, middle);
-			else
-				target = getMin(left, right);
+		int firstChild = Helpers.getFirstChildIndex(hole, dim);
+		
+		while (firstChild <= size) {
+			int target = getMin(firstChild, firstChild + dim - 1);
 			
 			if (heapElements[target] < value) {
 				heapElements[hole] = heapElements[target];
 				hole = target;
+				firstChild = Helpers.getFirstChildIndex(hole, dim);
 			} else
 				break;
 		}
+		
 		return hole;
 	}
 

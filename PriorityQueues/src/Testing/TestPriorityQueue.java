@@ -1,36 +1,35 @@
+package Testing;
 import static org.junit.Assert.*;
 
 import java.util.Random;
 
 import org.junit.Test;
 
-/**
- * 
- */
+import PriorityQueues.PriorityQueue;
 
-/**
- * @author nadavash
- *
- */
-public class TestBinaryHeap {
+
+public abstract class TestPriorityQueue {
+
 	public static final double DELTA = 0.1;
-	public static final int LARGE = 100000;
+	public static final int LARGE = 10000;
+	
+	public abstract PriorityQueue createQueue();
 
 	/**
-	 * Test method for {@link BinaryHeap#BinaryHeap()}.
+	 * Test method for {@link PriorityQueue#PriorityQueue()}.
 	 */
 	@Test
-	public void testBinaryHeap() {
-		BinaryHeap heap = new BinaryHeap();
+	public void testPriorityQueue() {
+		PriorityQueue heap = createQueue();
 		assertTrue("Contructor failed to create empty heap", heap.size() == 0 && heap.isEmpty());
 	}
 
 	/**
-	 * Test method for {@link BinaryHeap#isEmpty()}.
+	 * Test method for {@link PriorityQueue#isEmpty()}.
 	 */
 	@Test
 	public void testIsEmpty() {
-		BinaryHeap heap = new BinaryHeap();
+		PriorityQueue heap = createQueue();
 		heap.insert(50.0);
 		
 		// Test for not empty
@@ -49,11 +48,11 @@ public class TestBinaryHeap {
 	}
 
 	/**
-	 * Test method for {@link BinaryHeap#size()}.
+	 * Test method for {@link PriorityQueue#size()}.
 	 */
 	@Test
 	public void testSize() {
-		BinaryHeap heap = new BinaryHeap();
+		PriorityQueue heap = createQueue();
 		heap.insert(50.0);
 		
 		// Test for small list
@@ -71,11 +70,11 @@ public class TestBinaryHeap {
 	}
 
 	/**
-	 * Test method for {@link BinaryHeap#findMin()}.
+	 * Test method for {@link PriorityQueue#findMin()}.
 	 */
 	@Test
 	public void testFindMin() {
-		BinaryHeap heap = new BinaryHeap();
+		PriorityQueue heap = createQueue();
 		heap.insert(3);
 		heap.insert(2);
 		heap.insert(1);
@@ -99,11 +98,11 @@ public class TestBinaryHeap {
 	}
 
 	/**
-	 * Test method for {@link BinaryHeap#insert(double)}.
+	 * Test method for {@link PriorityQueue#insert(double)}.
 	 */
 	@Test
 	public void testInsert() {
-		BinaryHeap heap = new BinaryHeap();
+		PriorityQueue heap = createQueue();
 		addElements(heap, LARGE);
 		
 		assertTrue(heap.size() == LARGE);
@@ -112,11 +111,11 @@ public class TestBinaryHeap {
 	}
 
 	/**
-	 * Test method for {@link BinaryHeap#deleteMin()}.
+	 * Test method for {@link PriorityQueue#deleteMin()}.
 	 */
 	@Test
 	public void testDeleteMin() {
-		BinaryHeap heap = new BinaryHeap();
+		PriorityQueue heap = createQueue();
 		addElements(heap, LARGE);
 		
 		// test for removal of elements in order;
@@ -137,11 +136,11 @@ public class TestBinaryHeap {
 	}
 
 	/**
-	 * Test method for {@link BinaryHeap#makeEmpty()}.
+	 * Test method for {@link PriorityQueue#makeEmpty()}.
 	 */
 	@Test
 	public void testMakeEmpty() {
-		BinaryHeap heap = new BinaryHeap();
+		PriorityQueue heap = createQueue();
 		heap.makeEmpty();
 		
 		assertTrue("makeEmpty breaks empty heap", heap.isEmpty());
@@ -155,18 +154,18 @@ public class TestBinaryHeap {
 		assertTrue("makeEmpty does not work for large heap", heap.isEmpty());
 	}
 	
-	private void addElements(BinaryHeap heap, int numElements) {
+	private void addElements(PriorityQueue heap, int numElements) {
 		addMinElements(heap, numElements, 0.0);
 	}
 	
-	private void addMinElements(BinaryHeap heap, int numElements, double min) {
+	private void addMinElements(PriorityQueue heap, int numElements, double min) {
 		Random r = new Random();
 		for (int i = numElements; i > 0; --i) {
 			heap.insert(Math.max(min,r.nextInt(100)));
 		}
 	}
 	
-	private void deleteElements(BinaryHeap heap, int numElements) {
+	private void deleteElements(PriorityQueue heap, int numElements) {
 		for (int i = numElements; i > 0; --i) {
 			heap.deleteMin();
 		}

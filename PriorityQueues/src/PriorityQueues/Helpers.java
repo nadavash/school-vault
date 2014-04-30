@@ -1,3 +1,4 @@
+package PriorityQueues;
 /**
  * 
  * @author nadavash
@@ -43,16 +44,4 @@ public final class Helpers {
 	public static int getFirstChildIndex(int i, int dim) {
 		return i * dim - (dim - 2);
 	}
-//	
-//	/*
-//	 * 
-//	 */
-//	private int getMin(double[] heapElements, size, int low, int high) {
-//		int target = low;
-//		for (int i = low + 1; i <= size && i <= high; ++i) {
-//			if (heapElements[i] < heapElements[target])
-//				target = i;
-//		}
-//		return target;
-//	}
 }
