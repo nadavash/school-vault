@@ -1,10 +1,16 @@
 package PriorityQueues;
 
 /**
- * 
- * @author nadavash
- *
- */
+*
+* @author Nadav Ashkenazi
+* @date April 30, 2014
+* @email nadava@uw.edu
+* @studentID 1230523
+* @version CSE373 14sp
+* The DHeap class represents a priority queue that simulates
+* a d-tree with an array. This provides O(logd(n)) deletion and
+* insertion time into the heap.
+*/
 public class DHeap implements PriorityQueue {
 	
 	public static final int STARTING_SIZE = 10;
@@ -16,10 +22,17 @@ public class DHeap implements PriorityQueue {
 	private int size;
 	private int dim;
 	
+	/**
+	 * Creates a new DHeap with a dimension of 2.
+	 */
 	public DHeap() {
 		this(DEFAULT_DIM);
 	}
 	
+	/**
+	 * Creates a new DHeap with a tree dimension of d.
+	 * @param d The dimension of the tree
+	 */
 	public DHeap(int d) {
 		dim = d;
 		heapElements = new double[STARTING_SIZE];

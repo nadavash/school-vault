@@ -1,9 +1,16 @@
 package PriorityQueues;
 
 /**
- * @author nadavash
- *
- */
+*
+* @author Nadav Ashkenazi
+* @date April 30, 2014
+* @email nadava@uw.edu
+* @studentID 1230523
+* @version CSE373 14sp
+* The ThreeHeap class represents a priority queue that simulates
+* a ternary tree with an array. This provides O(log3(n)) deletion and
+* insertion time into the heap.
+*/
 public class ThreeHeap implements PriorityQueue {
 
 	public static final int STARTING_SIZE = 10;
@@ -13,6 +20,9 @@ public class ThreeHeap implements PriorityQueue {
 	private double[] heapElements;
 	private int size;
 	
+	/**
+	 * Creates a new ThreeHeap.
+	 */
 	public ThreeHeap() {
 		heapElements = new double[STARTING_SIZE];
 	}
@@ -70,10 +80,12 @@ public class ThreeHeap implements PriorityQueue {
 		return res;
 	}
 	
+	// Percolates down the tree until an element of bigger value is found.
 	private int percolateDown(int hole, double value) {
 		int left, right, middle, target;
 
 		while (3 * hole - 1 <= size) {
+			// Get all children indices
 			middle = hole * 3;
 			left = middle - 1;
 			right = middle + 1;

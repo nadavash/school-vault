@@ -1,7 +1,10 @@
 package PriorityQueues;
 /**
- * 
- * @author nadavash
+* @author Nadav Ashkenazi
+* @date April 30, 2014
+* @email nadava@uw.edu
+* @studentID 1230523
+* @version CSE373 14sp
  * Provides a few static helper methods for the PriorityQueue assignment.
  */
 public final class Helpers {

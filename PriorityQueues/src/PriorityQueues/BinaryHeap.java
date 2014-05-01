@@ -8,7 +8,8 @@ package PriorityQueues;
 * @studentID 1230523
 * @version CSE373 14sp
 * The BinaryHeap class represents a priority queue that simulates
-* a binary tree with an array.
+* a binary tree with an array. This provides O(log(n)) deletion and
+* insertion time into the heap.
 */
 public class BinaryHeap implements PriorityQueue {
 
@@ -19,6 +20,9 @@ public class BinaryHeap implements PriorityQueue {
 	private double[] heapElements;
 	private int size;
 	
+	/**
+	 * Creates a new binary heap.
+	 */
 	public BinaryHeap() {
 		heapElements = new double[STARTING_SIZE];
 	}
@@ -56,10 +60,14 @@ public class BinaryHeap implements PriorityQueue {
 	// Each value lower in priority above it get moved down until no such
 	// values exist.
 	private int percolateUp(int hole, double value) {
+		// Check if the any previous nodes have values higher
+		// the the values we are entering
 		while (hole > 1 && value < heapElements[hole / 2]) {
+			// Swap the values and move up the tree
 			heapElements[hole] = heapElements[hole / 2];
 			hole /= 2;
 		}
+		
 		return hole;
 	}
 
@@ -75,11 +83,13 @@ public class BinaryHeap implements PriorityQueue {
 		return res;
 	}
 	
+	// Percolates down the tree until an element of bigger value is found.
 	private int percolateDown(int hole, double value) {
 		int left;
 		int right;
 		int target;
 		while (2 * hole <= size) {
+			// get the left and right children
 			left = 2 * hole;
 			right = left + 1;
 			
@@ -88,6 +98,7 @@ public class BinaryHeap implements PriorityQueue {
 			else
 				target = right;
 			
+			// Swap elements if the target is lower than the value
 			if (heapElements[target] < value) {
 				heapElements[hole] = heapElements[target];
 				hole = target;

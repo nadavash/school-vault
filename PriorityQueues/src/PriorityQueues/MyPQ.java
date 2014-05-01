@@ -4,10 +4,18 @@ package PriorityQueues;
  */
 
 /**
- * @author nadavash
- *
- */
+*
+* @author Nadav Ashkenazi
+* @date April 30, 2014
+* @email nadava@uw.edu
+* @studentID 1230523
+* @version CSE373 14sp
+* The MyPQ class represents a priority queue that makes use of a linked
+* list for . This provides O(n) deletion time and O(1) insertion time into 
+* the queue.
+*/
 public class MyPQ implements PriorityQueue {
+	
 	private ListNode head;
 	private int size;
 
@@ -73,6 +81,9 @@ public class MyPQ implements PriorityQueue {
 		size = 0;
 	}
 
+	/**
+	 * Represents a node in the linked list for the MyPQ priority queue.
+	 */
 	private static class ListNode {
 		public double value;
 		public ListNode next;
