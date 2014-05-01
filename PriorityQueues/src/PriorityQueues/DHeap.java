@@ -59,9 +59,9 @@ public class DHeap implements PriorityQueue {
 	// values exist.
 	private int percolateUp(int hole, double value) {
 		while (hole > 1 && 
-				value < heapElements[Helpers.getParentIndex(hole, dim)]) {
-			heapElements[hole] = heapElements[Helpers.getParentIndex(hole, dim)];
-			hole = Helpers.getParentIndex(hole, dim);
+				value < heapElements[getParentIndex(hole, dim)]) {
+			heapElements[hole] = heapElements[getParentIndex(hole, dim)];
+			hole = getParentIndex(hole, dim);
 		}
 		
 		return hole;
@@ -81,7 +81,7 @@ public class DHeap implements PriorityQueue {
 	}
 	
 	private int percolateDown(int hole, double value) {
-		int firstChild = Helpers.getFirstChildIndex(hole, dim);
+		int firstChild = getFirstChildIndex(hole, dim);
 		
 		while (firstChild <= size) {
 			int target = getMin(firstChild, firstChild + dim - 1);
@@ -89,7 +89,7 @@ public class DHeap implements PriorityQueue {
 			if (heapElements[target] < value) {
 				heapElements[hole] = heapElements[target];
 				hole = target;
-				firstChild = Helpers.getFirstChildIndex(hole, dim);
+				firstChild = getFirstChildIndex(hole, dim);
 			} else
 				break;
 		}
@@ -110,5 +110,25 @@ public class DHeap implements PriorityQueue {
 				target = i;
 		}
 		return target;
+	}
+	
+	/**
+	 * Calculates the parent node index in a d-heap array.
+	 * @param i The index of the child node.
+	 * @param dim The dimension of the d-heap.
+	 * @return The index of the parent node.
+	 */
+	private int getParentIndex(int i, int dim) {
+		return (i + dim - 2) / dim;
+	}
+	
+	/**
+	 * Calculates the first child node index in a d-heap array.
+	 * @param i The index of the child node.
+	 * @param dim The dimension of the d-heap.
+	 * @return The index of the first child node.
+	 */
+	private int getFirstChildIndex(int i, int dim) {
+		return i * dim - (dim - 2);
 	}
 }

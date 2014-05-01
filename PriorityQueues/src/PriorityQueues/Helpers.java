@@ -24,24 +24,4 @@ public final class Helpers {
 		
 		return copy;
 	}
-	
-	/**
-	 * Calculates the parent node index in a d-heap array.
-	 * @param i The index of the child node.
-	 * @param dim The dimension of the d-heap.
-	 * @return The index of the parent node.
-	 */
-	public static int getParentIndex(int i, int dim) {
-		return (i + dim - 2) / dim;
-	}
-	
-	/**
-	 * Calculates the first child node index in a d-heap array.
-	 * @param i The index of the child node.
-	 * @param dim The dimension of the d-heap.
-	 * @return The index of the first child node.
-	 */
-	public static int getFirstChildIndex(int i, int dim) {
-		return i * dim - (dim - 2);
-	}
 }

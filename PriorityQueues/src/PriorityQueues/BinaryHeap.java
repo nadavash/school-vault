@@ -1,10 +1,15 @@
 package PriorityQueues;
 
 /**
- * 
- * @author nadavash
- *
- */
+*
+* @author Nadav Ashkenazi
+* @date April 30, 2014
+* @email nadava@uw.edu
+* @studentID 1230523
+* @version CSE373 14sp
+* The BinaryHeap class represents a priority queue that simulates
+* a binary tree with an array.
+*/
 public class BinaryHeap implements PriorityQueue {
 
 	public static final int STARTING_SIZE = 10;
