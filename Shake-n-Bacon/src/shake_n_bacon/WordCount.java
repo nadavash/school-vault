@@ -20,8 +20,7 @@ public class WordCount {
 		if (ite != null) {
 			int index = 0;
 			while (ite.hasNext()) {
-				DataCount current = ite.next();
-				counts[index++] = current;
+				counts[index++] = ite.next();
 			}
 		}
 		
