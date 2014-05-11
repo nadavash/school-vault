@@ -3,10 +3,10 @@ package shake_n_bacon;
 import providedCode.*;
 
 /**
- * @author <name>
- * @UWNetID <uw net id>
- * @studentID <id number>
- * @email <email address>
+ * @author Nadav Ashkenazi
+ * @UWNetID nadava
+ * @studentID 1230523
+ * @email nadava@uw.edu
  * 
  *        TODO: REPLACE this comment with your own as appropriate.
  * 
@@ -34,7 +34,18 @@ public class StringComparator implements Comparator<String> {
 	 */
 	@Override
 	public int compare(String s1, String s2) {
-		// TODO: To-be implemented
-		return 0;
+		char c1, c2;
+		int minLength = Math.min(s1.length(), s2.length());
+		
+		for (int i = 0; i < minLength; ++i) {
+			c1 = s1.charAt(i);
+			c2 = s2.charAt(i);
+			
+			if (c1 != c2) {
+				return c1 - c2;
+			}
+		}
+		
+		return s1.length() - s2.length();
 	}
 }
