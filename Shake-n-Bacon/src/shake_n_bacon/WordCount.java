@@ -10,18 +10,18 @@ import providedCode.*;
  */
 public class WordCount {
 
-	// TODO: Replace this comment with your own as appropriate.
-	// Implement a method that returns an array of DataCount objects
-	// containing each unique word.
+	/**
+	 * Creates an array of DataCount objects from a specified DataCounter object.
+	 * @param counter the object to get the data from.
+	 * @return The array of elements from the counter object.
+	 */
 	private static DataCount[] getCountsArray(DataCounter counter) {
 		SimpleIterator ite = counter.getIterator();
 		DataCount[] counts = new DataCount[counter.getSize()];
 		
-		if (ite != null) {
-			int index = 0;
-			while (ite.hasNext()) {
-				counts[index++] = ite.next();
-			}
+		int index = 0;
+		while (ite.hasNext()) {
+			counts[index++] = ite.next();
 		}
 		
 		return counts;

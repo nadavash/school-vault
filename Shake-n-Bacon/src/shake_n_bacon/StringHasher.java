@@ -26,6 +26,6 @@ public class StringHasher implements Hasher {
 			factor *= HASH_FACTOR;
 		}
 		
-		return hash;
+		return hash >= 0 ? hash : -hash;
 	}
 }
