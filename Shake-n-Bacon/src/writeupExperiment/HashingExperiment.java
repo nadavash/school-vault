@@ -2,7 +2,6 @@ package writeupExperiment;
 
 import providedCode.DataCount;
 import providedCode.DataCounter;
-import shake_n_bacon.HashTable_OA;
 import shake_n_bacon.HashTable_SC;
 import shake_n_bacon.StringComparator;
 import shake_n_bacon.StringHasher;

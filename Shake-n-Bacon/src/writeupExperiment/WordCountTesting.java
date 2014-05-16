@@ -36,11 +36,9 @@ public class WordCountTesting {
 		try {
 			FileWordReader reader = new FileWordReader(file);
 			String word = reader.nextWord();
-			int count = 0;
 			while (word != null) {
 				counter.incCount(word);
 				word = reader.nextWord();
-				count++;
 			}			
 		} catch (IOException e) {
 			System.err.println("Error processing " + file + " " + e);
