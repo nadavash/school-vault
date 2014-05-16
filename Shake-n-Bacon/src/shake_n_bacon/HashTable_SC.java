@@ -57,8 +57,10 @@ public class HashTable_SC extends DataCounter {
 		if (node == null) {
 			// If the table is relatively full, and there is still room to expand,
 			// grow the table
-			if (size >= table.length && sizeIndex < Helpers.TABLE_SIZES.length - 1)
+			if (size >= table.length && sizeIndex < Helpers.TABLE_SIZES.length - 1) {
 				growTable();
+				index = getIndex(data);
+			}
 			
 			size++;
 			node = new TableNode(data, table[index]);
@@ -133,19 +135,8 @@ public class HashTable_SC extends DataCounter {
 			TableNode node = new TableNode(current.data, current.count);
 			insertNode(node, newTable);
 		}
-		
+
 		table = newTable;
-	}
-	
-	public void print() {
-		int count = 0;
-		for (int i = 0; i < table.length; ++i) {
-			TableNode current = table[i];
-			while (current != null) {
-				System.out.println((count++) + ". " + current.key + ": " + current.count);
-				current = current.next;
-			}	
-		}
 	}
 	
 	/**

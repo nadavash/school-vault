@@ -7,91 +7,134 @@ import providedCode.*;
  * @UWNetID nadava
  * @studentID 1230523
  * @email nadava@uw.edu
- * 
- *        TODO: Replace this comment with your own as appropriate.
- * 
- *        1. You may implement HashTable with open addressing discussed in
- *        class; You can choose one of those three: linear probing, quadratic
- *        probing or double hashing. The only restriction is that it should not
- *        restrict the size of the input domain (i.e., it must accept any key)
- *        or the number of inputs (i.e., it must grow as necessary).
- * 
- *        2. Your HashTable should rehash as appropriate (use load factor as
- *        shown in the class).
- * 
- *        3. To use your HashTable for WordCount, you will need to be able to
- *        hash strings. Implement your own hashing strategy using charAt and
- *        length. Do NOT use Java's hashCode method.
- * 
- *        4. HashTable should be able to grow at least up to 200,000. We are not
- *        going to test input size over 200,000 so you can stop resizing there
- *        (of course, you can make it grow even larger but it is not necessary).
- * 
- *        5. We suggest you to hard code the prime numbers. You can use this
- *        list: http://primes.utm.edu/lists/small/100000.txt NOTE: Make sure you
- *        only hard code the prime numbers that are going to be used. Do NOT
- *        copy the whole list!
- * 
- *        TODO: Develop appropriate tests for your HashTable.
+ * The HashTable_OA class represents a has table that stores strings
+ * as keys with counts as values. The open addressing system uses a
+ * quadratic probing mechanism and thus remains at least half empty
+ * at all times.
  */
 public class HashTable_OA extends DataCounter {
-	public static final int[] SIZES = new int[] {
-		37
-	};
-	
+	public static final int SIZE_FACTOR = 2;
+
 	private DataCount[] table;
 	private int sizeIndex;
+	private int size;
 	private Comparator<String> comparator;
 	private Hasher hasher;
 	
 	public HashTable_OA(Comparator<String> c, Hasher h) {
 		sizeIndex = 0;
-		table = new DataCount[SIZES[sizeIndex]];
+		table = new DataCount[Helpers.TABLE_SIZES[sizeIndex] * SIZE_FACTOR];
 		comparator = c;
 		hasher = h;
 	}
 
 	@Override
 	public void incCount(String data) {
-		// TODO Auto-generated method stub
+		int index = getIndex(data);
+
+		// If not found in the array add it!
+		if (table[index] == null) {
+			size++;
+
+			// Grow the array if necessary
+			if (size >= table.length / SIZE_FACTOR) {
+				resize();
+				index = getIndex(data);
+			}
+			
+			table[index] = new DataCount(data, 0);
+		}
+
+		table[index].count++;
 	}
 
 	@Override
 	public int getSize() {
-		// TODO Auto-generated method stub
-		return 0;
+		return size;
 	}
 
 	@Override
 	public int getCount(String data) {
-		// TODO Auto-generated method stub
-		return 0;
+		int index = getIndex(data);
+		return table[index] == null ? 0 : table[index].count;
 	}
 
 	@Override
 	public SimpleIterator getIterator() {
-		// TODO Auto-generated method stub
-		return null;
+		return new OAIterator();
 	}
 	
-	// Returns an index based on the specified string key if the
-	// key exists in the table. Otherwise returns -1.
+	// Returns the index of where a specific node should exist,
+	// or does exist.
 	private int getIndex(String data) {
 		int startIndex = hasher.hash(data) % table.length;
-		int probeIndex = 0;
+		int probeIndex = startIndex;
 		
 		int i = 0;
-		while (table[probeIndex] != null &&
-				table[probeIndex].count >= 0) {
-			
-			if (table[probeIndex].data.equals(data))
-				return probeIndex;
-	
+		while (table[probeIndex] != null && 
+				comparator.compare(table[probeIndex].data, data) != 0) {
 			++i;
-			probeIndex = startIndex + i * i;
+			probeIndex = (startIndex + i * i) % table.length;
 		}
 		
-		return -1;
+		return probeIndex;
+	}
+	
+	/**
+	 * Resizes the table array of this OA hash table and copies over all
+	 * of the data from the previous table.
+	 */
+	private void resize() {
+		DataCount[] prev = table;
+		table = new DataCount[Helpers.TABLE_SIZES[sizeIndex++] * SIZE_FACTOR];
+		for (int i = 0; i < prev.length; ++i) {
+			if (prev[i] != null) {			
+				int index = getIndex(prev[i].data);
+				table[index] = prev[i];
+			}
+		}
+	}
+	
+	/**
+	 * Represents a SimpleIterator that iterates over an open addressing
+	 * hash table.
+	 */
+	private class OAIterator implements SimpleIterator {
+		private int currentIndex;
+		private int nextCount;
+		
+		/**
+		 * Creates a new open addressing iterator.
+		 */
+		public OAIterator() {
+			findNext();
+		}
+		
+		@Override
+		public DataCount next() {
+			nextCount++;
+			DataCount res = table[currentIndex++];
+			// Make a copy of the datacount to avoid data corruption by client
+			res = new DataCount(res.data, res.count);
+			if (hasNext())
+				findNext();
+			
+			return res;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return nextCount < size;
+		}
+		
+		/**
+		 * Finds the next element in the table if the current one is null.
+		 */
+		private void findNext() {
+			while (currentIndex < table.length && table[currentIndex] == null) {
+				++currentIndex;
+			}
+		}
 	}
 
 }

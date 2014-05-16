@@ -7,8 +7,9 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,15 +19,17 @@ import shake_n_bacon.*;
 
 /**
  * @author nadavash
- * TODO
+ * TODO write test description
  */
 public abstract class DataCounterTest {
 	
 	public static final Hasher HASHER = new StringHasher();
 	public static final Comparator<String> COMPARATOR = new StringComparator();
 	public static final String TEST_TEXT_FILE = "words.txt";
-	public static final ArrayList<String> WORDS = new ArrayList<String>();
+	public static final Set<String> WORDS = new TreeSet<String>();
 		
+	private DataCounter large;
+	
 	/**
 	 * Creates a new DataCounter for the current test instance.
 	 * @return a new DataCounter instance.
@@ -35,16 +38,25 @@ public abstract class DataCounterTest {
 	
 	@Before
 	public void setUp() {		
-		if (WORDS.size() > 0)
+		if (WORDS.size() > 0) {
+			large = createDataCounter();
+			for (String s : WORDS) {
+				large.incCount(s);
+			}
 			return;
+		}
 		
 		// Populate the arrayList once
 		try {
 			Scanner s = new Scanner(new File(TEST_TEXT_FILE));
-			int ss = 0;
 			while (s.hasNext()) {
 				WORDS.add(s.next());
-				ss++;
+			}
+			s.close();
+			
+			large = createDataCounter();
+			for (String st : WORDS) {
+				large.incCount(st);
 			}
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -83,12 +95,7 @@ public abstract class DataCounterTest {
 		assertEquals("GetSize returns one higher for incrementing existing value.", counter.getSize(), 1);
 		
 		// Test for big input
-		counter = createDataCounter();
-		for (int i = 0; i < WORDS.size(); ++i) {
-			counter.incCount(WORDS.get(i));
-		}
-		
-		assertEquals("GetSize does not work for large quantities.", counter.getSize(), WORDS.size());
+		assertEquals("GetSize does not work for large quantities.", large.getSize(), WORDS.size());
 	}
 
 
@@ -100,24 +107,55 @@ public abstract class DataCounterTest {
 		}
 		
 		assertEquals("GetCount does not return correct amount.", counter.getCount("hello"), 50);
+		counter = createDataCounter();
 		
 		// Increment count for many words
-		for (int i = 0; i < 100; ++i) {
+		for (String word : WORDS) {
+			//System.out.println("Before " + counter.getCount(word));
+
 			for (int j = 0; j < 10; ++j) {
-				counter.incCount(WORDS.get(i));
+				counter.incCount(word);
+				assertEquals("Not counting correctly.", counter.getCount(word), j + 1);
 			}
+			
+			//System.out.println("After " + counter.getCount(word));
 		}
-		
+				
 		// Check counts for many words
-		for (int i = 0; i < 100; ++i) {
-			assertEquals("GetCount does not work for many words.", counter.getCount(WORDS.get(i)), 10);
+		for (String word : WORDS) {
+			assertEquals("GetCount does not work for many words.", counter.getCount(word), 10);
 		}
 	}
 
 
 	@Test
 	public void testGetIterator() {
-		fail("Not yet implemented");
+		DataCounter counter = createDataCounter();
+		counter.incCount("hello");
+		counter.incCount("goodbye");
+		counter.incCount("mazeltov");
+		
+		SimpleIterator ite = counter.getIterator();
+		
+		int count = 0;
+		while (ite.hasNext()) {
+			ite.next();
+			count++;
+		}
+		
+		assertEquals("Iterator does not return three items.", count, 3);
+		
+		ite = large.getIterator();
+		count = 0;
+		while (ite.hasNext()) {
+			DataCount next = ite.next();
+			boolean found = WORDS.contains(next.data);
+			assertEquals("Count is not correct for DataCount iterator.", next.count, 1);
+			assertTrue("Not all words returned are contained within the word list.", found);
+			++count;
+		}
+		
+		assertEquals("Iterator does not enough items for large list.", count, WORDS.size());
 	}
 
 }
