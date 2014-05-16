@@ -107,6 +107,7 @@ public abstract class DataCounterTest {
 		}
 		
 		assertEquals("GetCount does not return correct amount.", counter.getCount("hello"), 50);
+		assertEquals("GetCount does not return correct amount.", counter.getCount("goodbye"), 0);
 		counter = createDataCounter();
 		
 		// Increment count for many words
