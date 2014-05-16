@@ -13,7 +13,6 @@ public class Reverb {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		if (args.length != 3) {
             System.err.println(" Incorrect number of arguments");
             System.err.println(" Usage: ");

@@ -5,7 +5,8 @@ package writeupExperiment;
  * @UWNetID nadava
  * @studentID 1230523
  * @email nadava@uw.edu 
- * TODO write header comment
+ * Timing experiment to compare runtime of the different DataCount
+ * hash table implementations.
  */
 public class TimingExperiment {
 	public static final String[] TEST_FILES = new String[] { "hamlet.txt",
@@ -26,10 +27,9 @@ public class TimingExperiment {
 	}
 
 	/**
-	 * TODO
-	 * 
-	 * @param args
-	 * @return
+	 * Returns the average runtime for the given counter and file.
+	 * @param args the arguments to pass to the testing method.
+	 * @return the average runtime.
 	 */
 	private static double getAverageRuntime(String[] args) {
 		double totalTime = 0;

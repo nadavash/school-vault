@@ -4,9 +4,12 @@ import providedCode.DataCounter;
 import shake_n_bacon.HashTable_SC;
 
 /**
- * TODO
- * @author nadavash
- *
+ * @author Nadav Ashkenazi
+ * @UWNetID nadava
+ * @studentID 1230523
+ * @email nadava@uw.edu 
+ * Represents the JUnit test for the separate chaining implementation
+ * of the hash tables for data counter.
  */
 public class HashTable_SCTest extends DataCounterTest {
 

@@ -41,7 +41,6 @@ public class QueueStack implements DStack {
      */
     @Override
     public void push(double value) {
-        // TODO write your push operation here
     	queue.enqueue(value);
     }
 

@@ -1,9 +1,11 @@
 package shake_n_bacon;
 
 /**
- * TODO
- * @author nadavash
- *
+ * @author Nadav Ashkenazi
+ * @UWNetID nadava
+ * @studentID 1230523
+ * @email nadava@uw.edu 
+ * Useful helper class for constants and other things!
  */
 public class Helpers {
 	

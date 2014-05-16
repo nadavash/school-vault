@@ -8,9 +8,12 @@ import shake_n_bacon.StringComparator;
 import shake_n_bacon.StringHasher;
 
 /**
- * TODO comment
- * @author nadavash
- *
+ * @author Nadav Ashkenazi
+ * @UWNetID nadava
+ * @studentID 1230523
+ * @email nadava@uw.edu 
+ * The HashingExperiment program tests two different implementations of the
+ * Hasher interface. Prints out the results + averages.
  */
 public class HashingExperiment {
 	public static final String[] TEST_FILES = new String[] { "macbeth.txt",
@@ -30,10 +33,10 @@ public class HashingExperiment {
 	}
 	
 	/**
-	 * TODO
-	 * 
-	 * @param args
-	 * @return
+	 * Returns the average runtime for the given counter and file.
+	 * @param counter the counter to test.
+	 * @param file the file to load and test against.
+	 * @return the average runtime.
 	 */
 	private static double getAverageRuntime(DataCounter counter, String file) {
 		double totalTime = 0;

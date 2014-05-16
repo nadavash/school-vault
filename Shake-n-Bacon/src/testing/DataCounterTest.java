@@ -18,8 +18,11 @@ import providedCode.*;
 import shake_n_bacon.*;
 
 /**
- * @author nadavash
- * TODO write test description
+ * @author Nadav Ashkenazi
+ * @UWNetID nadava
+ * @studentID 1230523
+ * @email nadava@uw.edu
+ * Thorough testing for the DataCounter abstract class.
  */
 public abstract class DataCounterTest {
 	
@@ -59,7 +62,6 @@ public abstract class DataCounterTest {
 				large.incCount(st);
 			}
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

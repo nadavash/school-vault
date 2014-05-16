@@ -7,31 +7,10 @@ import providedCode.*;
  * @UWNetID nadava
  * @studentID 1230523
  * @email nadava@uw.edu
- * 
- *        TODO: Replace this comment with your own as appropriate.
- * 
- *        1. You may implement HashTable with separate chaining discussed in
- *        class; the only restriction is that it should not restrict the size of
- *        the input domain (i.e., it must accept any key) or the number of
- *        inputs (i.e., it must grow as necessary).
- * 
- *        2. Your HashTable should rehash as appropriate (use load factor as
- *        shown in the class).
- * 
- *        3. To use your HashTable for WordCount, you will need to be able to
- *        hash strings. Implement your own hashing strategy using charAt and
- *        length. Do NOT use Java's hashCode method.
- * 
- *        4. HashTable should be able to grow at least up to 200,000. We are not
- *        going to test input size over 200,000 so you can stop resizing there
- *        (of course, you can make it grow even larger but it is not necessary).
- * 
- *        5. We suggest you to hard code the prime numbers. You can use this
- *        list: http://primes.utm.edu/lists/small/100000.txt NOTE: Make sure you
- *        only hard code the prime numbers that are going to be used. Do NOT
- *        copy the whole list!
- * 
- *        TODO: Develop appropriate tests for your HashTable.
+ * This HashTable class represents a class the implements a hash table
+ * using the separate chaining method for handling collisions. This is meant
+ * to be used for counting the frequencies of a different strings. The table
+ * can grow up to a size of around 250,000 data/count pairs.
  */
 public class HashTable_SC extends DataCounter {
 	
@@ -86,7 +65,11 @@ public class HashTable_SC extends DataCounter {
 		return new SCIterator();
 	}
 	
-	// TODO
+	/**
+	 * Calculates the index for the given string.
+	 * @param data the string to hash and index.
+	 * @return the index generated.
+	 */
 	private int getIndex(String data) {
 		return hasher.hash(data) % table.length;
 	}
@@ -149,7 +132,7 @@ public class HashTable_SC extends DataCounter {
 		private int nextCount;
 		
 		/**
-		 * TODO
+		 * Creates a new instance of the separate chaining table iterator.
 		 */
 		public SCIterator() {
 			gotoNextBucket();
@@ -174,7 +157,9 @@ public class HashTable_SC extends DataCounter {
 			return nextCount < size;
 		}
 		
-		// TODO
+		/**
+		 * Moves the iterator to the next bucket until a new DataCount is found.
+		 */
 		private void gotoNextBucket() {
 			while (bucketIndex < table.length) {
 				if (table[bucketIndex] != null) {
@@ -197,9 +182,9 @@ public class HashTable_SC extends DataCounter {
 		public TableNode next;
 		
 		/**
-		 * TODO
-		 * @param key
-		 * @param count
+		 * Creates a new table node.
+		 * @param key the key to set in the node.
+		 * @param count the count.
 		 */
 		public TableNode(String key, int count) {
 			this.key = key;
@@ -207,9 +192,7 @@ public class HashTable_SC extends DataCounter {
 		}
 		
 		/**
-		 * TODO
-		 * @param count
-		 * @param next
+		 * Creates a new table node with a key and the next node.
 		 */
 		public TableNode(String key, TableNode next) {
 			this(key, 0);

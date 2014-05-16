@@ -10,7 +10,8 @@ import providedCode.*;
  * The HashTable_OA class represents a has table that stores strings
  * as keys with counts as values. The open addressing system uses a
  * quadratic probing mechanism and thus remains at least half empty
- * at all times.
+ * at all times. The table can handle input of up to around 250,000
+ * data/count pairs.
  */
 public class HashTable_OA extends DataCounter {
 	public static final int SIZE_FACTOR = 2;
@@ -64,8 +65,11 @@ public class HashTable_OA extends DataCounter {
 		return new OAIterator();
 	}
 	
-	// Returns the index of where a specific node should exist,
-	// or does exist.
+	/**
+	 * Calculates the index in the hash table for the given data string.
+	 * @param data the data string to examine.
+	 * @return the index for the data string.
+	 */
 	private int getIndex(String data) {
 		int startIndex = hasher.hash(data) % table.length;
 		int probeIndex = startIndex;
