@@ -11,6 +11,7 @@ public class MyGraph implements Graph {
 	// you are also likely to want some private helper methods
 
 	// YOUR CODE HERE
+	private Map<Vertex, List<Edge>> graph;
 
 	/**
 	 * Creates a MyGraph object with the given collection of vertices and the
@@ -22,9 +23,21 @@ public class MyGraph implements Graph {
 	 *            a collection of the edges in this graph
 	 */
 	public MyGraph(Collection<Vertex> v, Collection<Edge> e) {
-
-		// YOUR CODE HERE
-
+		// TODO: add exceptions
+		graph = new HashMap<Vertex, List<Edge>>();
+		
+		// Add vertices to the graph
+		for (Vertex vertex : v) {
+			if (!graph.containsKey(vertex))
+				graph.put(vertex, new LinkedList<Edge>());
+		}
+		
+		// Add edges to the corresponding vertices on the graph
+		for (Edge edge : e) {
+			Vertex src = edge.getSource();
+			if (graph.containsKey(src))
+				graph.get(src).add(edge);
+		}
 	}
 
 	/**
