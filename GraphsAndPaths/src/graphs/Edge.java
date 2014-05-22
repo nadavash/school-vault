@@ -1,6 +1,8 @@
 package graphs;
 
 /**
+ * Quynh Huynh, Nadav Ashkenazi
+ * 
  * Representation of a directed graph edge.
  */
 public class Edge {
