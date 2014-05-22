@@ -47,9 +47,7 @@ public class MyGraph implements Graph {
 	 */
 	@Override
 	public Collection<Vertex> vertices() {
-
-		// YOUR CODE HERE
-
+		return graph.keySet();
 	}
 
 	/**
@@ -59,9 +57,16 @@ public class MyGraph implements Graph {
 	 */
 	@Override
 	public Collection<Edge> edges() {
-
+		
 		// YOUR CODE HERE
-
+		List<Edge> edges = new LinkedList<Edge>();
+		for (Vertex vertex : graph.keySet()) {
+			for (Edge edge : graph.get(vertex)) {
+				edges.add(edge);
+			}
+		}
+		
+		return edges;
 	}
 
 	/**
@@ -77,9 +82,15 @@ public class MyGraph implements Graph {
 	 */
 	@Override
 	public Collection<Vertex> adjacentVertices(Vertex v) {
-
-		// YOUR CODE HERE
-
+		if (!graph.containsKey(v))
+			throw new IllegalArgumentException();
+		
+		List<Vertex> adjacents = new LinkedList<Vertex>();
+		for (Edge edge : graph.get(v)) {
+			adjacents.add(edge.getDestination());
+		}
+		
+		return adjacents;
 	}
 
 	/**
