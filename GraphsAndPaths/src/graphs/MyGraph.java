@@ -110,7 +110,17 @@ public class MyGraph implements Graph {
 	public int edgeCost(Vertex a, Vertex b) {
 
 		// YOUR CODE HERE
-
+		Collection<Vertex> adjacent = adjacentVertices(a);
+		for(Vertex v : adjacent) {
+			for(Edge e : graph.get(v)) {
+				String destination = e.getDestination().toString();
+				if(destination.equals(b.toString())) {
+					return e.getWeight();
+				}
+			}
+		}
+		
+		return -1;
 	}
 
 	/**
