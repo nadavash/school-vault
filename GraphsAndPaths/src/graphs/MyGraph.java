@@ -60,10 +60,6 @@ public class MyGraph implements Graph {
 	 */
 	@Override
 	public Collection<Edge> edges() {
-<<<<<<< HEAD
-=======
-		
->>>>>>> c79232386259238f5747ed3ae7fb75196fc79edb
 		List<Edge> edges = new LinkedList<Edge>();
 		for (Vertex vertex : graph.keySet()) {
 			for (Edge edge : graph.get(vertex)) {
@@ -113,10 +109,6 @@ public class MyGraph implements Graph {
 	 */
 	@Override
 	public int edgeCost(Vertex a, Vertex b) {
-<<<<<<< HEAD
-=======
-		
->>>>>>> c79232386259238f5747ed3ae7fb75196fc79edb
 		Collection<Vertex> adjacent = adjacentVertices(a);
 		for(Vertex v : adjacent) {
 			for(Edge e : graph.get(v)) {
@@ -149,6 +141,7 @@ public class MyGraph implements Graph {
 		// YOUR CODE HERE (you might comment this out this method while doing
 		// Part 1)
 
+		return null;
 	}
 
 }
