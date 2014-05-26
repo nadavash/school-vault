@@ -3,15 +3,16 @@ package graphs;
 import java.util.*;
 
 /**
+ * @author Quynh Huynh, Nadav Ashkenazi
+ * @UWNetID quhuynh, nadava
+ * @studentID 1120428, 1230523
+ * @email quhuynh@uw.edu, nadava@uw.edu
+ * 
  * A representation of a graph. Assumes that we do not have negative cost edges
  * in the graph.
  */
 public class MyGraph implements Graph {
-	// you will need some private fields to represent the graph
-	// you are also likely to want some private helper methods
-
-	// YOUR CODE HERE
-	private Map<Vertex, List<Edge>> graph;
+	private Map<Vertex, List<Edge>> graph; 
 
 	/**
 	 * Creates a MyGraph object with the given collection of vertices and the
@@ -35,7 +36,9 @@ public class MyGraph implements Graph {
 		// Add edges to the corresponding vertices on the graph
 		for (Edge edge : e) {
 			Vertex src = edge.getSource();
-			if (graph.containsKey(src))
+			Vertex destination = edge.getDestination();
+			boolean weightIsPositive = edge.getWeight() >= 0;
+			if (weightIsPositive && graph.containsKey(src) && graph.containsKey(destination)) 
 				graph.get(src).add(edge);
 		}
 	}
@@ -57,8 +60,6 @@ public class MyGraph implements Graph {
 	 */
 	@Override
 	public Collection<Edge> edges() {
-		
-		// YOUR CODE HERE
 		List<Edge> edges = new LinkedList<Edge>();
 		for (Vertex vertex : graph.keySet()) {
 			for (Edge edge : graph.get(vertex)) {
@@ -108,13 +109,10 @@ public class MyGraph implements Graph {
 	 */
 	@Override
 	public int edgeCost(Vertex a, Vertex b) {
-
-		// YOUR CODE HERE
 		Collection<Vertex> adjacent = adjacentVertices(a);
 		for(Vertex v : adjacent) {
 			for(Edge e : graph.get(v)) {
-				String destination = e.getDestination().toString();
-				if(destination.equals(b.toString())) {
+				if(e.getDestination().equals(b)) {
 					return e.getWeight();
 				}
 			}
