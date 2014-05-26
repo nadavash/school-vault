@@ -58,7 +58,6 @@ public class MyGraph implements Graph {
 	@Override
 	public Collection<Edge> edges() {
 		
-		// YOUR CODE HERE
 		List<Edge> edges = new LinkedList<Edge>();
 		for (Vertex vertex : graph.keySet()) {
 			for (Edge edge : graph.get(vertex)) {
@@ -108,13 +107,11 @@ public class MyGraph implements Graph {
 	 */
 	@Override
 	public int edgeCost(Vertex a, Vertex b) {
-
-		// YOUR CODE HERE
+		
 		Collection<Vertex> adjacent = adjacentVertices(a);
 		for(Vertex v : adjacent) {
 			for(Edge e : graph.get(v)) {
-				String destination = e.getDestination().toString();
-				if(destination.equals(b.toString())) {
+				if(e.getDestination().equals(b)) {
 					return e.getWeight();
 				}
 			}
