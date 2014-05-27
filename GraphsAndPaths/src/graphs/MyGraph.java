@@ -37,9 +37,13 @@ public class MyGraph implements Graph {
 		for (Edge edge : e) {
 			Vertex src = edge.getSource();
 			Vertex destination = edge.getDestination();
-			boolean weightIsPositive = edge.getWeight() >= 0;
-			if (weightIsPositive && graph.containsKey(src) && graph.containsKey(destination)) 
+			if(edge.getWeight() < 0) {
+				throw new NegativeWeightException("Edge weights cannot be negative. ");
+			} else if(!(graph.containsKey(src) && graph.containsKey(destination))) {
+				throw new InvalidVertexException("Edge contains invalid vertex .");
+			} else {
 				graph.get(src).add(edge);
+			}
 		}
 	}
 
