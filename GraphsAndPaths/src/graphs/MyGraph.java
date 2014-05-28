@@ -164,6 +164,17 @@ public class MyGraph implements Graph {
 				}
 			}
 		}
+		
+		List<Vertex> path = new LinkedList<Vertex>();
+		current = b;
+		while (current != null) {
+			path.add(current);
+			current = current.getPath();
+		}
+		
+		// If the first in the path is the same as the initial vertex
+		if (path.get(0).equals(a))
+			return new Path(path, b.getCost());
 
 		return null;
 	}

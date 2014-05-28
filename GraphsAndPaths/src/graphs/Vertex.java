@@ -106,6 +106,13 @@ public class Vertex implements Comparable<Vertex> {
 	public void setPath(Vertex v) {
 		this.path = v;
 	}
+	
+	/**
+	 * TODO
+	 */
+	public Vertex getPath() {
+		return path;
+	}
 
 	@Override
 	public int compareTo(Vertex other) {
