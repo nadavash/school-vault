@@ -24,7 +24,6 @@ public class MyGraph implements Graph {
 	 *            a collection of the edges in this graph
 	 */
 	public MyGraph(Collection<Vertex> v, Collection<Edge> e) {
-		// TODO: add exceptions
 		graph = new HashMap<Vertex, List<Edge>>();
 		
 		// Add vertices to the graph
@@ -113,12 +112,9 @@ public class MyGraph implements Graph {
 	 */
 	@Override
 	public int edgeCost(Vertex a, Vertex b) {
-		Collection<Vertex> adjacent = adjacentVertices(a);
-		for(Vertex v : adjacent) {
-			for(Edge e : graph.get(v)) {
-				if(e.getDestination().equals(b)) {
-					return e.getWeight();
-				}
+		for(Edge e : graph.get(a)) {
+			if(e.getDestination().equals(b)) {
+				return e.getWeight();
 			}
 		}
 		
@@ -140,12 +136,55 @@ public class MyGraph implements Graph {
 	 * @throws IllegalArgumentException
 	 *             if a or b does not exist.
 	 */
-	public Path shortestPath(Vertex a, Vertex b) {
+	public Path shortestPath(Vertex a, Vertex b) {	
+		Queue<Vertex> unknown = new PriorityQueue<Vertex>();
+		
+		for (Vertex v : vertices()) {
+			v.setKnown(false);
+			v.setCost(Integer.MAX_VALUE);
+			unknown.add(v);
+		}
+		
+		a.setKnown(false);
+		a.setCost(0);
 
-		// YOUR CODE HERE (you might comment this out this method while doing
-		// Part 1)
+		Vertex current;
+		Vertex destination;
+		while (!unknown.isEmpty()) {
+			current = unknown.first();
+			current.setKnown(true);
+			unknown.remove(current);
+			
+			for (Edge e : graph.get(current)) {
+				destination = e.getDestination();
+				int c1 = current.getCost() + e.getWeight();
+				int c2 = destination.getCost();
+				
+				if (c1 < c2) {
+					destination.setCost(c1);
+					destination.setPath(current);
+				}
+			}
+		}
 
 		return null;
+	}
+	
+	/**
+	 * 
+	 * @param v
+	 * @return
+	 */
+	private Edge getShortestEdge(Vertex v) {
+		Edge low = null;
+		
+		for (Edge e : graph.get(v)) {
+			if ((low == null || low.getWeight() > e.getWeight()) &&
+					!e.getDestination().isKnown())
+				low = e;
+		}
+		
+		return low;
 	}
 
 }
