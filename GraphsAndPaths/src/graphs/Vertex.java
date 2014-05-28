@@ -109,8 +109,7 @@ public class Vertex implements Comparable<Vertex> {
 
 	@Override
 	public int compareTo(Vertex other) {
-		// TODO Auto-generated method stub
-		return 0;
+		return cost - other.cost;
 	}
 
 }

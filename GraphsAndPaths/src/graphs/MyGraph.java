@@ -151,9 +151,7 @@ public class MyGraph implements Graph {
 		Vertex current;
 		Vertex destination;
 		while (!unknown.isEmpty()) {
-			current = unknown.first();
-			current.setKnown(true);
-			unknown.remove(current);
+			current = unknown.remove();
 			
 			for (Edge e : graph.get(current)) {
 				destination = e.getDestination();
