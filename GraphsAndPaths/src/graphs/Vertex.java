@@ -1,11 +1,15 @@
 package graphs;
 
+
 /**
  * Representation of a graph vertex
  */
 public class Vertex {
 	// label attached to this vertex
 	private String label;
+	private int cost;
+	private boolean known;
+	private Vertex path;
 
 	/**
 	 * Construct a new vertex
@@ -59,6 +63,24 @@ public class Vertex {
 		} else {
 			return label.equals(other.label);
 		}
+	}
+	
+	public void setCost(int cost) {
+		if(cost >= 0) {
+			this.cost = cost;
+		}
+	}
+	
+	public void markKnown() {
+		known = true;
+	}
+	
+	public boolean isKnown() {
+		return known;
+	}
+	
+	public void setPath(Vertex v) {
+		this.path = v;
 	}
 
 }
