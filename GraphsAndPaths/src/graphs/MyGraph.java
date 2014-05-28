@@ -137,12 +137,12 @@ public class MyGraph implements Graph {
 	 *             if a or b does not exist.
 	 */
 	public Path shortestPath(Vertex a, Vertex b) {	
-		Queue<Vertex> unknown = new PriorityQueue<Vertex>();
+		Collection<Vertex> unknown = new ArrayList<Vertex>();
 		
 		for (Vertex v : vertices()) {
 			v.setKnown(false);
 			v.setCost(Integer.MAX_VALUE);
-			unknown.add(v);
+			//unknown.add(v);
 		}
 		
 		a.setKnown(false);
@@ -151,7 +151,8 @@ public class MyGraph implements Graph {
 		Vertex current;
 		Vertex destination;
 		while (!unknown.isEmpty()) {
-			current = unknown.remove();
+			//current = unknown.remove();
+			current = getLowestCostVertex(unknown);
 			
 			for (Edge e : graph.get(current)) {
 				destination = e.getDestination();
@@ -180,17 +181,16 @@ public class MyGraph implements Graph {
 	}
 	
 	/**
-	 * 
+	 * TODO
 	 * @param v
 	 * @return
 	 */
-	private Edge getShortestEdge(Vertex v) {
-		Edge low = null;
+	private Vertex getLowestCostVertex(Collection<Vertex> vertices) {
+		Vertex low = null;
 		
-		for (Edge e : graph.get(v)) {
-			if ((low == null || low.getWeight() > e.getWeight()) &&
-					!e.getDestination().isKnown())
-				low = e;
+		for (Vertex v : vertices) {
+			if (low == null || v.getCost() < low.getCost())
+				low = v;
 		}
 		
 		return low;
