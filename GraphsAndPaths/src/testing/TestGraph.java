@@ -71,17 +71,21 @@ public class TestGraph {
 	@Test
 	public void testVertices() {
 		Collection<Vertex> vs = graph.vertices();
-		System.out.println(vs);
-		System.out.println(vertices);
+		
 		// Test all vertices from file are in the list
 		for (Vertex v : vertices) {
-			assertEquals("Graph vertices do not contain all necessary vertices.", !vs.contains(v));
+			assertTrue("Graph vertices do not contain all necessary vertices.", vs.contains(v));
 		}
 	}
 
 	@Test
 	public void testEdges() {
-		fail("Not yet implemented");
+		Collection<Edge> es = graph.edges();
+		
+		// Test all edges from file are in the list
+		for (Edge e : edges) {
+			assertTrue("Graph edges do not contain all necessary edges.", es.contains(e));
+		}
 	}
 
 	@Test
@@ -91,7 +95,10 @@ public class TestGraph {
 
 	@Test
 	public void testEdgeCost() {
-		fail("Not yet implemented");
+		for (Edge e : edges) {
+			int cost = graph.edgeCost(e.getSource(), e.getDestination());
+			assertTrue("EdgeCost not calcualated correctly.", cost == e.getWeight());
+		}
 	}
 
 	@Test

@@ -17,7 +17,6 @@ public class FindPaths {
 
 		MyGraph g = readGraph(args[0],args[1]);
 
-		@SuppressWarnings("resource")
 		Scanner console = new Scanner(System.in);
 		Collection<Vertex> v = g.vertices();
                 Collection<Edge> e = g.edges();
