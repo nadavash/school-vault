@@ -65,7 +65,38 @@ public class TestGraph {
 
 	@Test
 	public void testMyGraph() {
-		fail("Not yet implemented");
+		// Test basic functionality of constructor
+		
+		// Test vertices and edges
+		final List<Vertex> verts = new ArrayList<Vertex>();
+		verts.add(new Vertex("A"));
+		verts.add(new Vertex("B"));
+		
+		final List<Edge> edges = new ArrayList<Edge>();
+		edges.add(new Edge(verts.get(0),verts.get(1),1));
+		edges.add(new Edge(verts.get(1),verts.get(0),-4));
+		
+		// Test NegativeWeightException
+		try {
+			new MyGraph(verts, edges);
+			fail("Constructor did not throw exception for edge with negative weight");
+		} catch (NegativeWeightException e) { }
+		
+		// Test InvalidVertexException
+		edges.set(1, new Edge(verts.get(0), new Vertex("yolo"), 3));
+		
+		try {
+			new MyGraph(verts, edges);
+			fail("Constructor did not throw exception for nonexistant vertex.");
+		} catch (InvalidVertexException e) { }
+		
+		// Test InvalidDuplicateEdgeException
+		edges.set(1, new Edge(verts.get(0), verts.get(1), 44));
+		
+		try {
+			new MyGraph(verts, edges);
+			fail("Constructor did not throw exception for invalid duplicate edge.");
+		} catch (InvalidDuplicateEdgeException e) { }
 	}
 
 	@Test
@@ -104,6 +135,12 @@ public class TestGraph {
 	@Test
 	public void testShortestPath() {
 		fail("Not yet implemented");
+		
+		// Test no path
+		
+		// Test path as one vertex (0 weight)
+		
+		// Test regular path
 	}
 
 }

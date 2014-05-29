@@ -36,13 +36,29 @@ public class MyGraph implements Graph {
 		for (Edge edge : e) {
 			Vertex src = edge.getSource();
 			Vertex destination = edge.getDestination();
-			if(edge.getWeight() < 0) {
+			
+			// Check that the weight is not negative
+			if(edge.getWeight() < 0)
 				throw new NegativeWeightException("Edge weights cannot be negative. ");
-			} else if(!(graph.containsKey(src) && graph.containsKey(destination))) {
+				
+			// Check if the graph contains destination and source vertices
+			if (!(graph.containsKey(src) && graph.containsKey(destination)))
 				throw new InvalidVertexException("Edge contains invalid vertex .");
-			} else {
-				graph.get(src).add(edge);
+				
+			// Check if direction already exists
+			boolean foundDuplicate = false;
+			for (Edge srcEdge : graph.get(src)) {
+				if (srcEdge.getDestination().equals(destination)) {
+					foundDuplicate = true;
+					
+					if (srcEdge.getWeight() != edge.getWeight())
+						throw new InvalidDuplicateEdgeException
+						("Duplicate edge bounds with different weights found.");
+				}
 			}
+
+			if (!foundDuplicate)
+				graph.get(src).add(edge);
 		}
 	}
 
@@ -137,7 +153,7 @@ public class MyGraph implements Graph {
 	 *             if a or b does not exist.
 	 */
 	public Path shortestPath(Vertex a, Vertex b) {	
-		Collection<Vertex> unknown = new ArrayList<Vertex>();
+		Set<Vertex> unknown = new HashSet<Vertex>();
 		
 		for (Vertex v : vertices()) {
 			v.setKnown(false);
@@ -151,8 +167,8 @@ public class MyGraph implements Graph {
 		Vertex current;
 		Vertex destination;
 		while (!unknown.isEmpty()) {
-			//current = unknown.remove();
 			current = getLowestCostVertex(unknown);
+			unknown.remove(current);
 			
 			for (Edge e : graph.get(current)) {
 				destination = e.getDestination();
