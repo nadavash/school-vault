@@ -147,14 +147,14 @@ public class TestGraph {
 		
 		assertTrue("Cost of the returned path is incorrect.", p.cost == 1);
 		//assertTrue()
-		System.out.println(p.vertices);
-		System.out.println(p.cost);
 		
 		// Test no path
 		
 		// Test path as one vertex (0 weight)
 		
 		// Test regular path
+		
+		// Test exception
 	}
 
 }
