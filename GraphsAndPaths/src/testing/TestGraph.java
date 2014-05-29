@@ -144,6 +144,9 @@ public class TestGraph {
 		
 		MyGraph graphic = new MyGraph(verts, edges);
 		Path p = graphic.shortestPath(verts.get(0), verts.get(1));
+		
+		assertTrue("Cost of the returned path is incorrect.", p.cost == 1);
+		//assertTrue()
 		System.out.println(p.vertices);
 		System.out.println(p.cost);
 		

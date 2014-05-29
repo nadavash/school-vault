@@ -8,7 +8,6 @@ public class Vertex implements Comparable<Vertex> {
 	// label attached to this vertex
 	private String label;
 	private int cost;
-	private boolean known;
 	private Vertex path;
 
 	/**
@@ -81,22 +80,6 @@ public class Vertex implements Comparable<Vertex> {
 	 */
 	public int getCost() {
 		return cost;
-	}
-	
-	/**
-	 * TODO
-	 * @param known
-	 */
-	public void setKnown(boolean known) {
-		this.known = known;
-	}
-	
-	/**
-	 * TODO
-	 * @return
-	 */
-	public boolean isKnown() {
-		return known;
 	}
 	
 	/**
