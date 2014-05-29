@@ -129,6 +129,9 @@ public class MyGraph implements Graph {
 	 */
 	@Override
 	public int edgeCost(Vertex a, Vertex b) {
+		if (!(graph.containsKey(a) && graph.containsKey(b)))
+			throw new IllegalArgumentException();
+		
 		for(Edge e : graph.get(a)) {
 			if(e.getDestination().equals(b)) {
 				return e.getWeight();

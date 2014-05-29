@@ -128,15 +128,34 @@ public class TestGraph {
 
 	@Test
 	public void testAdjacentVertices() {
-		fail("Not yet implemented");
+		// no adjacent vertices
+		Collection<Vertex> vertices = graph.adjacentVertices(new Vertex("D"));
+		assertTrue("Adjacent vertex list should be zero for vertex with no adjacents", 
+				vertices.isEmpty());
+		
+		// some adjacent vertices
+		vertices = graph.adjacentVertices(new Vertex("A"));
+		assertTrue("Adjacent vertex list should be of size 2 for vertex with two adjacents", 
+				vertices.size() == 2);
+		assertTrue("List does not contain one of the neighbors.", vertices.contains(new Vertex("B")));
+		assertTrue("List does not contain one of the neighbors.", vertices.contains(new Vertex("C")));
+		
+		// Test exception
+		try {
+			graph.adjacentVertices(new Vertex("some nonexistant vertex"));
+			fail("Adjacent vertices method did not throw exception for nonexistant vertex");
+		} catch(IllegalArgumentException e) { }
 	}
 
 	@Test
 	public void testEdgeCost() {
+		// Test normal cases
 		for (Edge e : edges) {
 			int cost = graph.edgeCost(e.getSource(), e.getDestination());
 			assertTrue("EdgeCost not calcualated correctly.", cost == e.getWeight());
 		}
+		
+		// TODO: Test exception
 	}
 
 	@Test
