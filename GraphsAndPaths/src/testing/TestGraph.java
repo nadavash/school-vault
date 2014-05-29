@@ -17,16 +17,28 @@ import org.junit.Test;
  *
  */
 public class TestGraph {
-	public static final String VERTEX_FILE = "vertex.txt";
-	public static final String EDGE_FILE = "edge.txt";
+	public static final String VERTEX_FILE = "test-vertex1.txt";
+	public static final String EDGE_FILE = "test-edge1.txt";
 	
 	private MyGraph graph;
-	private Collection<Vertex> vertices;
-	private Collection<Edge> edges;
+	private List<Vertex> vertices;
+	private List<Edge> edges;
 	
+	// Small edge case vertices
+	private List<Vertex> smVertices = new ArrayList<Vertex>();
+	private List<Edge> smEdges = new ArrayList<Edge>();
 
 	@Before
 	public void setUp() throws Exception {
+		// Initialize small vertices and edges lists
+		smVertices = new ArrayList<Vertex>();
+		smEdges = new ArrayList<Edge>();
+		smVertices.add(new Vertex("A"));
+		smVertices.add(new Vertex("B"));
+		
+		smEdges.add(new Edge(smVertices.get(0),smVertices.get(1),1));
+		smEdges.add(new Edge(smVertices.get(1),smVertices.get(0),1));
+		
 		// Initialize myGraph
 		Scanner s = null;
 		try {
@@ -68,33 +80,28 @@ public class TestGraph {
 		// Test basic functionality of constructor
 		
 		// Test vertices and edges
-		final List<Vertex> verts = new ArrayList<Vertex>();
-		verts.add(new Vertex("A"));
-		verts.add(new Vertex("B"));
 		
-		final List<Edge> edges = new ArrayList<Edge>();
-		edges.add(new Edge(verts.get(0),verts.get(1),1));
-		edges.add(new Edge(verts.get(1),verts.get(0),-4));
+		smEdges.set(1, new Edge(smVertices.get(1), smVertices.get(0),-4));
 		
 		// Test NegativeWeightException
 		try {
-			new MyGraph(verts, edges);
+			new MyGraph(smVertices, smEdges);
 			fail("Constructor did not throw exception for edge with negative weight");
 		} catch (NegativeWeightException e) { }
 		
 		// Test InvalidVertexException
-		edges.set(1, new Edge(verts.get(0), new Vertex("yolo"), 3));
+		smEdges.set(1, new Edge(smVertices.get(0), new Vertex("yolo"), 3));
 		
 		try {
-			new MyGraph(verts, edges);
+			new MyGraph(smVertices, smEdges);
 			fail("Constructor did not throw exception for nonexistant vertex.");
 		} catch (InvalidVertexException e) { }
 		
 		// Test InvalidDuplicateEdgeException
-		edges.set(1, new Edge(verts.get(0), verts.get(1), 44));
+		smEdges.set(1, new Edge(smVertices.get(0), smVertices.get(1), 44));
 		
 		try {
-			new MyGraph(verts, edges);
+			new MyGraph(smVertices, smEdges);
 			fail("Constructor did not throw exception for invalid duplicate edge.");
 		} catch (InvalidDuplicateEdgeException e) { }
 	}
@@ -134,27 +141,31 @@ public class TestGraph {
 
 	@Test
 	public void testShortestPath() {		
-		final List<Vertex> verts = new ArrayList<Vertex>();
-		verts.add(new Vertex("A"));
-		verts.add(new Vertex("B"));
-		
-		final List<Edge> edges = new ArrayList<Edge>();
-		edges.add(new Edge(verts.get(0),verts.get(1),1));
-		edges.add(new Edge(verts.get(1),verts.get(0),1));
-		
-		MyGraph graphic = new MyGraph(verts, edges);
-		Path p = graphic.shortestPath(verts.get(0), verts.get(1));
+		smEdges.set(1, new Edge(smVertices.get(1),smVertices.get(0),1));
+
+		MyGraph graphic = new MyGraph(smVertices, smEdges);
+		Path p = graphic.shortestPath(smVertices.get(0), smVertices.get(1));
 		
 		assertTrue("Cost of the returned path is incorrect.", p.cost == 1);
 		//assertTrue()
 		
-		// Test no path
+		// TODO: Test no path
+		p = graph.shortestPath(vertices.get(0), vertices.get(vertices.size() - 1));
 		
-		// Test path as one vertex (0 weight)
+		// TODO: Test path as one vertex (0 weight)
 		
-		// Test regular path
+		// TODO: Test regular path
+		p = graph.shortestPath(new Vertex("A"), new Vertex("D"));
+		assertTrue("Path cost of regular path is incorrect", p.cost == 7);
+		assertTrue("Regular path does not have the correct number of vertices.", p.vertices.size() == 3);
 		
 		// Test exception
+		try {
+			graph.shortestPath(new Vertex("some vertex that does not exist"),
+					new Vertex("some other vertex that doesn't exist"));
+			fail("Shortest path method does not throw exception when vertices "
+					+ "aren't in the graph");
+		} catch(IllegalArgumentException e) { }
 	}
 
 }

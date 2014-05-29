@@ -12,6 +12,7 @@ import java.util.*;
  * in the graph.
  */
 public class MyGraph implements Graph {
+	
 	private Map<Vertex, List<Edge>> graph; 
 
 	/**
@@ -157,30 +158,31 @@ public class MyGraph implements Graph {
 		if (!(graph.containsKey(a) && graph.containsKey(b)))
 			throw new IllegalArgumentException();
 		
-		Set<Vertex> unknown = new HashSet<Vertex>();
+		Map<Vertex, Vertex> vertices = new HashMap<Vertex, Vertex>();
 		
+		// Initialize vertices and the unknown set
 		for (Vertex v : vertices()) {
 			v.setCost(Integer.MAX_VALUE);
 			v.setPath(null);
+			v.setKnown(false);
 			if (v.equals(a)) {
 				a = v;
 			} else if (v.equals(b)) {
 				b = v;
 			}
-			unknown.add(v);
+			vertices.put(v, v);
 		}
 		
 		a.setCost(0);
 
-		Vertex current;
+		Vertex current = getLowestUnknownVertex(vertices);
 		Vertex destination;
-		while (!unknown.isEmpty()) {
-			current = getLowestCostVertex(unknown);
-			unknown.remove(current);
+		while (current != null) { // O(|V|)
+			current.setKnown(true);
 			
-			for (Edge e : graph.get(current)) {
-				destination = e.getDestination();
-				int c1 = current.getCost() + e.getWeight();
+			for (Vertex adjacent : adjacentVertices(current)) { // O(|E|)
+				destination = vertices.get(adjacent);
+				int c1 = current.getCost() + edgeCost(current, adjacent);
 				int c2 = destination.getCost();
 				
 				if (c1 < c2) {
@@ -188,14 +190,11 @@ public class MyGraph implements Graph {
 					destination.setPath(current);
 				}
 			}
+			
+			current = getLowestUnknownVertex(vertices);
 		}
 		
-		List<Vertex> path = new LinkedList<Vertex>();
-		current = b;
-		while (current != null) {
-			path.add(0, current);
-			current = current.getPath();
-		}
+		List<Vertex> path = buildPath(b);
 		
 		// If the first in the path is the same as the initial vertex
 		if (path.get(0).equals(a))
@@ -209,15 +208,32 @@ public class MyGraph implements Graph {
 	 * @param v
 	 * @return
 	 */
-	private Vertex getLowestCostVertex(Collection<Vertex> vertices) {
+	private Vertex getLowestUnknownVertex(Map<Vertex, Vertex> vertices) {
 		Vertex low = null;
 		
-		for (Vertex v : vertices) {
-			if (low == null || v.getCost() < low.getCost())
+		for (Vertex vv : vertices.keySet()) {
+			Vertex v = vertices.get(vv);
+			if ((low == null || v.getCost() < low.getCost()) && !v.isKnown())
 				low = v;
 		}
 		
 		return low;
+	}
+	
+	/**
+	 * TODO
+	 * @param destination
+	 * @return
+	 */
+	private List<Vertex> buildPath(Vertex destination) {
+		List<Vertex> path = new LinkedList<Vertex>();
+		Vertex current = destination;
+		while (current != null) {
+			path.add(0, current);
+			current = current.getPath();
+		}
+		
+		return path;
 	}
 
 }

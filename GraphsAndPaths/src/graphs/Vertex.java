@@ -4,11 +4,12 @@ package graphs;
 /**
  * Representation of a graph vertex
  */
-public class Vertex implements Comparable<Vertex> {
+public class Vertex {
 	// label attached to this vertex
 	private String label;
 	private int cost;
 	private Vertex path;
+	private boolean known;
 
 	/**
 	 * Construct a new vertex
@@ -96,10 +97,20 @@ public class Vertex implements Comparable<Vertex> {
 	public Vertex getPath() {
 		return path;
 	}
-
-	@Override
-	public int compareTo(Vertex other) {
-		return cost - other.cost;
+	
+	/**
+	 * TODO
+	 * @return
+	 */
+	public boolean isKnown() {
+		return known;
 	}
-
+	
+	/**
+	 * TODO
+	 * @param known
+	 */
+	public void setKnown(boolean known) {
+		this.known = known;
+	}
 }
