@@ -133,8 +133,19 @@ public class TestGraph {
 	}
 
 	@Test
-	public void testShortestPath() {
-		fail("Not yet implemented");
+	public void testShortestPath() {		
+		final List<Vertex> verts = new ArrayList<Vertex>();
+		verts.add(new Vertex("A"));
+		verts.add(new Vertex("B"));
+		
+		final List<Edge> edges = new ArrayList<Edge>();
+		edges.add(new Edge(verts.get(0),verts.get(1),1));
+		edges.add(new Edge(verts.get(1),verts.get(0),1));
+		
+		MyGraph graphic = new MyGraph(verts, edges);
+		Path p = graphic.shortestPath(verts.get(0), verts.get(1));
+		System.out.println(p.vertices);
+		System.out.println(p.cost);
 		
 		// Test no path
 		

@@ -152,16 +152,24 @@ public class MyGraph implements Graph {
 	 * @throws IllegalArgumentException
 	 *             if a or b does not exist.
 	 */
-	public Path shortestPath(Vertex a, Vertex b) {	
+	public Path shortestPath(Vertex a, Vertex b) {
+		// If either one of the vertices are not in the graph, throw exception
+		if (!(graph.containsKey(a) && graph.containsKey(b)))
+			throw new IllegalArgumentException();
+		
 		Set<Vertex> unknown = new HashSet<Vertex>();
 		
 		for (Vertex v : vertices()) {
-			v.setKnown(false);
 			v.setCost(Integer.MAX_VALUE);
-			//unknown.add(v);
+			v.setPath(null);
+			if (v.equals(a)) {
+				a = v;
+			} else if (v.equals(b)) {
+				b = v;
+			}
+			unknown.add(v);
 		}
 		
-		a.setKnown(false);
 		a.setCost(0);
 
 		Vertex current;
@@ -185,7 +193,7 @@ public class MyGraph implements Graph {
 		List<Vertex> path = new LinkedList<Vertex>();
 		current = b;
 		while (current != null) {
-			path.add(current);
+			path.add(0, current);
 			current = current.getPath();
 		}
 		
