@@ -12,9 +12,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * TODO
- * @author nadavash
- *
+ * @author Quynh Huynh, Nadav Ashkenazi
+ * @UWNetID quhuynh, nadava
+ * @studentID 1120428, 1230523
+ * @email quhuynh@uw.edu, nadava@uw.edu
+ * The TestGraph class tests the MyGraph class with sample text vertex
+ * and edge files designed specifically for the test cases here.
  */
 public class TestGraph {
 	public static final String VERTEX_FILE = "test-vertex1.txt";
@@ -94,7 +97,7 @@ public class TestGraph {
 		
 		try {
 			new MyGraph(smVertices, smEdges);
-			fail("Constructor did not throw exception for nonexistant vertex.");
+			fail("Constructor did not throw exception for nonexistant vertex");
 		} catch (InvalidVertexException e) { }
 		
 		// Test InvalidDuplicateEdgeException
@@ -102,7 +105,7 @@ public class TestGraph {
 		
 		try {
 			new MyGraph(smVertices, smEdges);
-			fail("Constructor did not throw exception for invalid duplicate edge.");
+			fail("Constructor did not throw exception for invalid duplicate edge");
 		} catch (InvalidDuplicateEdgeException e) { }
 	}
 
@@ -112,7 +115,7 @@ public class TestGraph {
 		
 		// Test all vertices from file are in the list
 		for (Vertex v : vertices) {
-			assertTrue("Graph vertices do not contain all necessary vertices.", vs.contains(v));
+			assertTrue("Graph vertices do not contain all necessary vertices", vs.contains(v));
 		}
 	}
 
@@ -122,7 +125,7 @@ public class TestGraph {
 		
 		// Test all edges from file are in the list
 		for (Edge e : edges) {
-			assertTrue("Graph edges do not contain all necessary edges.", es.contains(e));
+			assertTrue("Graph edges do not contain all necessary edges", es.contains(e));
 		}
 	}
 
@@ -137,8 +140,8 @@ public class TestGraph {
 		vertices = graph.adjacentVertices(new Vertex("A"));
 		assertTrue("Adjacent vertex list should be of size 2 for vertex with two adjacents", 
 				vertices.size() == 2);
-		assertTrue("List does not contain one of the neighbors.", vertices.contains(new Vertex("B")));
-		assertTrue("List does not contain one of the neighbors.", vertices.contains(new Vertex("C")));
+		assertTrue("List does not contain one of the neighbors", vertices.contains(new Vertex("B")));
+		assertTrue("List does not contain one of the neighbors", vertices.contains(new Vertex("C")));
 		
 		// Test exception
 		try {
@@ -152,10 +155,14 @@ public class TestGraph {
 		// Test normal cases
 		for (Edge e : edges) {
 			int cost = graph.edgeCost(e.getSource(), e.getDestination());
-			assertTrue("EdgeCost not calcualated correctly.", cost == e.getWeight());
+			assertTrue("EdgeCost not calcualated correctly", cost == e.getWeight());
 		}
 		
-		// TODO: Test exception
+		// Test exception
+		try {
+			graph.edgeCost(new Vertex("Yolo"), new Vertex("Yolo more"));
+			fail("Edge cost does not throw exception for nonexistant vertices");
+		} catch (IllegalArgumentException e) { }
 	}
 
 	@Test
@@ -163,20 +170,25 @@ public class TestGraph {
 		smEdges.set(1, new Edge(smVertices.get(1),smVertices.get(0),1));
 
 		MyGraph graphic = new MyGraph(smVertices, smEdges);
+		
+		// Test very short path
 		Path p = graphic.shortestPath(smVertices.get(0), smVertices.get(1));
+		assertTrue("Cost of the returned path is incorrect", p.cost == 1);
 		
-		assertTrue("Cost of the returned path is incorrect.", p.cost == 1);
-		//assertTrue()
+		// Test no path
+		p = graph.shortestPath(new Vertex("B"), new Vertex("A"));
+		assertTrue("Shortest path should return null for no path", p == null);
 		
-		// TODO: Test no path
-		p = graph.shortestPath(vertices.get(0), vertices.get(vertices.size() - 1));
+		// Test path as one vertex (0 weight)
+		p = graph.shortestPath(new Vertex("A"), new Vertex("A"));
+		assertTrue("Path cost of a == b should be zero", p.cost == 0);
+		assertTrue("Path length should be one vertex long", p.vertices.size() == 1);
+		assertTrue("Path should only contain vertex A", p.vertices.contains(new Vertex("A")));
 		
-		// TODO: Test path as one vertex (0 weight)
-		
-		// TODO: Test regular path
+		// Test regular path
 		p = graph.shortestPath(new Vertex("A"), new Vertex("D"));
 		assertTrue("Path cost of regular path is incorrect", p.cost == 7);
-		assertTrue("Regular path does not have the correct number of vertices.", p.vertices.size() == 3);
+		assertTrue("Regular path does not have the correct number of vertices", p.vertices.size() == 3);
 		
 		// Test exception
 		try {
