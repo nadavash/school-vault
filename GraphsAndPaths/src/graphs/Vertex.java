@@ -75,105 +75,48 @@ public class Vertex {
 	}
 	
 	/**
-<<<<<<< HEAD
-<<<<<<< HEAD
-	 * @param cost
-	 * @return Sets the cost of this vertex to the given value
-=======
 	 * Sets the cost of the vertex.
 	 * @param cost the cost to set the vertex to
->>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
-=======
-	 * Sets the cost of the vertex.
-	 * @param cost the cost to set the vertex to
->>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
 	 */
 	public void setCost(int cost) {
 		this.cost = cost;
 	}
 	
 	/**
-<<<<<<< HEAD
-<<<<<<< HEAD
-	 * @return This vertex's cost
-=======
 	 * Gets the cost of the vertex.
 	 * @return the cost of the vertex
->>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
-=======
-	 * Gets the cost of the vertex.
-	 * @return the cost of the vertex
->>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
 	 */
 	public int getCost() {
 		return cost;
 	}
 	
 	/**
-<<<<<<< HEAD
-<<<<<<< HEAD
-	 * @param v
-	 * @return Sets the lowest-cost path to this vertex with the given vertex 
-=======
 	 * Sets the previous vertex for this vertex's path.
 	 * @param v the previous vertex
->>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
-=======
-	 * Sets the previous vertex for this vertex's path.
-	 * @param v the previous vertex
->>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
 	 */
 	public void setPath(Vertex v) {
 		this.path = v;
 	}
 	
 	/**
-<<<<<<< HEAD
-<<<<<<< HEAD
+	 * Gets the path of the vertex.
 	 * @return The lowest-cost vertex that points to this vertex
-=======
-	 * Gets the path of the vertex.
-	 * @return the path of the vertex
->>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
-=======
-	 * Gets the path of the vertex.
-	 * @return the path of the vertex
->>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
 	 */
 	public Vertex getPath() {
 		return path;
 	}
 	
 	/**
-<<<<<<< HEAD
-<<<<<<< HEAD
-	 * @return If the lowest-cost path to this vertex is known
-=======
 	 * Checks if the vertex is known.
 	 * @return true if the vertex is known, false otherwise
->>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
-=======
-	 * Checks if the vertex is known.
-	 * @return true if the vertex is known, false otherwise
->>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
 	 */
 	public boolean isKnown() {
 		return known;
 	}
 	
 	/**
-<<<<<<< HEAD
-<<<<<<< HEAD
-	 * @param known
-	 * Sets this vertex's known factor to the given value
-=======
 	 * Sets the known value for this vertex.
 	 * @param known the value to set the known field to.
->>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
-=======
-	 * Sets the known value for this vertex.
-	 * @param known the value to set the known field to.
->>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
 	 */
 	public void setKnown(boolean known) {
 		this.known = known;

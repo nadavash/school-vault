@@ -8,7 +8,7 @@ import java.util.List;
  * @studentID 1120428, 1230523
  * @email quhuynh@uw.edu, nadava@uw.edu
  *
- * Stores a given path and its cost.
+ * Stores a path of vertices and its total cost.
  */
 public class Path {
 	public final List<Vertex> vertices; // stores the vertices of this path

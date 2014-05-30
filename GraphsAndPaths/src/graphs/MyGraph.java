@@ -223,20 +223,9 @@ public class MyGraph implements Graph {
 	}
 	
 	/**
-<<<<<<< HEAD
-<<<<<<< HEAD
-	 * @param v
-	 * @return The vertex in vertices with the lowest cost and is unknown
-=======
 	 * Finds the lowest unknown vertex in the given map of vertices.
 	 * @param vertices the map of vertices to search
 	 * @return the lowest unknown vertex in the map
->>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
-=======
-	 * Finds the lowest unknown vertex in the given map of vertices.
-	 * @param vertices the map of vertices to search
-	 * @return the lowest unknown vertex in the map
->>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
 	 */
 	private Vertex getLowestUnknownVertex(Map<Vertex, Vertex> vertices) {
 		Vertex low = null;
@@ -250,22 +239,10 @@ public class MyGraph implements Graph {
 	}
 	
 	/**
-<<<<<<< HEAD
-<<<<<<< HEAD
-	 * @param destination
-	 * @return A list of vertices with that represents the shortest path to the destination
-	 * 		   from the starting vertex (specified in shortestPath method)s
-=======
-=======
->>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
 	 * Builds the path to the given destination vertex, starting with
 	 * the origin vertex.
 	 * @param destination the destination to start building the path from
 	 * @return the path to the destination vertex
-<<<<<<< HEAD
->>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
-=======
->>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
 	 */
 	private List<Vertex> buildPath(Vertex destination) {
 		List<Vertex> path = new LinkedList<Vertex>();
