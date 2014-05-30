@@ -1,7 +1,10 @@
 package graphs;
 
 /**
- * Quynh Huynh, Nadav Ashkenazi
+ * @author Quynh Huynh, Nadav Ashkenazi
+ * @UWNetID quhuynh, nadava
+ * @studentID 1120428, 1230523
+ * @email quhuynh@uw.edu, nadava@uw.edu
  * 
  * Representation of a directed graph edge.
  */
@@ -63,7 +66,9 @@ public class Edge {
 		return "<" + from + ", " + to + ", " + w + ">";
 	}
 
-	// auto-generated: hashes on all fields
+	/** 
+	 * Returns the hash code for this edge
+	 */
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -73,7 +78,12 @@ public class Edge {
 		return result;
 	}
 
-	// auto-generated: compares all fields
+	/**
+	 * Returns if two edges are the same 
+	 * 
+	 * @param obj
+	 * 			the object you want to compare 
+	 */
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;

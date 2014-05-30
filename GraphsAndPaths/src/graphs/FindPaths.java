@@ -4,6 +4,11 @@ import java.util.*;
 import java.io.*;
 
 /**
+ * @author Quynh Huynh, Nadav Ashkenazi
+ * @UWNetID quhuynh, nadava
+ * @studentID 1120428, 1230523
+ * @email quhuynh@uw.edu, nadava@uw.edu
+ * 
  * Driver program that reads in a graph and prompts user for shortests paths in the graph.
  * (Intentionally without comments.  Read through the code to understand what it does.)
  */
@@ -37,13 +42,12 @@ public class FindPaths {
 				System.exit(1);
 			}
 			
-			// YOUR CODE HERE: call shortestPath and print
-			// out the result
+			// Print shortest path between two vertices
 			
 			Path result = g.shortestPath(a, b);
 			if(result == null) {
 				System.out.println("does not exist");
-			} else if(!a.equals(b)) {
+			} else {
 				System.out.println("Shortest path from " + a + " to " + b);
 				for(Vertex point : result.vertices) {
 					System.out.print(point + " ");

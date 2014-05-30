@@ -2,14 +2,18 @@ package graphs;
 
 
 /**
+ * @author Quynh Huynh, Nadav Ashkenazi
+ * @UWNetID quhuynh, nadava
+ * @studentID 1120428, 1230523
+ * @email quhuynh@uw.edu, nadava@uw.edu
+ * 
  * Representation of a graph vertex
  */
 public class Vertex {
-	// label attached to this vertex
-	private String label;
-	private int cost;
-	private Vertex path;
-	private boolean known;
+	private String label; // label attached to this vertex
+	private int cost; // cost of this vertex
+	private Vertex path; // lowest-cost path to this vertex
+	private boolean known; // if the lowest-cost path to this vertex is known
 
 	/**
 	 * Construct a new vertex
@@ -41,7 +45,9 @@ public class Vertex {
 		return label;
 	}
 
-	// auto-generated: hashes on label
+	/**
+	 * @return The hash code for this vertex
+	 */
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -49,7 +55,10 @@ public class Vertex {
 		return result;
 	}
 
-	// auto-generated: compares labels
+	/** 
+	 * @param The object you want to compare
+	 * @return If the two objects are equal
+	 */
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -66,49 +75,75 @@ public class Vertex {
 	}
 	
 	/**
-	 * TODO
+<<<<<<< HEAD
 	 * @param cost
+	 * @return Sets the cost of this vertex to the given value
+=======
+	 * Sets the cost of the vertex.
+	 * @param cost the cost to set the vertex to
+>>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
 	 */
 	public void setCost(int cost) {
-		if(cost >= 0) {
-			this.cost = cost;
-		}
+		this.cost = cost;
 	}
 	
 	/**
-	 * TODO
-	 * @return
+<<<<<<< HEAD
+	 * @return This vertex's cost
+=======
+	 * Gets the cost of the vertex.
+	 * @return the cost of the vertex
+>>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
 	 */
 	public int getCost() {
 		return cost;
 	}
 	
 	/**
-	 * TODO
+<<<<<<< HEAD
 	 * @param v
+	 * @return Sets the lowest-cost path to this vertex with the given vertex 
+=======
+	 * Sets the previous vertex for this vertex's path.
+	 * @param v the previous vertex
+>>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
 	 */
 	public void setPath(Vertex v) {
 		this.path = v;
 	}
 	
 	/**
-	 * TODO
+<<<<<<< HEAD
+	 * @return The lowest-cost vertex that points to this vertex
+=======
+	 * Gets the path of the vertex.
+	 * @return the path of the vertex
+>>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
 	 */
 	public Vertex getPath() {
 		return path;
 	}
 	
 	/**
-	 * TODO
-	 * @return
+<<<<<<< HEAD
+	 * @return If the lowest-cost path to this vertex is known
+=======
+	 * Checks if the vertex is known.
+	 * @return true if the vertex is known, false otherwise
+>>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
 	 */
 	public boolean isKnown() {
 		return known;
 	}
 	
 	/**
-	 * TODO
+<<<<<<< HEAD
 	 * @param known
+	 * Sets this vertex's known factor to the given value
+=======
+	 * Sets the known value for this vertex.
+	 * @param known the value to set the known field to.
+>>>>>>> 20ed9867acc0cbe28375a2df62b0149e6358e1b9
 	 */
 	public void setKnown(boolean known) {
 		this.known = known;
