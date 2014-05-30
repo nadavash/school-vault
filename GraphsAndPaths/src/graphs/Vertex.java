@@ -66,49 +66,48 @@ public class Vertex {
 	}
 	
 	/**
-	 * TODO
-	 * @param cost
+	 * Sets the cost of the vertex.
+	 * @param cost the cost to set the vertex to
 	 */
 	public void setCost(int cost) {
-		if(cost >= 0) {
-			this.cost = cost;
-		}
+		this.cost = cost;
 	}
 	
 	/**
-	 * TODO
-	 * @return
+	 * Gets the cost of the vertex.
+	 * @return the cost of the vertex
 	 */
 	public int getCost() {
 		return cost;
 	}
 	
 	/**
-	 * TODO
-	 * @param v
+	 * Sets the previous vertex for this vertex's path.
+	 * @param v the previous vertex
 	 */
 	public void setPath(Vertex v) {
 		this.path = v;
 	}
 	
 	/**
-	 * TODO
+	 * Gets the path of the vertex.
+	 * @return the path of the vertex
 	 */
 	public Vertex getPath() {
 		return path;
 	}
 	
 	/**
-	 * TODO
-	 * @return
+	 * Checks if the vertex is known.
+	 * @return true if the vertex is known, false otherwise
 	 */
 	public boolean isKnown() {
 		return known;
 	}
 	
 	/**
-	 * TODO
-	 * @param known
+	 * Sets the known value for this vertex.
+	 * @param known the value to set the known field to.
 	 */
 	public void setKnown(boolean known) {
 		this.known = known;

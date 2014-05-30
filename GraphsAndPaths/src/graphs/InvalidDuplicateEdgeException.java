@@ -4,14 +4,17 @@
 package graphs;
 
 /**
- * @author nadavash
- * TODO
+ * @author Quynh Huynh, Nadav Ashkenazi
+ * @UWNetID quhuynh, nadava
+ * @studentID 1120428, 1230523
+ * @email quhuynh@uw.edu, nadava@uw.edu
+ * 
+ * Represents an exception for invalid duplicate edges in a Graph object. Invalid
+ * duplicate edges are edges the have identical source and destination but a different
+ * cost.
  */
 public class InvalidDuplicateEdgeException extends IllegalStateException {
 
-	/**
-	 * TODO
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**

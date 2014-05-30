@@ -161,33 +161,30 @@ public class MyGraph implements Graph {
 		if (!(graph.containsKey(a) && graph.containsKey(b)))
 			throw new IllegalArgumentException();
 		
-		Map<Vertex, Vertex> vertices = new HashMap<Vertex, Vertex>();
-		
 		// Initialize vertices and the unknown set
-		for (Vertex v : vertices()) {
-			v.setCost(Integer.MAX_VALUE);
-			v.setPath(null);
-			v.setKnown(false);
-			if (v.equals(a)) {
-				a = v;
-			} else if (v.equals(b)) {
-				b = v;
-			}
-			vertices.put(v, v);
-		}
+		Map<Vertex, Vertex> vertices = buildInitMap(); // O(|V|)
+		
+		// Get correct references for origin and destination
+		a = vertices.get(a);
+		b = vertices.get(b);
 		
 		a.setCost(0);
 
+		// Find lowest unknown vertex
 		Vertex current = getLowestUnknownVertex(vertices);
 		Vertex destination;
-		while (current != null) { // O(|V|)
+		
+		// While there are unknown nodes in the map
+		while (current != null) { // O(|V|^2)
 			current.setKnown(true);
 			
+			// Go through each adjacent vertex
 			for (Vertex adjacent : adjacentVertices(current)) { // O(|E|)
 				destination = vertices.get(adjacent);
 				int c1 = current.getCost() + edgeCost(current, adjacent);
 				int c2 = destination.getCost();
 				
+				// If the new path calculated is lower cost, swap it!
 				if (c1 < c2) {
 					destination.setCost(c1);
 					destination.setPath(current);
@@ -205,17 +202,35 @@ public class MyGraph implements Graph {
 
 		return null;
 	}
+
+	/**
+	 * Builds a map that maps vertices to vertices to ensure references
+	 * work correctly for the shortest path method. Initializes each vertex's
+	 * known field to false, path to null, and cost to infinity.
+	 * @return the map of initialized vertices.
+	 */
+	private Map<Vertex, Vertex> buildInitMap() {
+		Map<Vertex, Vertex> vertices = new HashMap<Vertex, Vertex>();
+
+		for (Vertex v : vertices()) {
+			v.setCost(Integer.MAX_VALUE);
+			v.setPath(null);
+			v.setKnown(false);
+			vertices.put(v, v);
+		}
+		
+		return vertices;
+	}
 	
 	/**
-	 * TODO
-	 * @param v
-	 * @return
+	 * Finds the lowest unknown vertex in the given map of vertices.
+	 * @param vertices the map of vertices to search
+	 * @return the lowest unknown vertex in the map
 	 */
 	private Vertex getLowestUnknownVertex(Map<Vertex, Vertex> vertices) {
 		Vertex low = null;
 		
-		for (Vertex vv : vertices.keySet()) {
-			Vertex v = vertices.get(vv);
+		for (Vertex v : vertices.keySet()) {
 			if ((low == null || v.getCost() < low.getCost()) && !v.isKnown())
 				low = v;
 		}
@@ -224,9 +239,10 @@ public class MyGraph implements Graph {
 	}
 	
 	/**
-	 * TODO
-	 * @param destination
-	 * @return
+	 * Builds the path to the given destination vertex, starting with
+	 * the origin vertex.
+	 * @param destination the destination to start building the path from
+	 * @return the path to the destination vertex
 	 */
 	private List<Vertex> buildPath(Vertex destination) {
 		List<Vertex> path = new LinkedList<Vertex>();
