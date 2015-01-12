@@ -2,10 +2,13 @@
 // nadava@uw.edu - 1230523
 // CSE 333 15wi
 // Exercise 2 - DumpHex
+// BONUS - solved padding issue with padding variables.
 #include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
 
+// Prints, in hex, all of the byte values of [pData] through
+// [padata + bytelen].
 void DumpHex(void *pData, int byteLen);
 
 void DumpHex(void *pData, int byteLen) {
