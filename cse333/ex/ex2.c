@@ -1,7 +1,7 @@
-// Copyright 2015 Nadav Ashkenazi
+// Copyright 2015, Nadav Ashkenazi
 // nadava@uw.edu - 1230523
 // CSE 333 15wi
-// Exercise 1a - Pass by value/reference
+// Exercise 2 - DumpHex
 #include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
     int32_t  intVal;
     float    floatVal;
     double   doubleVal;
-  } Ex2Struct;
+  } __attribute__((__packed__)) Ex2Struct;
   Ex2Struct structVal = { '0', 1, 1.0, 1.0 };
 
   DumpHex(&charVal, sizeof(char));
