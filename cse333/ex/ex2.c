@@ -29,9 +29,10 @@ int main(int argc, char **argv) {
     char     padding1, padding2, padding3;
     int32_t  intVal;
     float    floatVal;
+    uint32_t padding4;
     double   doubleVal;
   } Ex2Struct;
-  Ex2Struct structVal = { '0', 0, 0, 0, 1, 1.0, 1.0 };
+  Ex2Struct structVal = { '0', 0, 0, 0, 1, 1.0, 1, 1.0 };
 
   DumpHex(&charVal, sizeof(char));
   DumpHex(&intVal, sizeof(int32_t));
