@@ -10,3 +10,14 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+cse333/ex/ex1b.dSYM/Contents/Info.plist
+cse333/ex/ex1b.dSYM/Contents/Resources/DWARF/ex1b
+cse333/ex/ex2.dSYM/Contents/Info.plist
+cse333/ex/ex2.dSYM/Contents/Resources/DWARF/ex2
+cse333/lecture/buf_to_int.dSYM/Contents/Info.plist
+cse333/lecture/buf_to_int.dSYM/Contents/Resources/DWARF/buf_to_int
+cse333/ex/ex1a
+cse333/ex/ex1b
+cse333/ex/ex2
+cse333/ex/ex1a.dSYM/Contents/Info.plist
+cse333/ex/ex1a.dSYM/Contents/Resources/DWARF/ex1a
