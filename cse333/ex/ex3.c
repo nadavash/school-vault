@@ -9,10 +9,13 @@
 
 // Defines a point in 3d space with x, y, and z coordinates.
 typedef struct {
-	uint16_t x, y, z;
+  uint16_t x, y, z;
 } Point3d;
 
+// Allocates a new Point3d with the given x, y, and z coordinates on the heap.
+// Returns NULL if failed to allocate.
 Point3d* AllocatePoint3d(uint16_t x, uint16_t y, uint16_t z);
+// Prints the x, y, and z coordinates for the given Point3d.
 void PrintPoint3d(Point3d* point);
 
 Point3d* AllocatePoint3d(uint16_t x, uint16_t y, uint16_t z) {
