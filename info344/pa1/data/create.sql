@@ -1,4 +1,4 @@
-USE NBA;
+USE nba;
 
 CREATE TABLE Players(
 	PlayerId INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
@@ -10,3 +10,6 @@ CREATE TABLE Players(
 	PPG FLOAT,
 	INDEX(PlayerName)
 )ENGINE=INNODB;
+
+CREATE USER 'i344pa1'@'localhost' IDENTIFIED BY 'i344nba';
+GRANT SELECT ON nba.* to 'i344pa1'@'localhost' identified by 'i344nba';
