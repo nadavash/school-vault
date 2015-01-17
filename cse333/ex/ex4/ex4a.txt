@@ -1,0 +1,19 @@
+Nadav Ashkenazi
+CSE 333
+Exercise 4a
+
+1. To append something to Alice's notes file, we must:
+   a. Open the file using the 'open' system call and get a file descriptor
+      to /homes/alice/notes.txt
+   b. Use the system call 'lseek' to immediately jump to the end of the file
+   c. Use the 'write' system call to begin writing at that position to the file
+   d. Call the 'close' function after writing to the end of the file
+2. To insert some lines at the beginning of the notes file:
+   a. We use the 'open' call like in (1)
+   b. Open a second, temporary file with the 'open' call
+   c. Begin writing to the temporary file the desired lines using 'write'
+   d. Using the 'read' on the original notes.txt, write all of it's contents to
+      the temporary file using the 'write' call
+   e. Once the copying is done, 'close' the notes.txt file and delete the original 
+      notes.txt file with the 'remove' system call
+   f. Close the temporary file and rename it to 'notes.txt'
