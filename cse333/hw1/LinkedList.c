@@ -119,8 +119,24 @@ bool PopLinkedList(LinkedList list, LLPayload_t *payload_ptr) {
   // and (b) the general case of a list with >=2 elements in it.
   // Be sure to call free() to deallocate the memory that was
   // previously allocated by PushLinkedList().
+  if (list->num_elements == 0) {
+    return false;
+  }
 
+  Verify333(list->head != NULL);  // debugging aid
+  Verify333(list->tail != NULL);  // debugging aid
 
+  LinkedListNodePtr ln = list->head;
+  payload_ptr = ln->payload;
+
+  if (list->num_elements == 1U) {
+    list->head = list->tail = NULL;
+  } else {
+    list->head = ln->next;
+  }
+
+  --list->num_elements;
+  free(ln);
 
   return true;
 }
