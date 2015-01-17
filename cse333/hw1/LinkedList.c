@@ -52,7 +52,10 @@ void FreeLinkedList(LinkedList list,
   // sweep through the list and free all of the nodes' payloads as
   // well as the nodes themselves
   while (list->head != NULL) {
-
+    LinkedListNodePtr node = list->head;
+    list->head = node->next;
+    payload_free_function(node->payload);
+    free(node);
   }
 
   // free the list record
