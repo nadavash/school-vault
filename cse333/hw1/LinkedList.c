@@ -391,6 +391,7 @@ bool LLIteratorDelete(LLIter iter,
     SliceLinkedList(list, &payload);
   } else {
     LinkedListNodePtr node = iter->node;
+    LLIteratorNext(iter);
     node->prev->next = node->next;
     node->next->prev = node->prev;
     payload = node->payload;
