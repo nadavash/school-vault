@@ -127,7 +127,7 @@ bool PopLinkedList(LinkedList list, LLPayload_t *payload_ptr) {
   Verify333(list->tail != NULL);  // debugging aid
 
   LinkedListNodePtr ln = list->head;
-  payload_ptr = ln->payload;
+  *payload_ptr = ln->payload;
 
   if (list->num_elements == 1U) {
     list->head = list->tail = NULL;
