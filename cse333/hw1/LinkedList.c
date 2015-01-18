@@ -99,6 +99,7 @@ bool PushLinkedList(LinkedList list, LLPayload_t payload) {
   // typical case; list has >=1 elements
   Verify333(list->head != NULL);  // debugging aid
   Verify333(list->tail != NULL);  // debugging aid
+  list->head->prev = ln;
   ln->prev = NULL;
   ln->next = list->head;
   list->head = ln;
