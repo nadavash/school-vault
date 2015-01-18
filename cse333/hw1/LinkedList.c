@@ -300,7 +300,10 @@ bool LLIteratorNext(LLIter iter) {
 
   // Step 7: if there is another node beyond the iterator, advance to it,
   // and return true.
-
+  if (iter->node->next != NULL) {
+    iter->node = iter->node->next;
+    return true;
+  }
 
 
   // Nope, there isn't another node, so return failure.
@@ -328,7 +331,10 @@ bool LLIteratorPrev(LLIter iter) {
 
   // Step 8:  if there is another node beyond the iterator, advance to it,
   // and return true.
-
+  if (iter->node->prev != NULL) {
+    iter->node = iter->node->prev;
+    return true;
+  }
 
 
   // nope, so return failure.
@@ -365,8 +371,34 @@ bool LLIteratorDelete(LLIter iter,
   // Be sure to call the payload_free_function to free the payload
   // the iterator is pointing to, and also free any LinkedList
   // data structure element as appropriate.
+  LinkedList list = iter->list;
 
+  if (list->num_elements == 1) {
+    payload_free_function(iter->node->payload);
+    free(iter->node);
+    iter->node = NULL;
+    list->head = list->tail = NULL;
 
+    return false;
+  }
+
+  LLPayload_t payload;
+  if (iter->node == list->head) {
+    LLIteratorNext(iter);
+    PopLinkedList(list, &payload);
+  } else if (iter->node == list->tail) {
+    LLIteratorPrev(iter);
+    SliceLinkedList(list, &payload);
+  } else {
+    LinkedListNodePtr node = iter->node;
+    node->prev->next = node->next;
+    node->next->prev = node->prev;
+    payload = node->payload;
+    free(node);
+  }
+
+  payload_free_function(payload);
+  payload = NULL;
 
   return true;
 }
