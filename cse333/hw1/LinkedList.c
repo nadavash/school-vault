@@ -133,6 +133,7 @@ bool PopLinkedList(LinkedList list, LLPayload_t *payload_ptr) {
     list->head = list->tail = NULL;
   } else {
     list->head = ln->next;
+    ln->next->prev = NULL;
   }
 
   --list->num_elements;
