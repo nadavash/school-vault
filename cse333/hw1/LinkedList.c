@@ -130,7 +130,7 @@ bool PopLinkedList(LinkedList list, LLPayload_t *payload_ptr) {
   LinkedListNodePtr ln = list->head;
   *payload_ptr = ln->payload;
 
-  if (list->num_elements == 1U) {
+  if (list->num_elements == 1) {
     list->head = list->tail = NULL;
   } else {
     list->head = ln->next;
@@ -150,8 +150,34 @@ bool AppendLinkedList(LinkedList list, LLPayload_t payload) {
   // Step 5: implement AppendLinkedList.  It's kind of like
   // PushLinkedList, but obviously you need to add to the end
   // instead of the beginning.
+  Verify333(payload != NULL);
 
+  // allocate space for the new node.
+  LinkedListNodePtr ln =
+    (LinkedListNodePtr) malloc(sizeof(LinkedListNode));
+  if (ln == NULL) {
+    // out of memory
+    return false;
+  }
 
+  ln->payload = payload;
+
+  if (list->num_elements == 0) {
+    Verify333(list->head == NULL);  // debugging aid
+    Verify333(list->tail == NULL);  // debugging aid
+    ln->next = ln->prev = NULL;
+    list->head = list->tail = ln;
+    list->num_elements = 1U;
+    return true;
+  }
+
+  Verify333(list->head != NULL);  // debugging aid
+  Verify333(list->tail != NULL);  // debugging aid
+  ln->next = NULL;
+  ln->prev = list->tail;
+  list->tail->next = ln;
+  list->tail = ln;
+  ++list->num_elements;
 
   return true;
 }
@@ -162,8 +188,25 @@ bool SliceLinkedList(LinkedList list, LLPayload_t *payload_ptr) {
   Verify333(list != NULL);
 
   // Step 6: implement SliceLinkedList.
+  if (list->num_elements == 0) {
+    return false;
+  }
 
+  Verify333(list->head != NULL);  // debugging aid
+  Verify333(list->tail != NULL);  // debugging aid
 
+  LinkedListNodePtr ln = list->tail;
+  *payload_ptr = ln->payload;
+
+  if (list->num_elements == 1) {
+    list->head = list->tail = NULL;
+  } else {
+    list->tail = ln->prev;
+    list->tail->next = NULL;
+  }
+
+  --list->num_elements;
+  free(ln);
 
   return true;
 }
