@@ -397,12 +397,11 @@ bool LLIteratorDelete(LLIter iter,
     node->next->prev = node->prev;
     payload = node->payload;
     free(node);
+    --list->num_elements;
   }
 
   payload_free_function(payload);
   payload = NULL;
-
-  --list->num_elements;
 
   return true;
 }
