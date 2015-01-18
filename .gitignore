@@ -14,7 +14,7 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-cse333/gtest/*
+cse333/gtest/
 
 cse333/ex/ex1a
 cse333/ex/ex1b
