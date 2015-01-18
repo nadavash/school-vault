@@ -378,6 +378,7 @@ bool LLIteratorDelete(LLIter iter,
     free(iter->node);
     iter->node = NULL;
     list->head = list->tail = NULL;
+    list->num_elements = 0;
 
     return false;
   }
@@ -400,6 +401,8 @@ bool LLIteratorDelete(LLIter iter,
 
   payload_free_function(payload);
   payload = NULL;
+
+  --list->num_elements;
 
   return true;
 }
