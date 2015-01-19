@@ -10,6 +10,9 @@ class Player {
 	private $pointsPerGame;
 
 	public function getPlayerName() {
+		if (!$this->playerName) {
+			return "--";
+		}
 		return $this->playerName;
 	}
 
@@ -18,6 +21,9 @@ class Player {
 	}
 
 	public function getGamesPlayed() {
+		if (!$this->gamesPlayed) {
+			return "--";
+		}
 		return $this->gamesPlayed;
 	}
 
@@ -26,6 +32,9 @@ class Player {
 	}
 
 	public function getFieldGoalPercentage() {
+		if (!$this->fieldGoalPercentage) {
+			return "--";
+		}
 		return $this->fieldGoalPercentage;
 	}
 
@@ -34,6 +43,9 @@ class Player {
 	}
 
 	public function getThreePointPercentage() {
+		if (!$this->threePointPercentage) {
+			return "--";
+		}
 		return $this->threePointPercentage;
 	}
 
@@ -42,6 +54,9 @@ class Player {
 	}
 
 	public function getFreeThrowPercentage() {
+		if (!$this->freeThrowPercentage) {
+			return "--";
+		}
 		return $this->freeThrowPercentage;
 	}
 
@@ -50,6 +65,9 @@ class Player {
 	}
 
 	public function getPointsPerGame() {
+		if (!$this->pointsPerGame) {
+			return "--";
+		}
 		return $this->pointsPerGame;
 	}
 
