@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <?php
+// Main page for the website. Has a text box that requests a player
+// name from the user, and if a query is present displays the results
+// of the query.
 require_once "src/PlayerDao.php";
 
 define("IMAGE_URL", "http://i.cdn.turner.com/nba/nba/.element/img/2.0/sect/statscube/players/large/");
