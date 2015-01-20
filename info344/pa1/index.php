@@ -84,9 +84,8 @@ function printPlayerCard($player) {
 	$imgUrl = IMAGE_URL . str_replace(" ", "_", strtolower($player->getPlayerName())) . ".png";
 	?>
 	<div class="player-card panel panel-default">
-		<object class="player-img" data="<?= $imgUrl ?>" type="image/png">
-    		<img class="player-img" src="/assets/stock.png" alt="player profile" />
-		</object>
+		<img class="player-img" src="<?= $imgUrl ?>" alt="player profile image"
+			onerror="if (this.src != 'error.jpg') this.src = '/assets/stock.png';" />
 		<div class="player-info">
 			<h3><?= $player->getPlayerName() ?></h3>
 			<table class="player-stats table">
