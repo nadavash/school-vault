@@ -6,8 +6,13 @@ define("IMAGE_URL", "http://i.cdn.turner.com/nba/nba/.element/img/2.0/sect/stats
 
 if (isset($_GET["q"])) {
 	$settings = parse_ini_file("default.ini");
+	if (!$settings) {
+		die("Failed to initialize nba search.");
+	}
 	$dao = new PlayerDao($settings);
-	$query = $_GET["q"];
+	if ($_GET["q"] !== "") {
+		$query = $_GET["q"];
+	}
 }
 ?>
 <html>
@@ -46,13 +51,22 @@ if (isset($_GET["q"])) {
 		</form>
 		<?php
 		if (isset($query)) {
-			?>
-			<div class="page-header">
-	  			<h2>Results for <small>"<?= $query ?>"</small></h2>
-			</div>
-			<?php
-			foreach ($dao->getPlayersByName($query) as $player) {
-				printPlayerCard($player);
+			$players = $dao->getPlayersByName($query);
+			if (count($players) === 0) {
+				?>
+				<div class="page-header">
+		  			<h2>No results for "<?= $query ?>"</h2>
+				</div>
+				<?php
+			} else {
+				?>
+				<div class="page-header">
+		  			<h2>Results for "<?= $query ?>"</h2>
+				</div>
+				<?php
+				foreach ($players as $player) {
+					printPlayerCard($player);
+				}
 			}
 		}
 		?>
@@ -70,13 +84,15 @@ function printPlayerCard($player) {
 	$imgUrl = IMAGE_URL . str_replace(" ", "_", strtolower($player->getPlayerName())) . ".png";
 	?>
 	<div class="player-card panel panel-default">
-		<img class="player-img" src="<?= $imgUrl ?>" alt="player profile" />
-		<div class="player-stats panel">
+		<object class="player-img" data="<?= $imgUrl ?>" type="image/png">
+    		<img class="player-img" src="/assets/stock.png" alt="player profile" />
+		</object>
+		<div class="player-info">
 			<h3><?= $player->getPlayerName() ?></h3>
 			<table class="player-stats table">
 				<caption>Stats</caption>
 				<thead>
-					<tr>
+					<tr class="player-stats-row">
 						<th>GP</th>
 						<th>FGP</th>
 						<th>TPP</th>

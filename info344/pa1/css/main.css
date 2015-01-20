@@ -1,8 +1,19 @@
 body {
 	font-family: "Corbel" sans-serif;
 	background-color: lightblue;
-	/*background: linear-gradient(lightblue, turquoise);*/
 }
+
+.results-page-content {
+	padding: 20px;
+	border-radius: 5px;
+	width: 900px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 20px;
+	margin-bottom: 20px;
+	background-color: white;
+}
+
 
 #main {
 	display: inline-block;
@@ -18,22 +29,25 @@ tr, th {
 
 .player-card {
 	overflow: hidden;
+	background: linear-gradient(white, lightblue);
+}
+
+.player-info {
+	position: relative;
+	overflow: hidden;
+	margin: 0;
+	background-color: rgba(255,255,255,0);
+	height: 185px;
 }
 
 .player-stats {
-	overflow: hidden;
-	margin: 0;	
+	position: absolute;
+	bottom: 0px;
+	margin-bottom: 0px;
 }
 
-.results-page-content {
-	padding: 20px;
-	border-radius: 5px;
-	width: 900px;
-	margin-left: auto;
-	margin-right: auto;
-	margin-top: 20px;
-	margin-bottom: 20px;
-	background-color: rgba(255,255,255, 0.80);
+.player-stats-row > th {
+	border-color: black !important;
 }
 
 .top-banner {
