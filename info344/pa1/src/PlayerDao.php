@@ -90,18 +90,24 @@ class PlayerDao {
 	}
 
 	/**
-	 * Returns the lowest levenshtein distance for a partial match (only first/last name).
+	 * Returns the lowest levenshtein distance for a partial match (only first/mid/last name).
 	 * @param  String $query      Name to search for
 	 * @param  String $playerName The actual player name
-	 * @return int             The lowest levenshtein distance of the two.
+	 * @return int             The lowest levenshtein distance of the name part.
 	 */
 	private function partialMatchDist($query, $playerName) {
 		$query = strtolower($query);
 		$splitName = explode(" ", strtolower($playerName));
-		$distFirst = levenshtein($query, $splitName[0]);
-		$distLast = levenshtein($query, $splitName[1]);
 
-		return $distFirst < $distLast ? $distFirst : $distLast;
+		$smallest = PHP_INT_MAX;
+		foreach ($splitName as $namePart) {
+			$dist = levenshtein($query, $namePart);
+			if ($dist < $smallest) {
+				$smallest = $dist;
+			}
+		}
+
+		return $smallest;
 	}
 
 	/**
