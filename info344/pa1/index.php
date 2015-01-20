@@ -48,7 +48,9 @@ if (isset($_GET["q"])) {
 				}
 		    	?>
 		    	<span class="input-group-btn">
-		    		<button class="btn btn-default" type="submit">Go!</button>
+		    		<button class="btn btn-default" type="submit">
+		    			<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+		    		</button>
 		    	</span>
 		    </div>	
 		</form>
