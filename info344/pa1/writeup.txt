@@ -1,0 +1,32 @@
+Nadav Ashkenazi - INFO 344 PA1 Writeup
+
+I implemented the website as one page that handles both user input and processing
+the query to search in the database. When you first go to the website, the page
+is initially empty. Entering a name into the textbox and clicking the search button
+redirects to the same index page with a query parameter, which causes the page
+to look for the player in the database. All of the matching players and their stats
+are then displayed below the search box.
+
+For the data, I decided to use Sequel Pro for Mac instead of phpMyAdmin because I
+prefer the software better. I connected to the RDS instance from Sequel Pro and
+created a database called "nba", and created a table called "Players" with all of
+the necessary columns. I cleaned up the data from the CSV using excel, and imported
+the data into the database on RDS using Sequel Pro. I also made sure to set up a
+user on RDS for the ec2 server to use when connecting.
+
+The PHP code is divided into three files:
+	index.php - the view of the website, handles user input and displaying results
+	Player.php - represents a single player objects that holds the player name and
+		other statistics about the player.
+	PlayerDao.php - this is the object that directly interfaces with the database,
+		and returns results as a Player object to the client. All the SQL code is
+		within PlayerDao.php.
+	default.ini - an options file with variables like 'user' and 'pass' to help
+		connect to a database instance easily.
+
+Setting up the server was arguably the hardest. I started with a SUSE 12 instance
+on ec2 which turned out not to have all of the necessary packages for the assignment,
+so I switched to SUSE 11 which seemed to work fine. I installed apache2, php, and
+all of the other necessary packages. I set up a virtual host for apache2 that points
+to the website files in my home directory, and ran the server. Everything beyond this
+point worked fairly well.

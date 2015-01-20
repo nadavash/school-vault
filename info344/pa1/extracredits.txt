@@ -1,0 +1,19 @@
+I implemented three extra credits for this assignment:
+1. [10pts] Misspelled names work gracefully
+
+I used the PHP standard function 'levenshtein' which allowed me to find the
+edit distance between two strings. I used this along with some other logic
+to try to display the best results. Now, mispelled names work, as long as they
+are close to the intended name.
+
+3. [6pts] Results page looks really really nice (CSS) **
+
+I used bootstrap along with some custom CSS to make some of the UI controls and
+containers look better.
+
+4. [2pts] Embedded photos of player
+
+This was fairly hard to figure out. I decided to piggyback off of the nba.com
+CDN for profile pictures of the players, which are predictable using the player
+first and last name. If the picture does not exist, I use a stock photo to
+keep the page and player info cards consistent.
