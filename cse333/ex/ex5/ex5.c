@@ -21,13 +21,16 @@ int main(int argc, char *argv[]) {
   if (!v)
     return EXIT_FAILURE;
 
-  for (i = 0; i < N; ++i) { // Place some elements in the vector.
+  for (i = 0; i < VectorLength(v); ++i) { // Place some elements in the vector.
     int *x = (int*)malloc(sizeof(int));
     element_t old;
     VectorSet(v, i, x, &old);
+    free(old);
   }
 
   PrintIntVector(v);
+
+  VectorFree(v);
 
   return EXIT_SUCCESS;
 }

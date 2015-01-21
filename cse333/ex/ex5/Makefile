@@ -8,10 +8,10 @@ CFLAGS = -Wall -std=c11 -g
 
 all: ex5
 
-ex5: ex5.o vector.o vector.h
-	$(CC) $(CFLAGS) -o ex5 ex5.o
+ex5: ex5.o vector.o vector.h FORCE
+	$(CC) $(CFLAGS) -o ex5 ex5.o vector.o
 
-%.o: %.c vector.h
+%.o: %.c vector.h FORCE
 	$(CC) $(CFLAGS) -c $<
 
 clean: FORCE
