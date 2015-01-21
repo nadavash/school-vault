@@ -22,6 +22,10 @@ vector_t VectorCreate(size_t n) {
   if (!v->arry)
     return NULL;
 
+  for (int i = 0; i < n; ++i) {
+    v->arry[i] = NULL;
+  }
+
   return v;
 }
 
@@ -50,6 +54,8 @@ bool VectorSet(vector_t v, uint32_t index, element_t e, element_t *prev) {
 
 element_t VectorGet(vector_t v, uint32_t index) {
   assert(v != NULL);
+  assert(index >= 0);
+  assert(index <= VectorLength(v));
   return v->arry[index];
 }
 
@@ -68,7 +74,7 @@ static element_t *ResizeArray(element_t *arry, size_t oldLen, size_t newLen) {
   newArry = (element_t*)malloc(newLen*sizeof(element_t));
 
   if (newArry == NULL)
-    return NULL; // malloc error!!!
+    return NULL;  // malloc error!!!
 
   // Copy elements to new array
   for (i = 0; i < copyLen; ++i)
@@ -77,6 +83,8 @@ static element_t *ResizeArray(element_t *arry, size_t oldLen, size_t newLen) {
   // Null initialize rest of new array.
   for (i = copyLen; i < newLen; ++i)
     newArry[i] = NULL;
+
+  free(arry);
 
   return newArry;
 }
