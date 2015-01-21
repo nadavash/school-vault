@@ -25,10 +25,13 @@ int main(int argc, char *argv[]) {
     int *x = (int*)malloc(sizeof(int));
     element_t old;
     VectorSet(v, i, x, &old);
-    free(old);
   }
 
   PrintIntVector(v);
+
+  for (i = 0; i < VectorLength(v); ++i) {
+    free(VectorGet(v, i));
+  }
 
   VectorFree(v);
 
