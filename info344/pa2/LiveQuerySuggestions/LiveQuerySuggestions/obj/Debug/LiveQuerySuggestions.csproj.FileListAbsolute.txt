@@ -1,0 +1,6 @@
+C:\Users\Nadav\Documents\GitHub\school-vault\info344\pa2\LiveQuerySuggestions\LiveQuerySuggestions\bin\LiveQuerySuggestions.dll.config
+C:\Users\Nadav\Documents\GitHub\school-vault\info344\pa2\LiveQuerySuggestions\LiveQuerySuggestions\bin\LiveQuerySuggestions.dll
+C:\Users\Nadav\Documents\GitHub\school-vault\info344\pa2\LiveQuerySuggestions\LiveQuerySuggestions\bin\LiveQuerySuggestions.pdb
+C:\Users\Nadav\Documents\GitHub\school-vault\info344\pa2\LiveQuerySuggestions\LiveQuerySuggestions\obj\Debug\LiveQuerySuggestions.csprojResolveAssemblyReference.cache
+C:\Users\Nadav\Documents\GitHub\school-vault\info344\pa2\LiveQuerySuggestions\LiveQuerySuggestions\obj\Debug\LiveQuerySuggestions.dll
+C:\Users\Nadav\Documents\GitHub\school-vault\info344\pa2\LiveQuerySuggestions\LiveQuerySuggestions\obj\Debug\LiveQuerySuggestions.pdb
