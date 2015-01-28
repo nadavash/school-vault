@@ -24,6 +24,10 @@
 #include "LinkedList.h"
 #include "LinkedList_priv.h"
 
+// Adds the given node to the given linked list. Assumes list is initially
+// empty.
+static void SetFirstNode(LinkedList list, LinkedListNodePtr node);
+
 LinkedList AllocateLinkedList(void) {
   // allocate the linked list record
   LinkedList ll = (LinkedList) malloc(sizeof(LinkedListHead));
@@ -87,11 +91,7 @@ bool PushLinkedList(LinkedList list, LLPayload_t payload) {
 
   if (list->num_elements == 0) {
     // degenerate case; list is currently empty
-    Verify333(list->head == NULL);  // debugging aid
-    Verify333(list->tail == NULL);  // debugging aid
-    ln->next = ln->prev = NULL;
-    list->head = list->tail = ln;
-    list->num_elements = 1U;
+    SetFirstNode(list, ln);
     return true;
   }
 
@@ -163,11 +163,7 @@ bool AppendLinkedList(LinkedList list, LLPayload_t payload) {
   ln->payload = payload;
 
   if (list->num_elements == 0) {
-    Verify333(list->head == NULL);  // debugging aid
-    Verify333(list->tail == NULL);  // debugging aid
-    ln->next = ln->prev = NULL;
-    list->head = list->tail = ln;
-    list->num_elements = 1U;
+    SetFirstNode(list, ln);
     return true;
   }
 
@@ -431,4 +427,12 @@ bool LLIteratorInsertBefore(LLIter iter, LLPayload_t payload) {
   newnode->next->prev = newnode;
   iter->list->num_elements += 1;
   return true;
+}
+
+static void SetFirstNode(LinkedList list, LinkedListNodePtr node) {
+  Verify333(list->head == NULL);  // debugging aid
+  Verify333(list->tail == NULL);  // debugging aid
+  node->next = node->prev = NULL;
+  list->head = list->tail = node;
+  list->num_elements = 1U;
 }

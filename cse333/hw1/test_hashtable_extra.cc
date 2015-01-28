@@ -33,11 +33,15 @@ namespace hw1 {
 // TODO(nadavash): Test hash functions.
 TEST_F(Test_HashTable, HTTestHashFunctions) {
   // Test FNVHash64
-  unsigned char test_str[] = {'h','e','l','l','o','!','!','!'};
+  unsigned char test_str[] = "hello!!!";
   ASSERT_EQ(FNVHash64(test_str, 8), FNVHash64(test_str, 8));
 
+  uint64_t intVal = *((uint64_t *)test_str);
   // Test FNVHashInt64
-  ASSERT_EQ(FNVHashInt64(test_str), FNVHashInt64(test_str));
+  ASSERT_EQ(FNVHashInt64((HTValue_t)intVal), FNVHashInt64((HTValue_t)intVal));
+
+  ASSERT_EQ(FNVHash64(test_str, 8), FNVHashInt64((HTValue_t)intVal));
+  ASSERT_NE(FNVHash64(test_str, 4), FNVHashInt64((HTValue_t)intVal));
 }
 
 }  // namespace hw1
