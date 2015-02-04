@@ -1,1 +1,1 @@
-﻿<%@ WebService Language="C#" CodeBehind="QuerySuggestionsService.asmx.cs" Class="LiveQuerySuggestions.QuerySuggestions" %>
+﻿<%@ WebService Language="C#" CodeBehind="QuerySuggestionsService.asmx.cs" Class="LiveQuerySuggestions.QuerySuggestionsService" %>

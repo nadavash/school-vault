@@ -11,7 +11,7 @@
     function FetchSuggestions(prefix, max, onsuccess) {
         $.ajax({
             type: 'get',
-            url: 'QuerySuggestions.asmx/GetSuggestions',
+            url: 'QuerySuggestionsService.asmx/GetSuggestions',
             data: {
                 prefix: JSON.stringify(prefix),
                 max: max
@@ -24,6 +24,9 @@
 
     function DisplaySuggestions(suggestions) {
         var $list = $('#suggestions').empty();
+        if (suggestions === null)
+            return;
+
         for (var i = 0; i < suggestions.length; ++i) {
             var $entry = $('<li>');
             $entry.text(suggestions[i]);

@@ -1,5 +1,9 @@
-﻿using System;
+﻿using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Blob;
+using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -22,11 +26,47 @@ namespace LiveQuerySuggestions
 
         static QuerySuggestionsService()
         {
-            using (StreamReader reader = new StreamReader())
+            using (StreamReader wikiStream = LoadEntries())
             {
                 prefixTree = new Trie();
-                prefixTree.ParseFromFile(reader);
+                prefixTree.CreateFromStream(wikiStream);
             }
+        }
+
+        private static StreamReader LoadEntries()
+        {
+            string filePath = Environment.GetFolderPath(
+                Environment.SpecialFolder.ApplicationData).ToString()
+                + "\\wiki.txt";
+            Debug.WriteLine(filePath);
+            Stream stream = null;
+            if (!File.Exists(filePath))
+            {
+                CloudStorageAccount storage = CloudStorageAccount.Parse(
+                    ConfigurationManager.AppSettings["StorageConnectionString"]);
+                CloudBlobClient blobClient = storage.CreateCloudBlobClient();
+                CloudBlobContainer container = blobClient.GetContainerReference("live-suggestions");
+
+                if (container.Exists())
+                {
+                    foreach (IListBlobItem item in container.ListBlobs(null, false))
+                    {
+                        if (item is CloudBlockBlob)
+                        {
+                            CloudBlockBlob blob = item as CloudBlockBlob;
+                            stream = new FileStream(filePath, FileMode.Create);
+                            blob.DownloadToStream(stream);
+                            stream.Seek(0, SeekOrigin.Begin);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                stream = new FileStream(filePath, FileMode.Open);
+            }
+
+            return new StreamReader(stream);
         }
         
         /// <summary>
@@ -39,12 +79,10 @@ namespace LiveQuerySuggestions
         [ScriptMethod(UseHttpGet = true)]
         public string[] GetSuggestions(string prefix, int max)
         {
-            string[] suggestions = new string[max];
-            for (int i = 0; i < max; ++i)
-            {
-                suggestions[i] = prefix;
-            }
-            return suggestions;
+            prefix = prefix.Trim();
+            if (prefix == string.Empty)
+                return null;
+            return prefixTree.PrefixSearch(prefix).ToArray();
         }
     }
 }

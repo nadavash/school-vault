@@ -27,3 +27,9 @@ cse333/hw1/example_program_ht
 cse333/hw1/test_suite
 lecture5_vector
 *.zip
+
+info344/pa2/LiveQuerySuggestions/packages
+info344/pa2/LiveQuerySuggestions/LiveQuerySuggestions/bin
+info344/pa2/LiveQuerySuggestions/LiveQuerySuggestions/obj
+info344/pa2/LiveQuerySuggestions/LiveQuerySuggestions/packages.config
+info344/pa2/LiveQuerySuggestions/LiveQuerySuggestions/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache

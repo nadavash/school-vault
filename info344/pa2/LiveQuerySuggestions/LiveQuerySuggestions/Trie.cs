@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Web;
 
 namespace LiveQuerySuggestions
@@ -19,7 +20,7 @@ namespace LiveQuerySuggestions
             set = new HashSet<string>();
         }
 
-        public void ParseFromFile(StreamReader reader)
+        public void CreateFromStream(StreamReader reader)
         {
             string word;
             while ((word = reader.ReadLine()) != null)
@@ -42,47 +43,71 @@ namespace LiveQuerySuggestions
                 }
                 current = current.Children[c];
             }
-            current.FullEntry = word;
+            current.IsFullEntry = true;
         }
 
         public List<string> PrefixSearch(string prefix)
         {
             var matches = new List<string>();   
-            var path = new Stack<TrieNode>();
             var current = root;
+            var builder = new StringBuilder();
             foreach (char c in prefix)
             {
-                if (current.IsLeaf || current.Children[c] == null)
+                if (current.IsLeaf || !current.Children.HasChild(c))
                     break;
 
-                path.Push(current);
                 current = current.Children[c];
+                builder.Append(c);
             }
 
 
-            FindEntriesFrom(current, 5, matches);
+            FindEntriesFrom(builder, current, 5, matches);
 
             return matches;
         }
 
-        private void FindEntriesFrom(TrieNode node, int max, List<string> entries)
+        private void FindEntriesFrom(StringBuilder prefix, TrieNode node,
+            int max, List<string> entries)
         {
-            Queue<TrieNode> nodes = new Queue<TrieNode>();
-            nodes.Enqueue(node);
-
-            while (nodes.Count != 0 && entries.Count < max)
+            if (node == null)
+                return;
+            else
             {
-                TrieNode current = nodes.Dequeue();
-                if (current.IsFullEntry)
-                    entries.Add(current.FullEntry);
+                if (node.IsFullEntry)
+                    entries.Add(prefix.ToString());
 
-                if (!current.IsLeaf)
+                if (!node.IsLeaf)
                 {
-                    foreach (TrieNode n in current.Children)
-                        nodes.Enqueue(n);
+                    foreach (TrieNode n in node.Children)
+                    {
+                        if (entries.Count >= max)
+                            return;
+                        prefix.Append(n.Key);
+                        FindEntriesFrom(prefix, n, max, entries);
+                        prefix.Remove(prefix.Length - 1, 1);
+                    }
                 }
             }
         }
+        //private void FindEntriesFrom(StringBuilder prefix, TrieNode node, 
+        //    int max, List<string> entries)
+        //{
+        //    Queue<TrieNode> nodes = new Queue<TrieNode>();
+        //    nodes.Enqueue(node);
+
+        //    while (nodes.Count != 0 && entries.Count < max)
+        //    {
+        //        TrieNode current = nodes.Dequeue();
+        //        if (current.IsFullEntry)
+        //            entries.Add(current.FullEntry);
+
+        //        if (!current.IsLeaf)
+        //        {
+        //            foreach (TrieNode n in current.Children)
+        //                nodes.Enqueue(n);
+        //        }
+        //    }
+        //}
 
         private class TrieNode
         {
@@ -97,17 +122,12 @@ namespace LiveQuerySuggestions
                     return children;
                 }
             }
-            public string FullEntry { get; set; }
-            public bool IsFullEntry { get { return FullEntry != null; } }
+            public bool IsFullEntry { get; set; }
             public bool IsLeaf { get { return Children.Count == 0; } }
 
             public TrieNode(char key)
-                : this(key, null) { }
-
-            public TrieNode(char key, string entry)
             {
                 Key = key;
-                FullEntry = entry;
             }
         }
     }

@@ -15,11 +15,11 @@ namespace LiveQuerySuggestions
         {
             get
             {
-                return elements[c == ' ' ? 26 : c - 'a'];
+                return elements[LetterToIndex(c)];
             }
             set
             {
-                int index = c == ' ' ? 26 : c - 'a';
+                int index = LetterToIndex(c);
                 if (elements[index] == null && value != null)
                     ++Count;
                 else if (elements[index] != null && value == null)
@@ -34,9 +34,26 @@ namespace LiveQuerySuggestions
             elements = new T[27];
         }
 
+        public bool HasChild(char c)
+        {
+            return ValidKey(c) && elements[LetterToIndex(c)] != null;
+        }
+
         public IEnumerator<T> GetEnumerator()
         {
             return new AlphabetMapEnumerator<T>(elements);
+        }
+
+        private int LetterToIndex(char c)
+        {
+            c = char.ToLower(c);
+            return c == ' ' ? 0 : c - 'a' + 1;
+        }
+
+        private bool ValidKey(char c)
+        {
+            c = char.ToLower(c);
+            return c == ' ' || (c >= 'a' && c <= 'z');
         }
 
         public class AlphabetMapEnumerator<Q> : IEnumerator<Q>
