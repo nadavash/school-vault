@@ -1,0 +1,29 @@
+I implemented three extra credits for this assignment:
+
+[10pts] Popularity (page view) based query suggestion*
+
+I downloaded the provided page counts dump from wikipedia, filtered it to
+contain only English entries, splite up the elements by spaces and filtered
+titles with the same regex I used for filtering the original wiki.txt file.
+To sort results by ranking, I made a hashmap of entries to ranking and after
+I receive my suggestios, I compare the results against the hashmap ranking and
+get the right ranking for each suggestion. I sort the list, where the entry
+with the highest rank as the first element, and so on. I display the actual
+rank as a bade next to the results on the client.
+
+[10pts] Hybrid List & Trie data structure (convert to Trie after > X entries in node)
+
+Each Trie node has either a list of string entries or an alphabet map that
+points to other trie nodes. I start a node initially with just string entries,
+and once that grows to 100 entries I switch the set of strings to an alphabet
+map with links to other nodes and build that node accordingly.
+
+[10pts] Handle misspelling gracefully**
+
+I used a LevenshteinDistance function implementation I found online and use
+it during my traversal of the tree. If the levenshtein distance between the
+actual string and the current is bigger than 2, I ignore it and continue
+looking through the tree.
+
+I only call the FuzzyPrefixSearch method when I get 0 results from the simple
+PrefixSearch method.

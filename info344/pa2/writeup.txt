@@ -1,0 +1,22 @@
+Nadav Ashkenazi - INFO 344 PA2 Writeup
+
+The web service was implemented using an ASMX service that contained
+the GetSuggestions and GetSuggestionsRanked service methods. During
+initialization, the service checks if it has the necessary text files in the
+filesystem and if it does not it goes ahead and fetches the files from blob
+storage. After that is done, the trie data structure is populated with strings
+from the wiki.txt file. The trie helps keep the total runtime of the
+service calls very short.
+
+I use jQuery to make an ajax call to the suggestions service and populate ul
+with list items from the results. The results include the string and the
+ranking of the suggestions to display as a badge on the right side of the li.
+
+I have a separate file for the Trie data structure, which also uses a custom
+map object called AlphabetMap.
+
+I am not using an azure WebRole for this project, but instead using a simple
+website because I managed to get the entire Trie data structure to fit in
+memory. To keep the web service alive, I wrote a python script that runs as
+a web job and pings the suggestions service with a simple web call. The job
+runs every 10 minutes.
