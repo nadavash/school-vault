@@ -229,12 +229,14 @@ namespace LiveQuerySuggestions
         {
             var matches = new List<string>();
             var builder = new StringBuilder();
-            var current = Traverse(prefix, builder);
 
             if (fuzzy)
-                FuzzyPrefixSearch(prefix, current, builder, max, matches);
+                FuzzyPrefixSearch(prefix, root, builder, max, matches);
             else
+            {
+                var current = Traverse(prefix, builder);
                 FindEntriesFromNode(prefix, current, builder, max, matches);
+            }
 
             return matches;
         }

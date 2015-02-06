@@ -1,8 +1,4 @@
-﻿#search-box, #main {
-    width: 80%;
+﻿#main {
+    width: 60%;
     margin: auto;
 }
-
-/*ul {
-    list-style: none;
-}*/
