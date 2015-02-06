@@ -8,7 +8,7 @@ using System.Web;
 namespace LiveQuerySuggestions
 {
     /// <summary>
-    /// 
+    /// Represents a radix tree.
     /// </summary>
     public class Trie
     {
@@ -17,14 +17,20 @@ namespace LiveQuerySuggestions
         public const int MAX_LEN_DIFF = 5;
 
         private TrieNode root;
-        private HashSet<string> set;
 
+        /// <summary>
+        /// Creates a new Trie.
+        /// </summary>
         public Trie()
         {
             root = new TrieNode();
-            set = new HashSet<string>();
         }
 
+        /// <summary>
+        /// Populates the trie with newline-separated strings from the given
+        /// StreamReader.
+        /// </summary>
+        /// <param name="reader">The stream reader to get lines from.</param>
         public void PopulateFromStream(StreamReader reader)
         {
             string word;
@@ -34,6 +40,10 @@ namespace LiveQuerySuggestions
             }
         }
 
+        /// <summary>
+        /// Adds one string word to the trie.
+        /// </summary>
+        /// <param name="word">The word to add.</param>
         public void Add(string word)
         {
             AddFrom(root, word);
@@ -75,6 +85,12 @@ namespace LiveQuerySuggestions
             current.IsFullEntry = true;
         }
 
+        /// <summary>
+        /// Does a prefix search over the trie.
+        /// </summary>
+        /// <param name="prefix">The prefix to look at.</param>
+        /// <param name="max">The max number of entries to return.</param>
+        /// <returns>Entries matching the prefix.</returns>
         public List<string> PrefixSearch(string prefix, int max)
         {
             return PrefixSearch(prefix, max, false);
@@ -119,6 +135,13 @@ namespace LiveQuerySuggestions
             }
         }
 
+        /// <summary>
+        /// Executes a fuzzy prefix search over the trie. Returns close matches
+        /// to the prefix.
+        /// </summary>
+        /// <param name="prefix">The prefix to look for.</param>
+        /// <param name="max">The max number of entries.</param>
+        /// <returns></returns>
         public List<string> FuzzyPrefixSearch(string prefix, int max)
         {
             return PrefixSearch(prefix, max, true);
@@ -129,11 +152,11 @@ namespace LiveQuerySuggestions
         {
             int len = Math.Min(actual.Length, builder.Length);
             string str = builder.ToString();
-            if (actual.Length - builder.Length > MAX_LEN_DIFF ||
-                LevenshteinDistance(str, actual.Substring(0, len)) > MAX_DIST)
+            if (LevenshteinDistance(str, actual.Substring(0, len)) > MAX_DIST)
                 return;
 
-            if (current.IsFullEntry)
+            if (current.IsFullEntry
+                && actual.Length - builder.Length < MAX_LEN_DIFF)
                 entries.Insert(0, str);
 
             if (current.IsBasic)
@@ -232,6 +255,9 @@ namespace LiveQuerySuggestions
             return current;
         }
 
+        /// <summary>
+        /// Helper class that represents a single node in the trie.
+        /// </summary>
         private class TrieNode
         {
             public AlphabetMap<TrieNode> Children { get; set; }

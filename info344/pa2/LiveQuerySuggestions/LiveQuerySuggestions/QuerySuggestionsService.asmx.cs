@@ -78,7 +78,7 @@ namespace LiveQuerySuggestions
                 matches = prefixTree.FuzzyPrefixSearch(prefix, max);
                 for (int i = 0; i < matches.Count; ++i)
                 {
-                    matches[i] = "Did you mean \"" + matches[i] + "\"?";
+                    matches[i] = "<b>" + matches[i] + "</b>?";
                 }
             }
 
@@ -113,7 +113,7 @@ namespace LiveQuerySuggestions
                 if (!fuzzy)
                     results[i][0] = ranked[i].Key;
                 else
-                    results[i][0] = "Did you mean \"" + ranked[i].Key + "\"?";
+                    results[i][0] = "<b>" + ranked[i].Key + "</b>?";
 
                 results[i][1] = ranked[i].Value.ToString();
             }

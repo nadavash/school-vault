@@ -6,11 +6,20 @@ using System.Threading.Tasks;
 
 namespace LiveQuerySuggestions
 {
+    /// <summary>
+    /// Represents a map that has 27 keys. "a"-"z" and " ".
+    /// </summary>
+    /// <typeparam name="T">The type to hold as value in the map.</typeparam>
     public class AlphabetMap<T> : IEnumerable<KeyValuePair<char, T>>
     {
         private T[] elements;
         public int Count { get; set; }
 
+        /// <summary>
+        /// Gets the elment at c from the map.
+        /// </summary>
+        /// <param name="c">The key for the element.</param>
+        /// <returns>The element at the key.</returns>
         public T this[char c]
         {
             get
@@ -29,11 +38,19 @@ namespace LiveQuerySuggestions
             }
         }
 
+        /// <summary>
+        /// Creates a new AlphabetMap.
+        /// </summary>
         public AlphabetMap()
         {
             elements = new T[27];
         }
 
+        /// <summary>
+        /// Checks if the map has the given child.
+        /// </summary>
+        /// <param name="c">The child to look for.</param>
+        /// <returns>True if map contains child, false otherwise.</returns>
         public bool HasChild(char c)
         {
             return ValidKey(c) && elements[LetterToIndex(c)] != null;
@@ -56,6 +73,9 @@ namespace LiveQuerySuggestions
             return c == ' ' || (c >= 'a' && c <= 'z');
         }
 
+        /// <summary>
+        /// An enumerator for AlphabetMap.
+        /// </summary>
         public class AlphabetMapEnumerator<Q> : IEnumerator<KeyValuePair<char, Q>>
         {
             public int index;

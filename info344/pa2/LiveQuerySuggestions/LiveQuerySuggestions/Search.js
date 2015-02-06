@@ -26,6 +26,8 @@
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
             success: onsuccess
+        }).fail(function () {
+            $('#suggestions').empty();
         });
     }
 
@@ -35,9 +37,17 @@
         if (suggestions === null)
             return;
 
+        if (suggestions[0][0][0] === '<') {
+            var $entry = $('<li class="list-group-item disabled">')
+                .text('Could not find results for "' + 
+                    $('#query').val() + '". Did you mean');
+            $entry.append($badge);
+            $list.append($entry);
+        }
+
         for (var i = 0; i < suggestions.length; ++i) {
             var $entry = $('<li class="list-group-item">')
-                .text(suggestions[i][0]);
+                .html(suggestions[i][0]);
             var $badge = $('<span class="badge">')
                 .text(suggestions[i][1]);
             $entry.append($badge);

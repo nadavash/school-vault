@@ -27,3 +27,5 @@ looking through the tree.
 
 I only call the FuzzyPrefixSearch method when I get 0 results from the simple
 PrefixSearch method.
+
+Misspellings suggestions are displayed as bold text in the list on the dom.
