@@ -26,8 +26,6 @@
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
             success: onsuccess
-        }).fail(function () {
-            $('#suggestions').empty();
         });
     }
 
