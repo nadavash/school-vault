@@ -35,21 +35,24 @@
         if (suggestions === null)
             return;
 
-        if (suggestions[0][0][0] === '<') {
-            var $entry = $('<li class="list-group-item disabled">')
-                .text('Could not find results for "' + 
-                    $('#query').val() + '". Did you mean');
-            $entry.append($badge);
-            $list.append($entry);
-        }
-
+        var allFuzzy = true;
         for (var i = 0; i < suggestions.length; ++i) {
+            if (suggestions[i][0][0] != '<') {
+                allFuzzy = false;
+            }
             var $entry = $('<li class="list-group-item">')
                 .html(suggestions[i][0]);
             var $badge = $('<span class="badge">')
                 .text(suggestions[i][1]);
             $entry.append($badge);
             $list.append($entry);
+        }
+
+        if (allFuzzy) {
+            var $entry = $('<li class="list-group-item disabled">')
+                .text('Could not find matches for "' +
+                    $('#query').val() + '". How about...');
+            $list.prepend($entry);
         }
     }
 })();

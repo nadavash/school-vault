@@ -14,7 +14,7 @@ namespace LiveQuerySuggestions
     {
         public const int MAX_NODE_ENTRIES = 100;
         public const int MAX_DIST = 2;
-        public const int MAX_LEN_DIFF = 5;
+        public const int MAX_LEN_DIFF = 3;
 
         private TrieNode root;
 

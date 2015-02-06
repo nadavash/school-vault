@@ -55,35 +55,35 @@ namespace LiveQuerySuggestions
             }
         }
         
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="prefix"></param>
-        /// <param name="max"></param>
-        /// <returns></returns>
-        [WebMethod]
-        [ScriptMethod(UseHttpGet = true)]
-        public string[] GetSuggestions(string prefix, int max)
-        {
-            prefix = prefix.Trim().ToLower();
-            if (prefix == string.Empty)
-                return null;
-            max = Math.Min(10, Math.Max(5, max));
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="prefix"></param>
+        ///// <param name="max"></param>
+        ///// <returns></returns>
+        //[WebMethod]
+        //[ScriptMethod(UseHttpGet = true)]
+        //public string[] GetSuggestions(string prefix, int max)
+        //{
+        //    prefix = prefix.Trim().ToLower();
+        //    if (prefix == string.Empty)
+        //        return null;
+        //    max = Math.Min(10, Math.Max(5, max));
 
-            Debug.WriteLine("Trying prefix search.");
-            List<string> matches = prefixTree.PrefixSearch(prefix, max);
-            if (matches.Count == 0)
-            {
-                Debug.WriteLine("Trying fuzzy search...");
-                matches = prefixTree.FuzzyPrefixSearch(prefix, max);
-                for (int i = 0; i < matches.Count; ++i)
-                {
-                    matches[i] = "<b>" + matches[i] + "</b>?";
-                }
-            }
+        //    Debug.WriteLine("Trying prefix search.");
+        //    List<string> matches = prefixTree.PrefixSearch(prefix, max);
+        //    if (matches.Count == 0)
+        //    {
+        //        Debug.WriteLine("Trying fuzzy search...");
+        //        matches = prefixTree.FuzzyPrefixSearch(prefix, max);
+        //        for (int i = 0; i < matches.Count; ++i)
+        //        {
+        //            matches[i] = "<b>" + matches[i] + "</b>?";
+        //        }
+        //    }
 
-            return matches.ToArray();
-        }
+        //    return matches.ToArray();
+        //}
 
         [WebMethod]
         [ScriptMethod(UseHttpGet = true)]
@@ -97,35 +97,42 @@ namespace LiveQuerySuggestions
             Debug.WriteLine("Trying prefix search.");
             List<string> matches = prefixTree.PrefixSearch(prefix, max);
 
-            bool fuzzy = false;
-            if (matches.Count == 0)
+            int fuzzyCount = 0;
+            if (matches.Count < 10)
             {
                 Debug.WriteLine("Trying fuzzy search...");
-                matches = prefixTree.FuzzyPrefixSearch(prefix, max);
-                fuzzy = true;
+                var fuzzyMatches = prefixTree.FuzzyPrefixSearch(prefix, max);
+
+                while (matches.Count < 10 && fuzzyMatches.Count > 0)
+                {
+                    if (!matches.Contains(fuzzyMatches[0]))
+                    {
+                        matches.Add(fuzzyMatches[0]);
+                        fuzzyCount++;
+                    }
+                    fuzzyMatches.RemoveAt(0);
+                }
             }
 
-            var ranked = RankSuggestions(matches);
+            var ranked = RankSuggestions(matches, fuzzyCount);
             string[][] results = new string[ranked.Length][];
             for (int i = 0; i < ranked.Length; ++i)
             {
                 results[i] = new string[2];
-                if (!fuzzy)
-                    results[i][0] = ranked[i].Key;
-                else
-                    results[i][0] = "<b>" + ranked[i].Key + "</b>?";
-
+                results[i][0] = ranked[i].Key;
                 results[i][1] = ranked[i].Value.ToString();
             }
 
             return results;
         }
 
-        private KeyValuePair<string, int>[] RankSuggestions(List<string> suggestions)
+        private KeyValuePair<string, int>[] RankSuggestions(List<string> suggestions, int numFuzzy)
         {
             var sorted = new List<KeyValuePair<string,int>>();
+            int index = 0;
             foreach (var sug in suggestions)
             {
+                var actual = index < suggestions.Count - numFuzzy ? sug : "<em>" + sug + "</em>";
                 if (pageCounts.ContainsKey(sug))
                 {
                     int currVal = pageCounts[sug];
@@ -136,12 +143,14 @@ namespace LiveQuerySuggestions
                             break;
                         ++i;
                     }
-                    sorted.Insert(i, new KeyValuePair<string, int>(sug, currVal));
+                    sorted.Insert(i, new KeyValuePair<string, int>(actual, currVal));
                 }
                 else
                 {
-                    sorted.Add(new KeyValuePair<string, int>(sug, 0));
+                    sorted.Add(new KeyValuePair<string, int>(actual, 0));
                 }
+
+                ++index;
             }
 
             return sorted.ToArray();

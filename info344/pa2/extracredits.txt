@@ -25,7 +25,10 @@ it during my traversal of the tree. If the levenshtein distance between the
 actual string and the current is bigger than 2, I ignore it and continue
 looking through the tree.
 
-I only call the FuzzyPrefixSearch method when I get 0 results from the simple
+I only call the FuzzyPrefixSearch method when I get < 100 results from the simple
 PrefixSearch method.
 
-Misspellings suggestions are displayed as bold text in the list on the dom.
+Misspellings suggestions are displayed as italic text in the list on the dom.
+They are also colored with a light gray to show that they are fuzzy matches.
+When all of the results are a result of fuzzy search, I display a special
+message.
