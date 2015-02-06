@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LiveQuerySuggestions
 {
-    public class AlphabetMap<T> : IEnumerable<T>
+    public class AlphabetMap<T> : IEnumerable<KeyValuePair<char, T>>
     {
         private T[] elements;
         public int Count { get; set; }
@@ -39,7 +39,7 @@ namespace LiveQuerySuggestions
             return ValidKey(c) && elements[LetterToIndex(c)] != null;
         }
 
-        public IEnumerator<T> GetEnumerator()
+        public IEnumerator<KeyValuePair<char, T>> GetEnumerator()
         {
             return new AlphabetMapEnumerator<T>(elements);
         }
@@ -56,7 +56,7 @@ namespace LiveQuerySuggestions
             return c == ' ' || (c >= 'a' && c <= 'z');
         }
 
-        public class AlphabetMapEnumerator<Q> : IEnumerator<Q>
+        public class AlphabetMapEnumerator<Q> : IEnumerator<KeyValuePair<char, Q>>
         {
             public int index;
             public Q[] elements;
@@ -67,9 +67,13 @@ namespace LiveQuerySuggestions
                 index = -1;
             }
 
-            public Q Current
+            public KeyValuePair<char, Q> Current
             {
-                get { return elements[index]; }
+                get 
+                {
+                    int key = index == 0 ? ' ' : 'a' + index - 1;
+                    return new KeyValuePair<char,Q>((char) key, elements[index]); 
+                }
             }
 
             public bool MoveNext()
