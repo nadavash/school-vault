@@ -15,6 +15,6 @@ ex11: ex11.o Vector.o Vector.h
 	$(CPP) $(CPPFLAGS) -c $<
 
 clean: FORCE
-	rm -f *.o *~ ex10
+	rm -f *.o *~ ex11
 
 FORCE:
