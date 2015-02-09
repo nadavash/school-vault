@@ -4,15 +4,15 @@
 // Exercise 11
 #include "Vector.h"
 
-Vector::Vector() : data_(data_ = new double[3]) {
+Vector::Vector() : data_(new double[3]) {
   Set(0, 0, 0);
 }
 
-Vector::Vector(const Vector& other) : data_(data_ = new double[3]) {
+Vector::Vector(const Vector& other) : data_(new double[3]) {
   Set(other.x(), other.y(), other.z());
 }
 
-Vector::Vector(double x, double y, double z) : data_(data_ = new double[3]) {
+Vector::Vector(double x, double y, double z) : data_(new double[3]) {
   Set(x, y, z);
 }
 
