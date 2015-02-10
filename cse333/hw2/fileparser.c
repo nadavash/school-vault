@@ -138,7 +138,6 @@ HashTable BuildWordHT(char *filename) {
   // file turns out to be empty (i.e., its length is 0),
   // or you couldn't read the file at all, return NULL to indicate
   // failure.
-  printf("%s\n", filename);
   filecontent = ReadFile(filename, &filelen);
   if (filecontent == NULL || filelen == 0) {
     return NULL;
