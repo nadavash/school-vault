@@ -273,9 +273,11 @@ static void AddToHashtable(HashTable tab, char *word, DocPositionOffset_t pos) {
 
     int len = strlen(word) + 1;
     newstr = (char *) malloc(len * sizeof(*newstr));
-    snprintf(newstr, len, "%s", word);
+    Verify333(newstr != NULL);
+    strncpy(newstr, word, len);
 
     wp = (WordPositions *) malloc(sizeof(*wp));
+    Verify333(wp != NULL);
     wp->word = newstr;
     wp->positions = AllocateLinkedList();
 

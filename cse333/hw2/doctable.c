@@ -51,6 +51,8 @@ void FreeDocTable(DocTable table) {
   Verify333(table != NULL);
 
   // STEP 1.
+  FreeHashTable(table->docid_to_docname, free);
+  FreeHashTable(table->docname_to_docid, free);
 
   free(table);
 }
@@ -80,6 +82,14 @@ DocID_t DTRegisterDocumentName(DocTable table, char *docname) {
   // free up the malloc'ed space and return the existing docid
 
   // STEP 2.
+  HTKey_t key = FNVHash64((unsigned char *) docname, strlen(docname));
+  int retval = LookupHashTable(table->docname_to_docid, key, &oldkv);
+  if (retval == 1) {
+    free(docid);
+    free(doccopy);
+    res = *((DocID_t *) oldkv.value);
+    return res;
+  }
 
   // allocate the next docID
   table->max_id += 1;
@@ -88,11 +98,16 @@ DocID_t DTRegisterDocumentName(DocTable table, char *docname) {
   // STEP 3.
   // Set up the key/value for the docid_to_docname mapping, and
   // do the insert.
-
+  kv.key = *docid;
+  kv.value = doccopy;
+  Verify333(InsertHashTable(table->docid_to_docname, kv, &oldkv) != 0);
 
   // STEP 4.
   // Set up the key/value for the docname_to_docid mapping, and
   // do the insert.
+  kv.key = key;
+  kv.value = docid;
+  Verify333(InsertHashTable(table->docname_to_docid, kv, &oldkv) != 0);
 
   return *docid;
 }
@@ -110,6 +125,13 @@ DocID_t DTLookupDocumentName(DocTable table, char *docname) {
   // docname_to_docid table within dt, and return
   // either "0" if the docname isn't found or the
   // docID if it is.
+  key = FNVHash64(docname, strlen(docname));
+  res = LookupHashTable(table->docname_to_docid, key, &kv);
+  if (res == 1) {
+    return *((DocID_t *) kv.value);
+  }
+
+  return 0;
 }
 
 char *DTLookupDocID(DocTable table, DocID_t docid) {
@@ -124,6 +146,12 @@ char *DTLookupDocID(DocTable table, DocID_t docid) {
   // and either return the string (i.e., the (char *)
   // saved in the value field for that key) or
   // NULL if the key isn't in the table.
+  res = LookupHashTable(table->docid_to_docname, docid, &kv);
+  if (res == 1) {
+    return kv.value;
+  }
+
+  return NULL;
 }
 
 HashTable DTGetDocidTable(DocTable table) {
