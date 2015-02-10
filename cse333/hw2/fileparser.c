@@ -68,7 +68,7 @@ char *ReadFile(const char *filename, HWSize_t *size) {
   // Use the stat system call to fetch a "struct stat" that describes
   // properties of the file. ("man 2 stat"). [You can assume we're on a 64-bit
   // system, with a 64-bit off_t field.]
-  result = stat(filename, &filestat)
+  result = stat(filename, &filestat);
   if (result != 0) {
     return NULL;
   }
@@ -91,7 +91,7 @@ char *ReadFile(const char *filename, HWSize_t *size) {
   // STEP 4.
   // Allocate space for the file, plus 1 extra byte to
   // NULL-terminate the string.
-  buf = (char*) malloc(filestat.st_size * sizeof(*buf) + 1);
+  buf = (char *) malloc(filestat.st_size * sizeof(*buf) + 1);
   Verify333(buf);
 
   // STEP 5.
@@ -138,6 +138,7 @@ HashTable BuildWordHT(char *filename) {
   // file turns out to be empty (i.e., its length is 0),
   // or you couldn't read the file at all, return NULL to indicate
   // failure.
+  printf("%s\n", filename);
   filecontent = ReadFile(filename, &filelen);
   if (filecontent == NULL || filelen == 0) {
     return NULL;
@@ -219,22 +220,25 @@ static void LoopAndInsert(HashTable tab, char *content) {
   //
   //    AddToHashTable(tab, wordstart, pos);
   //
+  bool end = false;
 
-  while (curptr != '\0') {
-    if (isalpha(*curptr)) {
-      wordstart = curptr;
-      while (isalpha(*curptr)) {
-        *curptr = tolower(*curptr);
-        ++curptr;
-      }
-
-      if (*curptr != '\0') {
-        *curptr = '\0';
-        ++curptr;
-      }
-
-      AddToHashtable(tab, wordstart, (curptr - content));
+  while (!end) {
+    while (isalpha(*curptr)) {
+      *curptr = tolower(*curptr);
+      ++curptr;
     }
+
+    if (*curptr == '\0') {
+      end = true;
+    }
+
+    if (curptr > wordstart) {
+      *curptr = '\0';
+      AddToHashtable(tab, wordstart, wordstart - content);
+    }
+
+    ++curptr;
+    wordstart = curptr;
   }
 }
 
@@ -252,9 +256,9 @@ static void AddToHashtable(HashTable tab, char *word, DocPositionOffset_t pos) {
   retval = LookupHashTable(tab, hashKey, &kv);
   if (retval == 1) {
     // Yes; we just need to add a position in using AppendLinkedList().  Note
-    // how we're casting the DocPositionOffset_t position variable to an LLPayload_t to store
-    // it in the linked list payload without needing to malloc space for it.
-    // Ugly, but it works!
+    // how we're casting the DocPositionOffset_t position variable to an
+    // LLPayload_t to store it in the linked list payload without needing to
+    // malloc space for it. Ugly, but it works!
     WordPositions *wp = (WordPositions *) kv.value;
     retval = AppendLinkedList(wp->positions, (LLPayload_t) ((intptr_t) pos));
     Verify333(retval != 0);
@@ -263,8 +267,25 @@ static void AddToHashtable(HashTable tab, char *word, DocPositionOffset_t pos) {
     // No; this is the first time we've seen this word.  Allocate and prepare
     // a new WordPositions structure, and append the new position to its list
     // using a similar ugly hack as right above.
+    HTKeyValue newKv;
     WordPositions *wp;
     char *newstr;
 
+    int len = strlen(word) + 1;
+    newstr = (char *) malloc(len * sizeof(*newstr));
+    snprintf(newstr, len, "%s", word);
+
+    wp = (WordPositions *) malloc(sizeof(*wp));
+    wp->word = newstr;
+    wp->positions = AllocateLinkedList();
+
+    retval = AppendLinkedList(wp->positions, (LLPayload_t) ((intptr_t) pos));
+    Verify333(retval != 0);
+
+    newKv.key = hashKey;
+    newKv.value = wp;
+
+    retval = InsertHashTable(tab, newKv, &kv);
+    Verify333(retval != 0);
   }
 }

@@ -150,7 +150,7 @@ bool AppendLinkedList(LinkedList list, LLPayload_t payload) {
   // Step 5: implement AppendLinkedList.  It's kind of like
   // PushLinkedList, but obviously you need to add to the end
   // instead of the beginning.
-  Verify333(payload != NULL);
+  // Verify333(payload != NULL);
 
   // allocate space for the new node.
   LinkedListNodePtr ln =
