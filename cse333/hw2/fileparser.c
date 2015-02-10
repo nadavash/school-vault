@@ -68,18 +68,25 @@ char *ReadFile(const char *filename, HWSize_t *size) {
   // Use the stat system call to fetch a "struct stat" that describes
   // properties of the file. ("man 2 stat"). [You can assume we're on a 64-bit
   // system, with a 64-bit off_t field.]
-  Verify333(stat(filename, &filestat) == 0);
+  result = stat(filename, &filestat)
+  if (result != 0) {
+    return NULL;
+  }
 
   // STEP 2.
   // Make sure this is a "regular file" and not a directory
   // or something else.  (use the S_ISREG macro described
   // in "man 2 stat")
-  Verify333(S_ISREG(filestat.st_mode));
+  if (!S_ISREG(filestat.st_mode)) {
+    return NULL;
+  }
 
   // STEP 3.
   // Attempt to open the file for reading.  (man 2 open)
   fd = open(filename, O_RDONLY);
-  Verify333(fd >= 0);
+  if (fd < 0) {
+    return NULL;
+  }
 
   // STEP 4.
   // Allocate space for the file, plus 1 extra byte to
@@ -98,8 +105,8 @@ char *ReadFile(const char *filename, HWSize_t *size) {
   left_to_read = filestat.st_size;
   while (left_to_read > 0) {
     numread = read(fd, buf, left_to_read);
-    if (numread == -1) {
-      Verify333(errno & (EAGAIN | EINTR));
+    if (numread == -1 && !(errno & (EAGAIN | EINTR))) {
+      break;
     } else {
       left_to_read -= numread;
     }
@@ -131,7 +138,10 @@ HashTable BuildWordHT(char *filename) {
   // file turns out to be empty (i.e., its length is 0),
   // or you couldn't read the file at all, return NULL to indicate
   // failure.
-
+  filecontent = ReadFile(filename, &filelen);
+  if (filecontent == NULL || filelen == 0) {
+    return NULL;
+  }
 
   // Verify that the file contains only ASCII text.  We won't try to index any
   // files that contain non-ASCII text; unfortunately, this means we aren't
@@ -210,8 +220,21 @@ static void LoopAndInsert(HashTable tab, char *content) {
   //    AddToHashTable(tab, wordstart, pos);
   //
 
-  while (1) {
+  while (curptr != '\0') {
+    if (isalpha(*curptr)) {
+      wordstart = curptr;
+      while (isalpha(*curptr)) {
+        *curptr = tolower(*curptr);
+        ++curptr;
+      }
 
+      if (*curptr != '\0') {
+        *curptr = '\0';
+        ++curptr;
+      }
+
+      AddToHashtable(tab, wordstart, (curptr - content));
+    }
   }
 }
 
