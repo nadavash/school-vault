@@ -50,6 +50,18 @@ int main(int argc, char **argv) {
   // When searchshell detects end-of-file on stdin (cntrl-D from the
   // keyboard), searchshell should free all dynamically allocated
   // memory and any other allocated resources and then exit.
+  int retval;
+  MemIndex index = NULL;
+  DocTable doctable = NULL;
+
+  printf("Indexing '%s'\n", argv[1]);
+  retval = CrawlFileTree(argv[1], &doctable, &index);
+  if (!retval) {
+    fprintf(stderr, "Error while crawling filetree at '%s'", argv[1]);
+    return EXIT_FAILURE;
+  }
+
+
 
   return EXIT_SUCCESS;
 }
