@@ -86,8 +86,6 @@ int MIAddPostingList(MemIndex index, char *word, DocID_t docid,
   // even though you hadn't yet finished the
   // memindex.c implementation.
 
-  return 1;
-
   // First, we have to see if the word we're being handed
   // already exists in the inverted index.
   res = LookupHashTable(index, wordkey, &kv);
@@ -102,6 +100,16 @@ int MIAddPostingList(MemIndex index, char *word, DocID_t docid,
     //   (3) insert that hashtable into the WordDocSet, and
     //   (4) insert the the new WordDocSet into the inverted
     //       index (i.e., into the "index" table).
+    wds = (WordDocSetPtr) malloc(sizeof(*wds));
+    Verify333(wds != NULL);
+    wds->word = word;
+    wds->docIDs = AllocateHashTable(128);
+    Verify333(wds != NULL);
+
+    kv.key = wordkey;
+    kv.value = wds;
+    res = InsertHashTable(index, kv, &hitkv);
+    Verify333(res != 0);
   } else {
     // Yes, this word already exists in the inverted index.
     // So, there's no need to insert it again; we can go
@@ -122,7 +130,10 @@ int MIAddPostingList(MemIndex index, char *word, DocID_t docid,
   // The entry's key is this docID and the entry's value
   // is the "positions" word positions list we were passed
   // as an argument.
-
+  kv.key = docid;
+  kv.value = positions;
+  res = InsertHashTable(wds->docIDs, kv, &hitkv);
+  Verify333(res != 0);
 
   return 1;
 }

@@ -177,7 +177,7 @@ static void HandleFile(char *fpath, DocTable *doctable, MemIndex *index) {
   // Invoke the DTRegisterDocumentName() function in
   // doctable.h/c to register the new file with the
   // doctable.
-  docID = DTRegisterDocumentName(doctable, fpath);
+  docID = DTRegisterDocumentName(*doctable, fpath);
 
   // Loop through the hash table.
   it = HashTableMakeIterator(tab);
