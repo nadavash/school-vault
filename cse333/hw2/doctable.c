@@ -125,7 +125,7 @@ DocID_t DTLookupDocumentName(DocTable table, char *docname) {
   // docname_to_docid table within dt, and return
   // either "0" if the docname isn't found or the
   // docID if it is.
-  key = FNVHash64(docname, strlen(docname));
+  key = FNVHash64((unsigned char *) docname, strlen(docname));
   res = LookupHashTable(table->docname_to_docid, key, &kv);
   if (res == 1) {
     return *((DocID_t *) kv.value);

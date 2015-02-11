@@ -92,14 +92,14 @@ static void HandleDir(char *dirpath, DIR *d, DocTable *doctable,
     char *newfile;
     int res, charsize;
     struct stat nextstat;
-    struct dirent *dirent = NULL, entry;
+    struct dirent *dirent = NULL;
 
     // STEP 1.
     // Use the "readdir_r()" system call to read the next directory entry. (man
     // 3 readdir_r).  If we hit the end of the directory, return back
     // out of this function.
-    res = readdir_r(d, &entry, &dirent);
-    if (res != 0 || dirent == NULL) {
+    dirent = readdir(d);
+    if (dirent == NULL) {
       return;
     }
 
@@ -109,8 +109,8 @@ static void HandleDir(char *dirpath, DIR *d, DocTable *doctable,
     // loop.) You can find out the name of the directory entry through the
     // "d_name" field of the struct dirent returned by readdir(), and you can
     // use strcmp() to compare it to "." or ".."
-    if (strcmp(entry.d_name, ".") == 0 ||
-        strcmp(entry.d_name, "..") == 0) {
+    if (strcmp(dirent->d_name, ".") == 0 ||
+        strcmp(dirent->d_name, "..") == 0) {
       continue;
     }
 
@@ -194,7 +194,7 @@ static void HandleFile(char *fpath, DocTable *doctable, MemIndex *index) {
     Verify333(retval != 0);
     wp = kv.value;
 
-    retval = MIAddPostingList(index, wp->word, docID, wp->positions);
+    retval = MIAddPostingList(*index, wp->word, docID, wp->positions);
     Verify333(retval != 0);
 
     // Since we've transferred ownership of the memory associated with both

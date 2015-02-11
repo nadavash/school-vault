@@ -58,6 +58,18 @@ static void MIFree(HTValue_t ptr) {
   free(wd);
 }
 
+// static HTIter GetIteratorForWord(MemIndex index, char *word) {
+//   wordkey = FNVHash64((unsigned char *) query[0], strlen(query[0]));
+//   res = LookupHashTable(index, wordkey, &kv);
+//   if (res != 1) {
+//     free(retlist);
+//     return NULL;
+//   }
+
+//   wds = kv->value;
+//   HTIter iter = HasTableMakeIterator(wds->docIDs);
+// }
+
 MemIndex AllocateMemIndex(void) {
   // Happily, HashTables dynamically resize themselves
   // now, so we can start by allocating a small hashtable.
@@ -167,7 +179,25 @@ LinkedList MIProcessQuery(MemIndex index, char *query[], uint8_t qlen) {
   // Then, append the SearchResult structure onto retlist.
   //
   // If there are no matching documents, free retlist and return NULL.
+  wordkey = FNVHash64((unsigned char *) query[0], strlen(query[0]));
+  res = LookupHashTable(index, wordkey, &kv);
+  if (res != 1) {
+    free(retlist);
+    return NULL;
+  }
 
+  wds = kv.value;
+  HTIter iter = HashTableMakeIterator(wds->docIDs);
+  while (!HTIteratorPastEnd(iter)) {
+    SearchResultPtr sr = (SearchResultPtr) malloc(sizeof(*sr));
+    Verify333(HTIteratorGet(iter, &kv) == 1);
+    sr->docid = kv.key;
+    sr->rank = NumElementsInLinkedList(kv.value);
+    Verify333(PushLinkedList(retlist, sr));
+
+    HTIteratorNext(iter);
+  }
+  HTIteratorFree(iter);
 
   // Great; we have our search results for the first query
   // word.  If there is only one query word, we're done!
@@ -188,7 +218,13 @@ LinkedList MIProcessQuery(MemIndex index, char *query[], uint8_t qlen) {
     // Look up the next query word (query[i]) in the inverted index.
     // If there are no matches, it means the overall query
     // should return no documents, so free retlist and return NULL.
-
+    wordkey = FNVHash64((unsigned char *) query[i], strlen(query[i]));
+    res = LookupHashTable(index, wordkey, &kv);
+    if (res != 1) {
+      FreeLinkedList(retlist, free);
+      return NULL;
+    }
+    wds = kv.value;
 
     // STEP 6.
     // There are matches.  We're going to iterate through
@@ -204,7 +240,19 @@ LinkedList MIProcessQuery(MemIndex index, char *query[], uint8_t qlen) {
     llit = LLMakeIterator(retlist, 0);
     ne = NumElementsInLinkedList(retlist);
     for (j = 0; j < ne; j++) {
+      LLPayload_t payload;
+      SearchResultPtr sr;
+      LLIteratorGetPayload(llit, &payload);
+      Verify333(payload != NULL);
+      sr = (SearchResultPtr) payload;
 
+      res = LookupHashTable(wds->docIDs, sr->docid, &kv);
+      if (res == 1) {
+        sr->rank += NumElementsInLinkedList(kv.value);
+        LLIteratorNext(llit);
+      } else {
+        LLIteratorDelete(llit, free);
+      }
     }
     LLIteratorFree(llit);
   }
