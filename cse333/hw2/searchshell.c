@@ -78,11 +78,8 @@ int main(int argc, char **argv) {
   uint8_t len;
   LinkedList matches;
 
-  while (1) {
-    printf("enter query:\n");
-    if (!fgets(line, sizeof(line), stdin))
-      break;
-
+  printf("enter query:\n");
+  while (fgets(line, sizeof(line), stdin)) {
     StrToLower(line);
     len = SplitSpaces(line, query);
     matches = MIProcessQuery(index, query, len);
@@ -90,6 +87,8 @@ int main(int argc, char **argv) {
       PrintMatches(matches, doctable);
       FreeLinkedList(matches, free);
     }
+
+    printf("enter query:\n");
   }
 
   FreeMemIndex(index);
@@ -116,6 +115,7 @@ static void StrToLower(char *str) {
 static uint8_t SplitSpaces(char *str, char **query) {
   uint8_t i = 0;
 
+  // Get tokens for the string split by space and newline.
   char *rent;
   char *ch = strtok_r(str, " \n", &rent);
   while (ch != NULL) {
@@ -136,6 +136,7 @@ static void PrintMatches(LinkedList results, DocTable doctable) {
   if (!iter)
     return;
 
+  // Iterate over the list.
   bool next = true;
   while (next) {
     LLPayload_t payload;
@@ -145,6 +146,7 @@ static void PrintMatches(LinkedList results, DocTable doctable) {
     LLIteratorGetPayload(iter, &payload);
     sr = (SearchResultPtr) payload;
 
+    // Get the docname from the table, and print it out along with the rank.
     docname = DTLookupDocID(doctable, sr->docid);
 
     if (docname) {
