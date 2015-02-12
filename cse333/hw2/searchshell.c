@@ -35,7 +35,7 @@
 static void Usage(void);
 
 // Converts the given string str to lowercase.
-static void StrToLower(char *str, uint32_t len);
+static void StrToLower(char *str);
 
 // Splits the given string str by a space delimiter and returns an array of
 // strings with the delimited parts.
@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
     if (!fgets(line, sizeof(line), stdin))
       break;
 
-    StrToLower(line, sizeof(line));
+    StrToLower(line);
     len = SplitSpaces(line, query);
     matches = MIProcessQuery(index, query, len);
     if (matches) {
@@ -106,9 +106,10 @@ static void Usage(void) {
   exit(-1);
 }
 
-static void StrToLower(char *str, uint32_t len) {
-  for (int i = len; i >= 0; --i) {
-    str[i] = tolower(str[i]);
+static void StrToLower(char *str) {
+  while (*str != '\0') {
+    *str = tolower(*str);
+    ++str;
   }
 }
 
