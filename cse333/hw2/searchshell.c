@@ -92,6 +92,9 @@ int main(int argc, char **argv) {
     }
   }
 
+  FreeMemIndex(index);
+  FreeDocTable(doctable);
+
   return EXIT_SUCCESS;
 }
 
