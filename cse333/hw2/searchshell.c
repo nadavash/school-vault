@@ -116,7 +116,8 @@ static void StrToLower(char *str) {
 static uint8_t SplitSpaces(char *str, char **query) {
   uint8_t i = 0;
 
-  char *ch = strtok(str, " \n");
+  char *rent;
+  char *ch = strtok_r(str, " \n", &rent);
   while (ch != NULL) {
     if (i >= 128)
       break;
@@ -124,7 +125,7 @@ static uint8_t SplitSpaces(char *str, char **query) {
     query[i] = ch;
     ++i;
 
-    ch = strtok(NULL, " \n");
+    ch = strtok_r(NULL, " \n", &rent);
   }
 
   return i;
