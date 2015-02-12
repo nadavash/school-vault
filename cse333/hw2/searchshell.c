@@ -151,4 +151,6 @@ static void PrintMatches(LinkedList results, DocTable doctable) {
 
     next = LLIteratorNext(iter);
   }
+
+  LLIteratorFree(iter);
 }
