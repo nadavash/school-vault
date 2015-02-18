@@ -32,7 +32,7 @@
     function DisplaySuggestions(suggestions) {
         currentRequest = null;
         var $list = $('#suggestions').empty();
-        if (suggestions === null)
+        if (suggestions === null || suggestions.length == 0)
             return;
 
         var allFuzzy = true;
