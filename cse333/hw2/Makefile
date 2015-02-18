@@ -37,6 +37,6 @@ test_suite: $(TESTOBJS) $(TESTHEADERS) libhw2.a FORCE
 	$(CC) $(CFLAGS) -c -std=c11 $<
 
 clean: FORCE
-	/bin/rm -f *.o *~ test_suite searchshell libhw2.a
+	/bin/rm -rf *.o *~ *.dSYM test_suite searchshell libhw2.a
 
 FORCE:
