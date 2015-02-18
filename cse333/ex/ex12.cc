@@ -2,6 +2,7 @@
 // nadava@uw.edu - 1230523
 // CSE 333 15wi
 // Exercise 12
+#include <algorithm>
 #include <cstdlib>
 #include <iostream>
 #include <vector>
