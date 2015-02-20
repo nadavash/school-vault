@@ -22,5 +22,10 @@ namespace DashboardWebRole
         {
             return "Hello World";
         }
+
+        public string StartCrawler()
+        {
+            return "started crawler.";
+        }
     }
 }

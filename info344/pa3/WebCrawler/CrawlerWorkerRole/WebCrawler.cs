@@ -8,5 +8,13 @@ namespace CrawlerWorkerRole
 {
     class WebCrawler
     {
+        private string name;
+        
+        public WebCrawler(string name)
+        {
+            this.name = name;
+        }
+
+
     }
 }
