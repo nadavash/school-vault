@@ -64,6 +64,9 @@ namespace CrawlerWorkerRole
             while (!cancellationToken.IsCancellationRequested)
             {
                 Trace.TraceInformation("Working");
+
+
+
                 await Task.Delay(1000);
             }
         }

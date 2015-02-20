@@ -29,17 +29,3 @@ cse333/hw1/example_program_ht
 cse333/hw1/test_suite
 lecture5_vector
 *.zip
-
-info344/pa2/LiveQuerySuggestions/packages
-info344/pa2/LiveQuerySuggestions/LiveQuerySuggestions/bin
-info344/pa2/LiveQuerySuggestions/LiveQuerySuggestions/obj
-info344/pa2/LiveQuerySuggestions/LiveQuerySuggestions/packages.config
-
-info344/pa3/WebCrawler/packages
-info344/pa3/WebCrawler/CrawlerWorkerRole/bin
-info344/pa3/WebCrawler/CrawlerWorkerRole/obj
-info344/pa3/WebCrawler/DashboardWebRole/bin
-info344/pa3/WebCrawler/DashboardWebRole/obj
-info344/pa3/WebCrawler/WebCrawler/bin
-info344/pa3/WebCrawler/WebCrawler/obj
-info344/pa3/WebCrawler/WebCrawler/csx

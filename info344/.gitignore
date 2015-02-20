@@ -1,0 +1,15 @@
+pa2/LiveQuerySuggestions/packages
+pa2/LiveQuerySuggestions/LiveQuerySuggestions/bin
+pa2/LiveQuerySuggestions/LiveQuerySuggestions/obj
+pa2/LiveQuerySuggestions/LiveQuerySuggestions/packages.config
+
+pa3/WebCrawler/packages
+pa3/WebCrawler/CrawlerWorkerRole/bin
+pa3/WebCrawler/CrawlerWorkerRole/obj
+pa3/WebCrawler/DashboardWebRole/bin
+pa3/WebCrawler/DashboardWebRole/obj
+pa3/WebCrawler/WebCrawler/bin
+pa3/WebCrawler/WebCrawler/obj
+pa3/WebCrawler/WebCrawler/csx
+pa3/WebCrawler/CrawlerLibrary/bin
+pa3/WebCrawler/CrawlerLibrary/obj
