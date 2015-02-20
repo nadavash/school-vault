@@ -10,6 +10,8 @@
 
 *.dSYM
 *.[ao]
+*.dll
+*.exe
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
@@ -32,3 +34,12 @@ info344/pa2/LiveQuerySuggestions/packages
 info344/pa2/LiveQuerySuggestions/LiveQuerySuggestions/bin
 info344/pa2/LiveQuerySuggestions/LiveQuerySuggestions/obj
 info344/pa2/LiveQuerySuggestions/LiveQuerySuggestions/packages.config
+
+info344/pa3/WebCrawler/packages
+info344/pa3/WebCrawler/CrawlerWorkerRole/bin
+info344/pa3/WebCrawler/CrawlerWorkerRole/obj
+info344/pa3/WebCrawler/DashboardWebRole/bin
+info344/pa3/WebCrawler/DashboardWebRole/obj
+info344/pa3/WebCrawler/WebCrawler/bin
+info344/pa3/WebCrawler/WebCrawler/obj
+info344/pa3/WebCrawler/WebCrawler/csx
