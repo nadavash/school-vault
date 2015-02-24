@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Web;
+using System.Web.Script.Services;
 using System.Web.Services;
 
 namespace DashboardWebRole
@@ -30,17 +31,13 @@ namespace DashboardWebRole
         }
 
         [WebMethod]
-        public string HelloWorld()
-        {
-            return "Hello World";
-        }
-
+        [ScriptMethod(UseHttpGet = true)]
         public string StartCrawler()
         {
             try
             {
                 CloudQueue commands = GetQueue("commandqueue");
-                CloudQueueMessage msg = new CloudQueueMessage("start");
+                CloudQueueMessage msg = new CloudQueueMessage("crawl");
                 commands.AddMessage(msg);
             }
             catch (Exception e)
@@ -51,12 +48,14 @@ namespace DashboardWebRole
             return "Sent start crawler message.";
         }
 
+        [WebMethod]
+        [ScriptMethod(UseHttpGet = true)]
         public string StopCrawler()
         {
             try
             {
                 CloudQueue commands = GetQueue("commandqueue");
-                CloudQueueMessage msg = new CloudQueueMessage("stop");
+                CloudQueueMessage msg = new CloudQueueMessage("pause");
                 commands.AddMessage(msg);
             }
             catch (Exception e)
@@ -67,13 +66,31 @@ namespace DashboardWebRole
             return "Sent stop crawler message.";
         }
 
+        [WebMethod]
+        [ScriptMethod(UseHttpGet = true)]
+        public string ClearUrlQueue()
+        {
+            try
+            {
+                GetQueue("urlqueue").Clear();
+            }
+            catch (Exception e)
+            {
+                return e.ToString();
+            }
+
+            return "Url queue cleared.";
+        }
+
+        [WebMethod]
+        [ScriptMethod(UseHttpGet = true)]
         public int IndexSize()
         {
             CloudTable index = GetTable("crawlerindex");
             return 0;
         }
 
-        public CloudQueue GetQueue(string qref)
+        private CloudQueue GetQueue(string qref)
         {
             CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
             CloudQueue queue = queueClient.GetQueueReference(qref);
@@ -81,7 +98,7 @@ namespace DashboardWebRole
             return queue;
         }
 
-        public CloudTable GetTable(string tableref)
+        private CloudTable GetTable(string tableref)
         {
             CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
             CloudTable table = tableClient.GetTableReference(tableref);

@@ -12,11 +12,13 @@ using Microsoft.WindowsAzure.Storage;
 using System.Configuration;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Microsoft.WindowsAzure.Storage.Table;
+using CrawlerLibrary;
 
 namespace CrawlerWorkerRole
 {
     public class WorkerRole : RoleEntryPoint
     {
+        public const int SleepTimeMillis = 25;
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private readonly ManualResetEvent runCompleteEvent = new ManualResetEvent(false);
 
@@ -31,15 +33,30 @@ namespace CrawlerWorkerRole
         public override void Run()
         {
             Trace.TraceInformation("CrawlerWorkerRole is running");
-            //InitAzureStorage();
+            InitAzureStorage();
 
-            try
+            WebCrawler crawler = new WebCrawler("MyLittleCrawler", urlsQueue, indexTable);
+            crawler.InitializeCrawler("www.bleacherreport.com", "www.cnn.com");
+
+            string command = null;
+            while (command != "kill")
             {
-                this.RunAsync(this.cancellationTokenSource.Token).Wait();
-            }
-            finally
-            {
-                this.runCompleteEvent.Set();
+                CloudQueueMessage msg = commandsQueue.GetMessage();
+                if (msg != null)
+                {
+                    commandsQueue.DeleteMessageAsync(msg);
+                 
+                    // Process new command if different.
+                    if (command != msg.AsString) 
+                    {
+                        command = msg.AsString;
+                        ProcessNewCommand(command, crawler);
+                    }
+                }
+                else if (command != null)
+                    ProcessCurrent(command, crawler);
+
+                Thread.Sleep(SleepTimeMillis);
             }
         }
 
@@ -70,17 +87,32 @@ namespace CrawlerWorkerRole
             Trace.TraceInformation("CrawlerWorkerRole has stopped");
         }
 
-        private async Task RunAsync(CancellationToken cancellationToken)
+        private void ProcessNewCommand(string command, WebCrawler crawler)
         {
-            // TODO: Replace the following with your own logic.
-            while (!cancellationToken.IsCancellationRequested)
+            Trace.TraceInformation("Received command '{0}' from commands queue.", command);
+            switch (command)
             {
-                Trace.TraceInformation("Working");
+                case "crawl":
+                    crawler.Reset();
+                    crawler.CrawlSitemaps();
+                    break;
+                case "pause":
+                    crawler.StopLoading();
+                    break;
+            }
+        }
 
-
-
-
-                await Task.Delay(1000);
+        private void ProcessCurrent(string lastCommand, WebCrawler crawler)
+        {
+            bool idle = false;
+            switch (lastCommand)
+            {
+                case "crawl":
+                    idle = crawler.CrawlNext();
+                    break;
+                case "pause":
+                    idle = true;
+                    break;
             }
         }
 

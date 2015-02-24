@@ -24,7 +24,12 @@ namespace CrawlerLibrary
         private Dictionary<string, RobotsParser> robots;
         private CloudQueue urlsQueue;
         private CloudTable indexTable;
-        private HashSet<string> urlsCrawled;
+        private HashSet<string> urlsFound;
+
+        private long numUrlsCrawled;
+        private bool stopLoading = false;
+
+        public bool IsLoading { get; private set; }
 
         public WebCrawler(string userAgent, CloudQueue queue,
                           CloudTable table)
@@ -33,12 +38,12 @@ namespace CrawlerLibrary
             robots = new Dictionary<string, RobotsParser>();
             urlsQueue = queue;
             indexTable = table;
-            urlsCrawled = new HashSet<string>();
+            urlsFound = new HashSet<string>();
+            IsLoading = false;
         }
 
         public void InitializeCrawler(params string[] websites)
         {
-            Reset();
             RobotsParser parser;
             foreach (var website in websites)
             {
@@ -53,13 +58,22 @@ namespace CrawlerLibrary
 
         public void CrawlSitemaps()
         {
+            if (stopLoading)
+                throw new InvalidOperationException("Cannot crawl before resetting.");
+            else if (IsLoading)
+                throw new InvalidOperationException("Already crawling.");
+
             ThreadPool.QueueUserWorkItem(PrivCrawlSitemaps, this);
         }
 
         private void PrivCrawlSitemaps(object context)
         {
+            IsLoading = true;
             foreach (var website in robots)
             {
+                if (stopLoading)
+                    break;
+
                 if (website.Key == "www.bleacherreport.com")
                 {
                     ParseSitemap("http://bleacherreport.com/sitemap/nba.xml");
@@ -72,15 +86,28 @@ namespace CrawlerLibrary
                     }
                 }
             }
+            IsLoading = false;
         }
 
         public void Reset()
         {
             urlsQueue.Clear();
+            urlsFound.Clear();
+            stopLoading = false;
+            numUrlsCrawled = 0;
+            IsLoading = false;
+        }
+
+        public void StopLoading()
+        {
+            stopLoading = true;
         }
 
         public bool CrawlNext()
         {
+            if (stopLoading)
+                throw new InvalidOperationException("Cannot crawl before resetting.");
+
             string url = DequeueUrl();
             if (url == null)
                 return false;
@@ -95,7 +122,7 @@ namespace CrawlerLibrary
             string pageUrl = context.ToString();
             using (Stream htmlStream = GetStreamFromUrl(pageUrl))
             {
-                if (htmlStream == null)
+                if (htmlStream == null || stopLoading)
                     return;
                 Trace.TraceInformation("Parsing '{0}'.", pageUrl);
 
@@ -109,9 +136,11 @@ namespace CrawlerLibrary
                     Trace.TraceInformation("Page title not found for '{0}'.", pageUrl);
                 else
                 {
+                    if (stopLoading)
+                        return;
                     WebPageData pageData = new WebPageData(pageUrl, title.InnerText);
                     TableOperation insertOp = TableOperation.InsertOrReplace(pageData);
-                    indexTable.Execute(insertOp);
+                    indexTable.ExecuteAsync(insertOp);
                 }
 
                 var links = doc.DocumentNode.SelectNodes("//a");
@@ -119,6 +148,8 @@ namespace CrawlerLibrary
                 {
                     foreach (var linkTag in links)
                     {
+                        if (stopLoading)
+                            return;
                         EnqueueUrlIfValid(linkTag.GetAttributeValue("href", ""));
                     }
                 }
@@ -130,7 +161,7 @@ namespace CrawlerLibrary
             Queue<string> urls = new Queue<string>();
             urls.Enqueue(sitemap);
 
-            while (urls.Count > 0)
+            while (urls.Count > 0 && !stopLoading)
             {
                 string current = urls.Dequeue();
                 using (Stream xmlStream = GetStreamFromUrl(current))
@@ -173,11 +204,11 @@ namespace CrawlerLibrary
                 return;
 
             url = uri.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
-            lock (urlsCrawled)
+            lock (urlsFound)
             {
-                if (urlsCrawled.Contains(url) || UrlCrawled(uri))
+                if (urlsFound.Contains(url) || UrlCrawled(uri))
                     return;
-                urlsCrawled.Add(url);
+                urlsFound.Add(url);
             }
 
             CloudQueueMessage msg = new CloudQueueMessage(url);

@@ -68,6 +68,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CrawlerStateInfo.cs" />
     <Compile Include="RobotsParser.cs" />
     <Compile Include="WebCrawler.cs" />
     <Compile Include="WebPageData.cs" />
