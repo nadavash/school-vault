@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualBasic.CompilerServices;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -9,8 +10,12 @@ using System.Threading.Tasks;
 
 namespace CrawlerLibrary
 {
-    class RobotsParser
+    public class RobotsParser
     {
+        public const string USER_AGENT = "user-agent";
+        public const string SITEMAP = "sitemap";
+        public const string DISSALLOW = "disallow";
+
         public string UserAgent { get; private set; }
         public List<string> SiteMaps { get; private set; }
         public List<string> Disallowed { get; private set; }
@@ -22,7 +27,7 @@ namespace CrawlerLibrary
             Disallowed = new List<string>();
         }
 
-        public bool Parse(StreamReader reader)
+        public void Parse(StreamReader reader)
         {
             string line;
             string[] parts;
@@ -34,32 +39,30 @@ namespace CrawlerLibrary
                 if (line[0] == '#')
                     continue;
 
-                parts = line.Split(':');
-                if (parts.Length != 2)
+                parts = line.Split(new char[] {':'}, 2);
+                if (parts.Length < 2)
                 {
-                    Clear();
-                    return false;
+                    Trace.TraceError("Failed to parse robots.txt line: " + line);
+                    continue;
                 }
-
+                parts[0] = parts[0].ToLower();
                 parts[1] = parts[1].Trim();
 
                 // Check if a user agent is specified.
-                if (parts[0] == "User-agent")
+                if (parts[0] == USER_AGENT)
                 {
-                    Regex regex = new Regex(parts[1]);
-                    matchingAgent = regex.IsMatch(UserAgent);
+                    matchingAgent = Operators.LikeString(UserAgent, parts[1],
+                        Microsoft.VisualBasic.CompareMethod.Text);
                 }
                 else if (matchingAgent)
                     ParseLine(parts);
             }
-
-            return true;
         }
 
         public bool IsUrlAllowed(string url)
         {
             Uri uri = new Uri(url);
-            string path = uri.GetComponents(UriComponents.Path, UriFormat.Unescaped);
+            string path = "/" + uri.GetComponents(UriComponents.Path, UriFormat.Unescaped);
             foreach (var s in Disallowed)
             {
                 if (path.StartsWith(s))
@@ -73,15 +76,15 @@ namespace CrawlerLibrary
         {
             switch (parts[0])
             {
-                case "Sitemap":
+                case SITEMAP:
                     SiteMaps.Add(parts[1]);
                     break;
-                case "Disallow":
+                case DISSALLOW:
                     Disallowed.Add(parts[1]);
                     break;
                 default:
                     Trace.TraceError(
-                        string.Format("Unrecognized robots.txt attribute while parsing: '{}'",
+                        string.Format("Unrecognized robots.txt attribute while parsing: '{0}'",
                                       parts[0]));
                     break;
             }

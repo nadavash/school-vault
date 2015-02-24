@@ -9,6 +9,9 @@ using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Diagnostics;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using Microsoft.WindowsAzure.Storage;
+using System.Configuration;
+using Microsoft.WindowsAzure.Storage.Queue;
+using Microsoft.WindowsAzure.Storage.Table;
 
 namespace CrawlerWorkerRole
 {
@@ -17,9 +20,18 @@ namespace CrawlerWorkerRole
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private readonly ManualResetEvent runCompleteEvent = new ManualResetEvent(false);
 
+        private CloudStorageAccount storageAccount;
+
+        private CloudTable indexTable;
+        private CloudTable statusTable;
+
+        private CloudQueue commandsQueue;
+        private CloudQueue urlsQueue;
+
         public override void Run()
         {
             Trace.TraceInformation("CrawlerWorkerRole is running");
+            //InitAzureStorage();
 
             try
             {
@@ -67,8 +79,27 @@ namespace CrawlerWorkerRole
 
 
 
+
                 await Task.Delay(1000);
             }
+        }
+
+        private void InitAzureStorage()
+        {
+            storageAccount = CloudStorageAccount.Parse(
+                ConfigurationManager.ConnectionStrings["CrawlerWorkerRole.Properties.Settings.StorageConnectionString"]
+                .ConnectionString);
+            CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
+            commandsQueue = queueClient.GetQueueReference("commandqueue");
+            commandsQueue.CreateIfNotExists();
+            urlsQueue = queueClient.GetQueueReference("urlqueue");
+            urlsQueue.CreateIfNotExists();
+
+            CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
+            indexTable = tableClient.GetTableReference("crawlerindex");
+            indexTable.CreateIfNotExists();
+            statusTable = tableClient.GetTableReference("workerstatus");
+            statusTable.CreateIfNotExists();
         }
     }
 }
