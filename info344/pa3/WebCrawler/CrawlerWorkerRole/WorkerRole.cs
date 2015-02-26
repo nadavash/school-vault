@@ -18,7 +18,7 @@ namespace CrawlerWorkerRole
 {
     public class WorkerRole : RoleEntryPoint
     {
-        public const int SleepTimeMillis = 100;
+        public const int SleepTimeMillis = 80;
 
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private readonly ManualResetEvent runCompleteEvent = new ManualResetEvent(false);
@@ -27,6 +27,7 @@ namespace CrawlerWorkerRole
         private PerformanceCounter cpuUsage;
         private PerformanceCounter ramUsage;
         private PerformanceCounter ramAvailable;
+        private int cpuUsagePercentage;
 
         // Cloud storage
         private CloudStorageAccount storageAccount;
@@ -43,11 +44,13 @@ namespace CrawlerWorkerRole
             InitAzureStorage();
             CancellationToken token = cancellationTokenSource.Token;
 
+            cpuUsage.NextValue();
             WebCrawler crawler = new WebCrawler("MyLittleCrawler", urlsQueue, 
                                                 indexTable, statusTable);
-            crawler.InitializeCrawler("www.bleacherreport.com");
+            crawler.InitializeCrawler("www.bleacherreport.com", "www.cnn.com");
             string command = null;
             CrawlerStatus status = CrawlerStatus.Paused;
+            int counter = 0;
             while (command != "kill" && !token.IsCancellationRequested)
             {
                 CloudQueueMessage msg = GetNextMessage();
@@ -66,10 +69,17 @@ namespace CrawlerWorkerRole
                     status = ProcessCurrent(command, crawler);
                 }
 
-                CrawlerStateInfo info = BuildCrawlerStateInfo(crawler, status);
-                PostCrawlerStateInfo(info);
-
                 Thread.Sleep(SleepTimeMillis);
+
+                if (counter >= 15)
+                {
+                    cpuUsagePercentage = (int)cpuUsage.NextValue();
+                    counter = 0;
+                    CrawlerStateInfo info = BuildCrawlerStateInfo(crawler, status);
+                    PostCrawlerStateInfo(info);
+                }
+
+                ++counter;
             }
 
             runCompleteEvent.Reset();
@@ -151,7 +161,7 @@ namespace CrawlerWorkerRole
             stateInfo.LastTenUrls = String.Join(",", crawler.GetLastTen());
             stateInfo.UrlsCrawled = crawler.NumUrlsCrawled;
             stateInfo.UrlsIndexed = crawler.NumUrlsIndexed;
-            stateInfo.CpuUtilization = (int) cpuUsage.NextValue();
+            stateInfo.CpuUtilization = cpuUsagePercentage;
             stateInfo.RamAvailable = (long)ramAvailable.NextValue();
             stateInfo.RamUsed = (long)ramUsage.NextValue();
 

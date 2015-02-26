@@ -71,6 +71,20 @@
         });
     }
 
+    function GetErrors() {
+        console.log('Get errors.');
+        MakeAjaxCall('GetErrors', {}, function (results) {
+            var list = $('#errors');
+            var errs = resuts.d;
+            if (!errs) return;
+
+            for (var i = 0; i < errs.length; ++i) {
+                list.append(
+                    $('<li class="list-group-item">').text(errs[i].tostring()));
+            }
+        });
+    }
+
     function Search() {
         console.log('Searching. ' + $('#query').val());
         PostAjaxCall('GetTitleFromIndex', {

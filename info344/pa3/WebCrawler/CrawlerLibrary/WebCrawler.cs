@@ -242,7 +242,13 @@ namespace CrawlerLibrary
             Uri uri;
             if (Uri.TryCreate("http://" + host, UriKind.Absolute, out hostUri) &&
                 Uri.TryCreate(hostUri, url, out uri))
-                EnqueueUrlIfValid(uri.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped));
+            {
+                try
+                {
+                    EnqueueUrlIfValid(uri.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped));
+                }
+                catch (Exception e) { Trace.TraceError(e.ToString()); }
+            }
             else
                 EnqueueUrlIfValid(url);
         }
@@ -251,10 +257,19 @@ namespace CrawlerLibrary
         {
             url = FixUrl(url);
             Uri uri;
-            if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
+            if (!Uri.TryCreate(url, UriKind.Absolute, out uri) || !IsValidUrl(uri))
                 return;
 
-            url = uri.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
+            try
+            {
+                url = uri.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError(e.ToString());
+                return; 
+            }
+
             lock (urlsFound)
             {
                 if (urlsFound.Contains(url) || UrlCrawled(uri))

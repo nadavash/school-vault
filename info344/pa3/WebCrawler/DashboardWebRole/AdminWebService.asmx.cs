@@ -12,6 +12,7 @@ using CrawlerLibrary;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using System.Net;
+using System.Diagnostics;
 
 namespace DashboardWebRole
 {
@@ -59,8 +60,34 @@ namespace DashboardWebRole
                 else
                     return result.First().Title;
             }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        [WebMethod]
+        [ScriptMethod(UseHttpGet = true)]
+        public CrawlerError[] GetErrors()
+        {
+            DateTime last = DateTime.UtcNow - TimeSpan.FromHours(1);
+            string val = String.Format("datetime'{0}'", last.ToString("s"));
+            Debug.WriteLine(val);
+            var query = new TableQuery<CrawlerError>()
+                .Where(TableQuery.CombineFilters(
+                    TableQuery.GenerateFilterCondition("PartitionKey",
+                                                       QueryComparisons.Equal, "CrawlerError"),
+                    "and",
+                    TableQuery.GenerateFilterCondition("Timestamp", QueryComparisons.GreaterThanOrEqual, val)));
+
+            try
+            {
+                var result = GetTable("workerstatus").ExecuteQuery(query);
+                return result.ToArray();
+            }
             catch (Exception e)
             {
+                Debug.WriteLine(e.ToString());
                 return null;
             }
         }
