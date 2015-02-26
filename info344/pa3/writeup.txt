@@ -1,0 +1,25 @@
+Nadav Ashkenazi - INFO 344 PA3 Writeup
+
+I implemented the dashboard using bootstrap and a asmx service called 
+"AdminWebService". The dashboard contains all features including viewing
+errors, deleting index and queues, viewing stats about the crawlers, etc.
+Most of this data is fetched from the workersatus table which holds errors
+as well as diagnostics data about the workers.
+
+The crawler takes in a list of urls and begins crawling from those url's 
+sitemaps. Then it begins fetching urls from the cloud queue, processes the page,
+and adds new links to the queue from the page, and stores the title and url
+in the index.
+
+I divided up my solution into a project for common library files, like table
+entities and the crawler. I have one project for the worker role and the web
+role. I decided to make a crawler class and to use the class within the worker
+role to relieve the duties of actually crawling pages from the role. The worker
+role is in charge of handling posting diagnostics data and listening to messages
+from the web role. The web role includes the dashboard html as well as the web
+service that can send the worker messages through a queue, and get info through
+a table
+
+I began testing my crawler with a console app and then went on to implement the
+web and worker roles. This helped me get the important functionality of the
+crawler without having to worry about building the layers around it initially.

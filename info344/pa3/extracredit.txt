@@ -1,0 +1,10 @@
+I implemented one extra credit for this assignment:
+
+For this assignment I decided to implement the threading extra credit tha allows
+my crawler to crawl mulitple urls concurrently. I used a thread pool to implement
+this extra credit.
+
+My crawler has a crawlNext method that dispatches a task to the thread pool to
+start processing a particular url. This way, I call CrawlNext and immediately
+return. I can call crawlNext multiple times to queue more and more workers. The
+thread pool then processes those jobs as new threads open up.
