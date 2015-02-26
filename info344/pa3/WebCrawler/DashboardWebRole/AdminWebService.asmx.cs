@@ -8,6 +8,10 @@ using System.Linq;
 using System.Web;
 using System.Web.Script.Services;
 using System.Web.Services;
+using CrawlerLibrary;
+using System.Threading.Tasks;
+using Microsoft.WindowsAzure.ServiceRuntime;
+using System.Net;
 
 namespace DashboardWebRole
 {
@@ -26,8 +30,39 @@ namespace DashboardWebRole
         public AdminWebService()
         {
             storageAccount = CloudStorageAccount.Parse(
-                ConfigurationManager.ConnectionStrings["DashboardWebRole.Properties.Settings.StorageConnectionString"]
-                .ConnectionString);
+                RoleEnvironment.GetConfigurationSettingValue("StorageConnectionString"));
+        }
+
+        [WebMethod]
+        public string GetTitleFromIndex(string url)
+        {
+            Uri uri = FixUrl(url);
+            if (uri == null)
+                return null;
+
+            string host = uri.GetComponents(UriComponents.Host, UriFormat.Unescaped);
+            string encoded = WebUtility.UrlEncode(
+                uri.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped));
+            TableQuery<WebPageData> query = new TableQuery<WebPageData>()
+                .Where(TableQuery.CombineFilters(
+                    TableQuery.GenerateFilterCondition("PartitionKey",
+                                                       QueryComparisons.Equal, host),
+                    "and",
+                    TableQuery.GenerateFilterCondition("RowKey",
+                                                       QueryComparisons.Equal, encoded)));
+            
+            try
+            {
+                var result = GetTable("crawlerindex").ExecuteQuery(query);
+                if (result.Count() < 1)
+                    return null;
+                else
+                    return result.First().Title;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
         }
 
         [WebMethod]
@@ -56,7 +91,7 @@ namespace DashboardWebRole
             {
                 CloudQueue commands = GetQueue("commandqueue");
                 CloudQueueMessage msg = new CloudQueueMessage("pause");
-                commands.AddMessage(msg);
+                commands.AddMessage(msg, TimeSpan.FromSeconds(10));
             }
             catch (Exception e)
             {
@@ -79,15 +114,55 @@ namespace DashboardWebRole
                 return e.ToString();
             }
 
-            return "Url queue cleared.";
+            return DeleteTable("workerstatus", "Url queue cleared.");
         }
 
         [WebMethod]
         [ScriptMethod(UseHttpGet = true)]
-        public int IndexSize()
+        public string DeleteIndex()
         {
-            CloudTable index = GetTable("crawlerindex");
-            return 0;
+            return DeleteTable("crawlerindex", "Index deleted.");
+        }
+
+        [WebMethod]
+        [ScriptMethod(UseHttpGet = true)]
+        public string DeleteErrors()
+        {
+            return DeleteTable("workerstatus", "Errors deleted.");
+        }
+
+        [WebMethod]
+        [ScriptMethod(UseHttpGet = true, ResponseFormat = ResponseFormat.Json)]
+        public DashboardData GetDashboardData()
+        {
+            try
+            {
+                return BuildDashboardData();
+            }
+            catch (Exception) { }
+
+            return null;
+        }
+
+        private DashboardData BuildDashboardData()
+        {
+            DashboardData data = new DashboardData();
+            CloudQueue urlsQueue = GetQueue("urlqueue");
+            urlsQueue.FetchAttributes();
+            int? msgCount = urlsQueue.ApproximateMessageCount;
+            var msgs = urlsQueue.PeekMessages(10);
+
+            data.NumQueuedUrls = msgCount != null ? msgCount.Value : 0;
+            data.QueuedUrls =  msgs.Select(x => x.AsString).ToArray();
+
+            CloudTable crawlerStates = GetTable("workerstatus");
+            TableQuery<CrawlerStateInfo> states = new TableQuery<CrawlerStateInfo>();
+            states.Where(TableQuery.GenerateFilterCondition("PartitionKey", 
+                                                            QueryComparisons.Equal, 
+                                                            "CrawlerStateInfo"));
+            data.CrawlerStates = crawlerStates.ExecuteQuery(states).ToArray();
+
+            return data;
         }
 
         private CloudQueue GetQueue(string qref)
@@ -104,6 +179,41 @@ namespace DashboardWebRole
             CloudTable table = tableClient.GetTableReference(tableref);
             table.CreateIfNotExists();
             return table;
+        }
+
+        private string DeleteTable(string tableName, string msg)
+        {
+            try
+            {
+                GetTable(tableName).DeleteIfExists();
+            }
+            catch (Exception e)
+            {
+                return e.ToString();
+            }
+
+            return msg;
+        }
+
+        private Uri FixUrl(string url)
+        {
+            if (url == null)
+                return null;
+
+            if (!url.StartsWith("http:") && !url.StartsWith("https:"))
+                url = "http://" + url; 
+            Uri uri;
+            if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
+                return null;
+
+            return uri;
+        }
+
+        public class DashboardData
+        {
+            public int NumQueuedUrls { get; set; }
+            public string[] QueuedUrls { get; set; }
+            public CrawlerStateInfo[] CrawlerStates { get; set; }
         }
     }
 }

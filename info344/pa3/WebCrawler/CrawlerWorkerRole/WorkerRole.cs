@@ -18,10 +18,17 @@ namespace CrawlerWorkerRole
 {
     public class WorkerRole : RoleEntryPoint
     {
-        public const int SleepTimeMillis = 25;
+        public const int SleepTimeMillis = 100;
+
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private readonly ManualResetEvent runCompleteEvent = new ManualResetEvent(false);
+        
+        // Perf counters
+        private PerformanceCounter cpuUsage;
+        private PerformanceCounter ramUsage;
+        private PerformanceCounter ramAvailable;
 
+        // Cloud storage
         private CloudStorageAccount storageAccount;
 
         private CloudTable indexTable;
@@ -34,18 +41,19 @@ namespace CrawlerWorkerRole
         {
             Trace.TraceInformation("CrawlerWorkerRole is running");
             InitAzureStorage();
+            CancellationToken token = cancellationTokenSource.Token;
 
-            WebCrawler crawler = new WebCrawler("MyLittleCrawler", urlsQueue, indexTable);
-            crawler.InitializeCrawler("www.bleacherreport.com", "www.cnn.com");
-
+            WebCrawler crawler = new WebCrawler("MyLittleCrawler", urlsQueue, 
+                                                indexTable, statusTable);
+            crawler.InitializeCrawler("www.bleacherreport.com");
             string command = null;
-            while (command != "kill")
+            CrawlerStatus status = CrawlerStatus.Paused;
+            while (command != "kill" && !token.IsCancellationRequested)
             {
-                CloudQueueMessage msg = commandsQueue.GetMessage();
+                CloudQueueMessage msg = GetNextMessage();
                 if (msg != null)
                 {
                     commandsQueue.DeleteMessageAsync(msg);
-                 
                     // Process new command if different.
                     if (command != msg.AsString) 
                     {
@@ -54,10 +62,17 @@ namespace CrawlerWorkerRole
                     }
                 }
                 else if (command != null)
-                    ProcessCurrent(command, crawler);
+                {
+                    status = ProcessCurrent(command, crawler);
+                }
+
+                CrawlerStateInfo info = BuildCrawlerStateInfo(crawler, status);
+                PostCrawlerStateInfo(info);
 
                 Thread.Sleep(SleepTimeMillis);
             }
+
+            runCompleteEvent.Reset();
         }
 
         public override bool OnStart()
@@ -71,6 +86,11 @@ namespace CrawlerWorkerRole
             bool result = base.OnStart();
 
             Trace.TraceInformation("CrawlerWorkerRole has been started");
+
+            cpuUsage = new PerformanceCounter("Process", "% Processor Time", 
+                                              Process.GetCurrentProcess().ProcessName);
+            ramUsage = new PerformanceCounter("Memory", "% Committed Bytes In Use");
+            ramAvailable = new PerformanceCounter("Memory", "Available MBytes");
 
             return result;
         }
@@ -102,25 +122,52 @@ namespace CrawlerWorkerRole
             }
         }
 
-        private void ProcessCurrent(string lastCommand, WebCrawler crawler)
+        private CrawlerStatus ProcessCurrent(string lastCommand, WebCrawler crawler)
         {
-            bool idle = false;
+            CrawlerStatus status = CrawlerStatus.Idle;
             switch (lastCommand)
             {
                 case "crawl":
-                    idle = crawler.CrawlNext();
+                    if (crawler.IsLoading)
+                    {
+                        status = CrawlerStatus.Loading;
+                        crawler.CrawlNext();
+                    }
+                    else if (crawler.CrawlNext())
+                        status = CrawlerStatus.Crawling;
                     break;
                 case "pause":
-                    idle = true;
+                    status = CrawlerStatus.Paused;
                     break;
             }
+
+            return status;
+        }
+
+        private CrawlerStateInfo BuildCrawlerStateInfo(WebCrawler crawler, CrawlerStatus status)
+        {
+            CrawlerStateInfo stateInfo = new CrawlerStateInfo("crawler1", status);
+            stateInfo.ErrorCount = crawler.NumErrors;
+            stateInfo.LastTenUrls = String.Join(",", crawler.GetLastTen());
+            stateInfo.UrlsCrawled = crawler.NumUrlsCrawled;
+            stateInfo.UrlsIndexed = crawler.NumUrlsIndexed;
+            stateInfo.CpuUtilization = (int) cpuUsage.NextValue();
+            stateInfo.RamAvailable = (long)ramAvailable.NextValue();
+            stateInfo.RamUsed = (long)ramUsage.NextValue();
+
+            return stateInfo;
+        }
+
+        private void PostCrawlerStateInfo(CrawlerStateInfo info)
+        {
+            TableOperation insertOp = TableOperation.InsertOrMerge(info);
+            statusTable.ExecuteAsync(insertOp);
         }
 
         private void InitAzureStorage()
         {
             storageAccount = CloudStorageAccount.Parse(
-                ConfigurationManager.ConnectionStrings["CrawlerWorkerRole.Properties.Settings.StorageConnectionString"]
-                .ConnectionString);
+                RoleEnvironment.GetConfigurationSettingValue("StorageConnectionString"));
             CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
             commandsQueue = queueClient.GetQueueReference("commandqueue");
             commandsQueue.CreateIfNotExists();
@@ -128,10 +175,33 @@ namespace CrawlerWorkerRole
             urlsQueue.CreateIfNotExists();
 
             CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-            indexTable = tableClient.GetTableReference("crawlerindex");
-            indexTable.CreateIfNotExists();
-            statusTable = tableClient.GetTableReference("workerstatus");
-            statusTable.CreateIfNotExists();
+            while (true)
+            {
+                try
+                {
+                    indexTable = tableClient.GetTableReference("crawlerindex");
+                    indexTable.CreateIfNotExists();
+                    statusTable = tableClient.GetTableReference("workerstatus");
+                    statusTable.CreateIfNotExists();
+                    Thread.Sleep(1000);
+                    break;
+                }
+                catch (Exception e) { }
+            }
+        }
+
+        private CloudQueueMessage GetNextMessage()
+        {
+            try
+            {
+                CloudQueueMessage msg = commandsQueue.GetMessage();
+                return msg;
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError(e.ToString());
+                return null;
+            }
         }
     }
 }

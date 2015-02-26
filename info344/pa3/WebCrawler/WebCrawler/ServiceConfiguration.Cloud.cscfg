@@ -2,10 +2,14 @@
 <ServiceConfiguration serviceName="WebCrawler" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration" osFamily="4" osVersion="*" schemaVersion="2014-06.2.4">
   <Role name="DashboardWebRole">
     <Instances count="1" />
-    <ConfigurationSettings />
+    <ConfigurationSettings>
+      <Setting name="StorageConnectionString" value="DefaultEndpointsProtocol=https;AccountName=i344storage;AccountKey=Zd9kYPFSAXzBBFGZHTQQRcKm3cip4CrPN069ZlSUE/dOV6DHE4muQ+oAR/wpP/wL8lE7l8OdtbxEVeelFaQsyQ==" />
+    </ConfigurationSettings>
   </Role>
   <Role name="CrawlerWorkerRole">
     <Instances count="1" />
-    <ConfigurationSettings />
+    <ConfigurationSettings>
+      <Setting name="StorageConnectionString" value="DefaultEndpointsProtocol=https;AccountName=i344storage;AccountKey=Zd9kYPFSAXzBBFGZHTQQRcKm3cip4CrPN069ZlSUE/dOV6DHE4muQ+oAR/wpP/wL8lE7l8OdtbxEVeelFaQsyQ==" />
+    </ConfigurationSettings>
   </Role>
 </ServiceConfiguration>

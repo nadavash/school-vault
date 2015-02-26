@@ -9,17 +9,33 @@ namespace CrawlerLibrary
 {
     public enum CrawlerStatus
     {
-        Idle,
-        Loading,
-        Crawling
+        Paused = 0,
+        Idle = 1,
+        Loading = 2,
+        Crawling = 3
     }
 
-    class CrawlerStateInfo : TableEntity
+    public class CrawlerStateInfo : TableEntity
     {
-        public CrawlerStatus Status { get; set; }
-        public int EnqueuedUrls { get; set; }
+        public CrawlerStatus Status 
+        {
+            get
+            {
+                return (CrawlerStatus)CrawlerStatus;
+            }
+            set
+            {
+                CrawlerStatus = (int)value;
+            }
+        }
+
+        public int CrawlerStatus { get; set; }
+        public int UrlsIndexed { get; set; }
+        public int UrlsCrawled { get; set; }
+        public string LastTenUrls { get; set; }
         public int ErrorCount { get; set; }
-        public short CpuUtilization { get; set; }
+        public int CpuUtilization { get; set; }
+        public long RamUsed { get; set; }
         public long RamAvailable { get; set; }
 
         public CrawlerStateInfo(string name, CrawlerStatus status)

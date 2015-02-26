@@ -24,21 +24,35 @@ namespace CrawlerLibrary
         private Dictionary<string, RobotsParser> robots;
         private CloudQueue urlsQueue;
         private CloudTable indexTable;
-        private HashSet<string> urlsFound;
+        private CloudTable errorTable;
 
-        private long numUrlsCrawled;
+        private HashSet<string> urlsFound;
+        private Queue<string> lastTen;
+
         private bool stopLoading = false;
 
+        public bool IsRunning
+        {
+            get
+            {
+                return stopLoading;
+            }
+        }
         public bool IsLoading { get; private set; }
+        public int NumUrlsIndexed { get; private set; }
+        public int NumUrlsCrawled { get; private set; }
+        public int NumErrors { get; set; }
 
         public WebCrawler(string userAgent, CloudQueue queue,
-                          CloudTable table)
+                          CloudTable table, CloudTable errorTable)
         {
             this.userAgent = userAgent;
             robots = new Dictionary<string, RobotsParser>();
             urlsQueue = queue;
             indexTable = table;
+            this.errorTable = errorTable;
             urlsFound = new HashSet<string>();
+            lastTen = new Queue<string>(10);
             IsLoading = false;
         }
 
@@ -82,6 +96,8 @@ namespace CrawlerLibrary
                 {
                     foreach (var sitemap in website.Value.SiteMaps)
                     {
+                        if (stopLoading)
+                            break;
                         ParseSitemap(sitemap);
                     }
                 }
@@ -93,9 +109,20 @@ namespace CrawlerLibrary
         {
             urlsQueue.Clear();
             urlsFound.Clear();
+            lastTen.Clear();
             stopLoading = false;
-            numUrlsCrawled = 0;
+            NumUrlsIndexed = 0;
+            NumUrlsCrawled = 0;
+            NumErrors = 0;
             IsLoading = false;
+        }
+
+        public string[] GetLastTen()
+        {
+            lock (lastTen)
+            {
+                return lastTen.ToArray();
+            }
         }
 
         public void StopLoading()
@@ -119,39 +146,45 @@ namespace CrawlerLibrary
 
         private void ParsePageCallback(object context)
         {
+            ++NumUrlsCrawled;
             string pageUrl = context.ToString();
-            using (Stream htmlStream = GetStreamFromUrl(pageUrl))
+            HtmlDocument doc = GetLoadedDoc(pageUrl);
+            if (doc == null || stopLoading)
+                return;
+            Trace.TraceInformation("Parsing '{0}'.", pageUrl);
+
+                
+            var title = doc.DocumentNode.SelectSingleNode("//title");
+            if (title == null)
+                title = doc.DocumentNode.SelectSingleNode("//h1");
+            var date = doc.DocumentNode.SelectSingleNode("//meta[@itemprop='datePublished']");
+
+            if (title == null || string.IsNullOrEmpty(title.InnerText))
+                Trace.TraceInformation("Page title not found for '{0}'.", pageUrl);
+            else
             {
-                if (htmlStream == null || stopLoading)
+                if (stopLoading)
                     return;
-                Trace.TraceInformation("Parsing '{0}'.", pageUrl);
 
-                HtmlDocument doc = new HtmlDocument();
-                doc.Load(htmlStream);
-                var title = doc.DocumentNode.SelectSingleNode("//title");
-                if (title == null)
-                    title = doc.DocumentNode.SelectSingleNode("//h1");
+                WebPageData pageData = new WebPageData(pageUrl, title.InnerText);
+                if (date != null)
+                    pageData.DateCreated = date.GetAttributeValue("content", null);
 
-                if (title == null || string.IsNullOrEmpty(title.InnerText))
-                    Trace.TraceInformation("Page title not found for '{0}'.", pageUrl);
-                else
+                TableOperation insertOp = TableOperation.InsertOrReplace(pageData);
+                indexTable.ExecuteAsync(insertOp);
+                AddToLastTen(pageUrl);
+                NumUrlsIndexed++;
+            }
+
+            var links = doc.DocumentNode.SelectNodes("//a");
+            if (links != null)
+            {
+                foreach (var linkTag in links)
                 {
                     if (stopLoading)
                         return;
-                    WebPageData pageData = new WebPageData(pageUrl, title.InnerText);
-                    TableOperation insertOp = TableOperation.InsertOrReplace(pageData);
-                    indexTable.ExecuteAsync(insertOp);
-                }
-
-                var links = doc.DocumentNode.SelectNodes("//a");
-                if (links != null)
-                {
-                    foreach (var linkTag in links)
-                    {
-                        if (stopLoading)
-                            return;
-                        EnqueueUrlIfValid(linkTag.GetAttributeValue("href", ""));
-                    }
+                    EnqueueUrlIfValid(linkTag.GetAttributeValue("href", ""),
+                                      WebPageData.GetSimpleHost(pageUrl));
                 }
             }
         }
@@ -166,12 +199,17 @@ namespace CrawlerLibrary
                 string current = urls.Dequeue();
                 using (Stream xmlStream = GetStreamFromUrl(current))
                 {
+                    if (xmlStream == null)
+                        continue;
+
                     XmlDocument doc = new XmlDocument();
                     doc.Load(xmlStream);
                     if (doc.GetElementsByTagName("urlset").Count > 0)
                     {
                         foreach (XmlNode urlNode in doc.GetElementsByTagName("loc"))
                         {
+                            if (stopLoading)
+                                break;
                             EnqueueUrlIfValid(urlNode.InnerText);
                             Thread.Sleep(50);
                         }
@@ -181,6 +219,8 @@ namespace CrawlerLibrary
                         string txt;
                         foreach (XmlNode urlNode in doc.GetElementsByTagName("loc"))
                         {
+                            if (stopLoading)
+                                break;
                             // TODO: Check date within last 2 months
                             txt = urlNode.InnerText;
                             if (txt.Contains("2015"))
@@ -196,11 +236,22 @@ namespace CrawlerLibrary
             }
         }
 
+        private void EnqueueUrlIfValid(string url, string host)
+        {
+            Uri hostUri;
+            Uri uri;
+            if (Uri.TryCreate("http://" + host, UriKind.Absolute, out hostUri) &&
+                Uri.TryCreate(hostUri, url, out uri))
+                EnqueueUrlIfValid(uri.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped));
+            else
+                EnqueueUrlIfValid(url);
+        }
+
         private void EnqueueUrlIfValid(string url)
         {
             url = FixUrl(url);
             Uri uri;
-            if (!Uri.TryCreate(url, UriKind.Absolute, out uri) || !IsValidUrl(uri))
+            if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
                 return;
 
             url = uri.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
@@ -266,14 +317,44 @@ namespace CrawlerLibrary
             {
                 url = FixUrl(url);
                 HttpWebRequest request = WebRequest.CreateHttp(url);
+                request.Timeout = 10000;
                 request.UserAgent = userAgent;
                 return request.GetResponse().GetResponseStream();
             }
             catch (WebException webExp)
             {
                 Trace.TraceError("{0} - {1}: {2}", url, webExp.Status, webExp.Message);
+                ++NumErrors;
+                
+                CrawlerError error = new CrawlerError("crawler1", url);
+                error.Status = webExp.Status.ToString();
+                error.Message = webExp.Message;
+                TableOperation insertOp = TableOperation.InsertOrMerge(error);
+                errorTable.ExecuteAsync(insertOp);
+
                 return null;
             }
+        }
+
+        private HtmlDocument GetLoadedDoc(string url)
+        {
+            try
+            {
+                using (Stream stream = GetStreamFromUrl(url))
+                {
+                    if (stream != null)
+                    {
+                        HtmlDocument doc = new HtmlDocument();
+                        doc.Load(stream);
+                        return doc;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError("Failed to load html document for {0}, {1}", url, e.ToString());
+            }
+            return null;
         }
 
         private string FixUrl(string url)
@@ -284,6 +365,16 @@ namespace CrawlerLibrary
             }
 
             return "http://" + url;
+        }
+
+        private void AddToLastTen(string url)
+        {
+            lock (lastTen)
+            {
+                if (lastTen.Count >= 10)
+                    lastTen.Dequeue();
+                lastTen.Enqueue(url);
+            }
         }
     }
 }

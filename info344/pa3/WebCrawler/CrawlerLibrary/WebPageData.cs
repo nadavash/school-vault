@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CrawlerLibrary
 {
-    class WebPageData : TableEntity
+    public class WebPageData : TableEntity
     {
         public static string GetSimpleHost(string url)
         {
@@ -25,6 +25,7 @@ namespace CrawlerLibrary
             }
         }
         public string Title { get; set; }
+        public string DateCreated { get; set; }
 
         public WebPageData(string url, string title)
         {

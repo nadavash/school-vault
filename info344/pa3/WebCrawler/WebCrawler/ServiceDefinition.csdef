@@ -11,6 +11,15 @@
     <Endpoints>
       <InputEndpoint name="Endpoint1" protocol="http" port="80" />
     </Endpoints>
+    <ConfigurationSettings>
+      <Setting name="StorageConnectionString" />
+    </ConfigurationSettings>
+    <LocalResources>
+    </LocalResources>
   </WebRole>
-  <WorkerRole name="CrawlerWorkerRole" vmsize="Small" />
+  <WorkerRole name="CrawlerWorkerRole" vmsize="Small">
+    <ConfigurationSettings>
+      <Setting name="StorageConnectionString" />
+    </ConfigurationSettings>
+  </WorkerRole>
 </ServiceDefinition>

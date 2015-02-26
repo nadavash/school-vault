@@ -22,25 +22,5 @@ namespace CrawlerWorkerRole.Properties {
                 return defaultInstance;
             }
         }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
-        [global::System.Configuration.DefaultSettingValueAttribute("DefaultEndpointsProtocol=https;AccountName=i344storage;AccountKey=Zd9kYPFSAXzBBFG" +
-            "ZHTQQRcKm3cip4CrPN069ZlSUE/dOV6DHE4muQ+oAR/wpP/wL8lE7l8OdtbxEVeelFaQsyQ==")]
-        public string StorageConnectionString {
-            get {
-                return ((string)(this["StorageConnectionString"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("commandsqueue")]
-        public string CommandsQueue {
-            get {
-                return ((string)(this["CommandsQueue"]));
-            }
-        }
     }
 }
