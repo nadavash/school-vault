@@ -1,0 +1,10 @@
+Nadav Ashkenazi
+CSE 333
+Exercise 13a
+
+Valgrind only complains on the first run for input of 100. My guess is that
+since we are only off by 1 byte from the buffer in the first case, we will
+try to read memory that is outside of the buffer that is used for malloc's
+tail. This would be memory that valgrind will proclaim as invalid for reading.
+However, when we use an input of 500 we will actually start looking at memory
+from the 1000b buffer, which will be considered as a valid region by valgrind.
