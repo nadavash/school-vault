@@ -124,18 +124,18 @@ HWSize_t WriteIndex(MemIndex mi, DocTable dt, const char *filename) {
   filesize += dtres;
 
   // write the memindex using WriteMemIndex().
-  mires = WriteMemIndex(f, mi, (IndexFileOffset_t) filesize);
+  mires = WriteMemIndex(f, mi, sizeof(IndexFileHeader) + dtres);
   if (mires == 0) {
     return 0;
   }
   filesize += mires;
 
   // write the header using WriteHeader().
-  mires = WriteHeader(f, DTNumDocsInDocTable(dt), MINumWordsInMemIndex(mi));
-  if (mires == 0) {
+  HWSize_t hres = WriteHeader(f, dtres, mires);
+  if (hres == 0) {
     return 0;
   }
-  filesize += mires;
+  filesize += hres;
 
   // Clean up and return the total amount written.
   fclose(f);
@@ -370,9 +370,7 @@ static HWSize_t WriteBucketRecord(FILE *f,
   // Use NumElementsInLinkedList() to figure out how many chained
   // elements are in this bucket.  Put bucket_rec in network
   // byte order.
-  bucket_rec br;
-  br.chain_len = NumElementsInLinkedList(li);
-  br.bucket_position = b_offset;
+  bucket_rec br = { NumElementsInLinkedList(li), b_offset };
   br.toDiskFormat();
 
   // fseek() to the "bucket_rec" record for this bucket.
@@ -382,7 +380,7 @@ static HWSize_t WriteBucketRecord(FILE *f,
 
   // Write the bucket_rec.
   res = fwrite(&br, sizeof(bucket_rec), 1, f);
-  if (res < sizeof(bucket_rec)) {
+  if (res != 1) {
     return 0;
   }
 
@@ -420,14 +418,13 @@ static HWSize_t WriteBucket(FILE *f,
       HTKeyValue *kv;
 
       // Make the element position object.
-      element_position_rec pos;
-      pos.element_position = nextelpos;
-      pos.toDiskFormat();
-
       res = fseek(f, offset + j, SEEK_SET);
       if (res != 0) {
         return 0;
       }
+
+      element_position_rec pos = { nextelpos };
+      pos.toDiskFormat();
 
       res = fwrite(&pos, sizeof(element_position_rec), 1, f);
       if (res != 1) {
