@@ -227,12 +227,12 @@ static HWSize_t WriteDocPositionListFn(FILE *f,
   Verify333(it != nullptr);
   for (i = 0; i < num_pos_ho; i++) {
     // Get the next position from the list.
-    LLPayload_t pos;
-    LLIteratorGetPayload(it, &pos);
-    uint64_t p = (uint64_t) pos;
+    LLPayload_t payload;
+    LLIteratorGetPayload(it, &payload);
+    uint64_t pos = (uint64_t) payload;
 
     // Truncate to 32 bits, then convert it to network order and write it out.
-    position.position = (DocPositionOffset_t) p;
+    position.position = (DocPositionOffset_t) pos;
     position.toDiskFormat();
 
     res = fwrite(&position, sizeof(position), 1, f);
