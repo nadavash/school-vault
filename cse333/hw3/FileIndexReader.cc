@@ -45,12 +45,11 @@ FileIndexReader::FileIndexReader(std::string filename,
 
 
   // Read the entire file header and convert to host format.
-  IndexFileHeader header;
-  Verify333(fread(&header, sizeof(header), 1, file_) == 1);
-  header.toHostFormat();
+  Verify333(fread(&header_, sizeof(header_), 1, file_) == 1);
+  header_.toHostFormat();
 
   // Verify that the magic number is correct.  Crash if not.
-  Verify333(header.magic_number == MAGIC_NUMBER);
+  Verify333(header_.magic_number == MAGIC_NUMBER);
 
 
   // Make sure the index file's length lines up with the header fields.
@@ -76,6 +75,8 @@ FileIndexReader::FileIndexReader(std::string filename,
       for (int i = 0; i < read; ++i) {
         crcobj.FoldByteIntoCRC(buf[i]);
       }
+
+      left_to_read -= read;
     }
     Verify333(crcobj.GetFinalCRC() == header_.checksum);
   }

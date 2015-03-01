@@ -72,12 +72,83 @@ QueryProcessor::ProcessQuery(const vector<string> &query) {
   Verify333(query.size() > 0);
   vector<QueryProcessor::QueryResult> finalresult;
 
-  // MISSING:
+  list<DocIDResult> tempResults;
+  std::unique_ptr<DocIDTableReader> reader(ProcessQueryPart(query[0]));
+  if (reader == nullptr) {
+    return finalresult;
+  }
+  PopulateResults(*reader, &tempResults);
 
+  for (auto iter = ++query.begin(); iter != query.end(); ++iter) {
+    std::unique_ptr<DocIDTableReader> currReader(ProcessQueryPart(*iter));
+    if (currReader == nullptr) {
+      return finalresult;
+    }
+
+    CrossReferenceResults(*currReader, &tempResults);
+    if (tempResults.empty()) {
+      return finalresult;
+    }
+  }
+
+  for (const auto& queryRes : tempResults) {
+    QueryResult result;
+    result.rank = queryRes.rank;
+    if (GetDocName(queryRes.docid, &result.document_name)) {
+      finalresult.push_back(result);
+    }
+  }
 
   // Sort the final results.
   std::sort(finalresult.begin(), finalresult.end());
   return finalresult;
+}
+
+DocIDTableReader* QueryProcessor::ProcessQueryPart(const string& str) {
+  for (int i = 0; i < arraylen_; ++i) {
+    std::unique_ptr<DocIDTableReader> reader(itr_array_[i]->LookupWord(str));
+    if (reader != nullptr) {
+      return reader.release();
+    }
+  }
+  return nullptr;
+}
+
+// A private helper to com
+void QueryProcessor::PopulateResults(DocIDTableReader& reader,
+                                     list<DocIDResult>* results) {
+  for (auto docid : reader.GetDocIDList()) {
+    list<DocPositionOffset_t> occurences;
+    if (!reader.LookupDocID(docid.docid, &occurences))
+      continue;
+
+    DocIDResult result;
+    result.docid = docid.docid;
+    result.rank = occurences.size();
+    results->push_back(result);
+  }
+}
+
+bool QueryProcessor::GetDocName(const DocID_t& docid, string* name) {
+  for (int i = 0; i < arraylen_; ++i) {
+    if (dtr_array_[i]->LookupDocID(docid, name)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+void QueryProcessor::CrossReferenceResults(DocIDTableReader& reader,
+                                           list<DocIDResult>* final) {
+  for (auto iter = final->begin(); iter != final->end(); iter++) {
+    list<DocPositionOffset_t> occurences;
+    if (reader.LookupDocID(iter->docid, &occurences)) {
+      iter->rank += occurences.size();
+    } else {
+      iter = final->erase(iter);
+    }
+  }
 }
 
 }  // namespace hw3

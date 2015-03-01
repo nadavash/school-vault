@@ -31,7 +31,7 @@ HashTableReader::HashTableReader(FILE *f, IndexFileOffset_t offset)
   : file_(f), offset_(offset) {
   // fread() the bucket list header in this hashtable from its
   // "num_buckets" field, and convert to host byte order.
-
+  Verify333(fseek(file_, offset_, SEEK_SET) == 0);
   Verify333(fread(&header_, sizeof(header_), 1, file_) == 1);
   header_.toHostFormat();
 }
