@@ -168,8 +168,8 @@ static HWSize_t WriteDocidDocnameFn(FILE *f,
 
   // fwrite() the filename.  We don't write the null-terminator from
   // the string, just the characters.
-  res = fwrite(kv->value, slen_ho, 1, f);
-  if (res != 1) {
+  res = fwrite(kv->value, sizeof(char), slen_ho, f);
+  if (res != slen_ho) {
     return 0;
   }
 
@@ -202,7 +202,7 @@ static HWSize_t WriteDocPositionListFn(FILE *f,
 
   // Extract the positions LinkedList from the HTKeyValue and
   // determine its size.
-  LinkedList positions = (LinkedList)kv->value;
+  LinkedList positions = static_cast<LinkedList>(kv->value);
   HWSize_t num_pos_ho = NumElementsInLinkedList(positions);
 
   // Write the header, in disk format.
@@ -247,7 +247,7 @@ static HWSize_t WriteDocPositionListFn(FILE *f,
 
   // Calculate and return the total amount of data written.
   // MISSING (fix this return value):
-  return sizeof(position) * i + sizeof(header);
+  return sizeof(header) + sizeof(position) * num_pos_ho;
 }
 
 // This write_element_fn is used to write a WordDocSet
@@ -298,7 +298,7 @@ static HWSize_t WriteWordDocSetFn(FILE *f,
 
 
   // Calculate and return the total amount of data written.
-  return sizeof(header) + wordlen_ho;
+  return sizeof(header) + wordlen_ho + htlen_ho;
 }
 
 static HWSize_t WriteMemIndex(FILE *f, MemIndex mi, IndexFileOffset_t offset) {
@@ -418,13 +418,13 @@ static HWSize_t WriteBucket(FILE *f,
       HTKeyValue *kv;
 
       // Make the element position object.
-      res = fseek(f, offset + j, SEEK_SET);
+      element_position_rec pos = { nextelpos };
+      pos.toDiskFormat();
+
+      res = fseek(f, offset + j * sizeof(pos), SEEK_SET);
       if (res != 0) {
         return 0;
       }
-
-      element_position_rec pos = { nextelpos };
-      pos.toDiskFormat();
 
       res = fwrite(&pos, sizeof(element_position_rec), 1, f);
       if (res != 1) {
@@ -506,7 +506,7 @@ static HWSize_t WriteHashTable(FILE *f,
       next_bucket_offset += res;
     }
 
-    next_bucket_rec_offset += sizeof(BucketListHeader);
+    next_bucket_rec_offset += sizeof(bucket_rec);
   }
 
   // Calculate and return the total number of bytes written.
