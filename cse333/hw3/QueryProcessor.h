@@ -95,12 +95,12 @@ class QueryProcessor {
                     list<QueryProcessor::QueryResult>* results);
 
   // A private helper to populate results from the given DocIDTableReaders.
-  void PopulateResults(DocIDTableReader& reader, HWSize_t index,
+  void PopulateResults(DocIDTableReader* reader, HWSize_t index,
                        list<DocIDResult>* results);
 
   // A private helper to cross reference between two query results list and
   // ensure only results from both stay.
-  void CrossReferenceResults(DocIDTableReader& reader,
+  void CrossReferenceResults(DocIDTableReader* reader,
                              list<DocIDResult>* final);
 
   // Converts a list of DocIDResult objects to QueryResust objects and puts them

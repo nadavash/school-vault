@@ -96,7 +96,7 @@ void QueryProcessor::ProcessQuery(const vector<string>& query, HWSize_t index,
   std::unique_ptr<DocIDTableReader> reader(
       itr_array_[index]->LookupWord(query[0]));
   if (reader != nullptr) {
-    PopulateResults(*reader, index, &tempResults);
+    PopulateResults(reader.get(), index, &tempResults);
   } else {
     return;
   }
@@ -108,7 +108,7 @@ void QueryProcessor::ProcessQuery(const vector<string>& query, HWSize_t index,
       return;
     }
 
-    CrossReferenceResults(*currReader, &tempResults);
+    CrossReferenceResults(currReader.get(), &tempResults);
     if (tempResults.empty()) {
       return;
     }
@@ -117,11 +117,11 @@ void QueryProcessor::ProcessQuery(const vector<string>& query, HWSize_t index,
   ConvertToQueryResults(tempResults, index, results);
 }
 
-void QueryProcessor::PopulateResults(DocIDTableReader& reader, HWSize_t index,
+void QueryProcessor::PopulateResults(DocIDTableReader* reader, HWSize_t index,
     list<DocIDResult>* results) {
-  for (const auto& docid : reader.GetDocIDList()) {
+  for (const auto& docid : reader->GetDocIDList()) {
     list<DocPositionOffset_t> occurences;
-    if (reader.LookupDocID(docid.docid, &occurences)) {
+    if (reader->LookupDocID(docid.docid, &occurences)) {
       DocIDResult result;
       result.docid = docid.docid;
       result.rank = occurences.size();
@@ -130,11 +130,11 @@ void QueryProcessor::PopulateResults(DocIDTableReader& reader, HWSize_t index,
   }
 }
 
-void QueryProcessor::CrossReferenceResults(DocIDTableReader& reader,
+void QueryProcessor::CrossReferenceResults(DocIDTableReader* reader,
     list<DocIDResult>* final) {
   for (auto iter = final->begin(); iter != final->end();) {
     list<DocPositionOffset_t> occurences;
-    if (reader.LookupDocID(iter->docid, &occurences)) {
+    if (reader->LookupDocID(iter->docid, &occurences)) {
       iter->rank += occurences.size();
       ++iter;
     } else {
