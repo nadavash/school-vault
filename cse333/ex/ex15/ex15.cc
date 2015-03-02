@@ -41,32 +41,33 @@ int main(int argc, char** argv) {
   // Prepare local file
   int fd = open(argv[3], O_RDONLY);
   if (fd == -1) {
-    std::cerr << "Failed to open file '" << argv[3] << "'";
+    std::cerr << "Failed to open file '" << argv[3] << "'" << std::endl;
     return EXIT_FAILURE;
   }
 
   // Prepare socket
-  struct addrinfo* ai;
+  struct addrinfo* ai, * p;
   struct addrinfo hints = {0};
   hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
   int res = getaddrinfo(argv[1], argv[2], &hints, &ai);
   if (res) {
-    std::cerr << "Failed to get addr info: " << res;
+    std::cerr << "Failed to get addr info: " << res << std::endl;
     return EXIT_FAILURE;
   }
 
   // Make socket and connect
   int soc = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
   if (soc < 0) {
-    std::cerr << "Failed to open socket: " << soc;
+    std::cerr << "Failed to open socket: " << soc << std::endl;
     return EXIT_FAILURE;
   }
 
-  if (connect(soc, ai->ai_addr, ai->ai_addrlen) == 0) {
-
-  } else {
-    std::cerr << "Faild to connect to server.";
+  for (p = ai; p; p = p->ai_next) {
+    if (connect(soc, ai->ai_addr, ai->ai_addrlen) == 0) {
+      WriteOut(soc, fd);
+      break;
+    }
   }
 
   freeaddrinfo(ai);
