@@ -89,8 +89,8 @@ class QueryProcessor {
     HWSize_t  rank;   // The rank of the matching document.
   };
 
-  // A private helper to get DocIDTableReaders from the indices for the given
-  // string.
+  // A private helper to process the given query for one index in the
+  // QueryProcessor.
   void ProcessQuery(const vector<string>& query, HWSize_t index,
                     list<QueryProcessor::QueryResult>* results);
 
@@ -103,6 +103,8 @@ class QueryProcessor {
   void CrossReferenceResults(DocIDTableReader& reader,
                              list<DocIDResult>* final);
 
+  // Converts a list of DocIDResult objects to QueryResust objects and puts them
+  // in the provided vector.
   void ConvertToQueryResults(const list<DocIDResult>& idResults, HWSize_t index,
                              list<QueryProcessor::QueryResult>* queryResults);
 

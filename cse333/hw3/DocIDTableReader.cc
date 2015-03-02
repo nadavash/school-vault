@@ -61,20 +61,14 @@ bool DocIDTableReader::LookupDocID(const DocID_t &docid,
       // order, adding to the end of the list as you extract
       // successive positions.
 
-      std::list<DocPositionOffset_t> results;
       for (int i = 0; i < header.num_positions; ++i) {
         docid_element_position position;
         Verify333(fread(&position, sizeof(position), 1, file_) == 1);
-        results.push_back(position.position);
+        ret_list->push_back(position.position);
       }
-
-
 
       // Return the positions list through the output parameter,
       // and return true.
-
-      *ret_list = results;
-
 
       return true;
     }

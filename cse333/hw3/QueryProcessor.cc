@@ -102,20 +102,22 @@ void QueryProcessor::ProcessQuery(const vector<string>& query, HWSize_t index,
   }
 
   for (auto iter = ++query.begin(); iter != query.end(); ++iter) {
+    std::cout << *iter << std::endl;
     std::unique_ptr<DocIDTableReader> currReader(
         itr_array_[index]->LookupWord(*iter));
     if (reader == nullptr) {
-      results->clear();
       return;
     }
 
     CrossReferenceResults(*currReader, &tempResults);
+    if (tempResults.empty()) {
+      return;
+    }
   }
 
   ConvertToQueryResults(tempResults, index, results);
 }
 
-// A private helper to com
 void QueryProcessor::PopulateResults(DocIDTableReader& reader, HWSize_t index,
     list<DocIDResult>* results) {
   for (const auto& docid : reader.GetDocIDList()) {
@@ -131,12 +133,13 @@ void QueryProcessor::PopulateResults(DocIDTableReader& reader, HWSize_t index,
 
 void QueryProcessor::CrossReferenceResults(DocIDTableReader& reader,
     list<DocIDResult>* final) {
-  for (auto iter = final->begin(); iter != final->end(); iter++) {
+  for (auto iter = final->begin(); iter != final->end();) {
     list<DocPositionOffset_t> occurences;
     if (reader.LookupDocID(iter->docid, &occurences)) {
       iter->rank += occurences.size();
+      ++iter;
     } else {
-      iter = --final->erase(iter);
+      iter = final->erase(iter);
     }
   }
 }

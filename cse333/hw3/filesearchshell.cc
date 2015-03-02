@@ -18,9 +18,13 @@
  *  along with 333proj.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <memory>
+#include <sstream>
+#include <string>
 
 #include "./QueryProcessor.h"
 
@@ -85,11 +89,79 @@ static void Usage(char *progname) {
 // a stringstream gets the job done too.)
 //
 // Good luck, and write beautiful code!
+
+// Takes in the program parameters and makes a QueryProcessor object using the
+// given indices. Returns nullptr on failure.
+hw3::QueryProcessor* GetQueryProcessor(int argc, char** argv);
+
+// A helper function to split the given string str by spaces into a vector of
+// string parts.
+std::vector<string>* SplitInputString(string& str);
+
+// A helper function to print the results vector to std::cout.
+void PrintResults(vector<hw3::QueryProcessor::QueryResult>& results);
+
+
 int main(int argc, char **argv) {
   if (argc < 2) Usage(argv[0]);
 
+  std::unique_ptr<hw3::QueryProcessor> queryProcessor(
+      GetQueryProcessor(argc, argv));
+
+  if (queryProcessor == nullptr) {
+    return EXIT_FAILURE;
+  }
+
+  string query;
   while (1) {
+    std::cout << "Enter query:" << std::endl;
+
+    if (!std::getline(std::cin, query)) {
+      break;
+    }
+
+    std::transform(query.begin(), query.end(), query.begin(), ::tolower);
+    std::unique_ptr<vector<string>> queryParts(SplitInputString(query));
+
+    if (queryParts != nullptr) {
+      vector<hw3::QueryProcessor::QueryResult> results =
+          queryProcessor->ProcessQuery(*queryParts);
+
+      PrintResults(results);
+    }
   }
 
   return EXIT_SUCCESS;
+}
+
+hw3::QueryProcessor* GetQueryProcessor(int argc, char** argv) {
+  list<string> params;
+  for (int i = 1; i < argc; ++i) {
+    params.push_back(string(argv[i]));
+  }
+
+  return new hw3::QueryProcessor(params);
+}
+
+vector<string>* SplitInputString(string& str) {
+  std::unique_ptr<vector<string>> parts(new vector<string>());
+  std::istringstream iss(str);
+  string part;
+
+  while (iss >> part) {
+    parts->push_back(part);
+  }
+
+  if (parts->empty()) {
+    return nullptr;
+  }
+
+  return parts.release();
+}
+
+void PrintResults(vector<hw3::QueryProcessor::QueryResult>& results) {
+  for (const auto& result : results) {
+    std::cout << "  " << result.document_name << " (" << result.rank << ")"
+              << std::endl;
+  }
 }
