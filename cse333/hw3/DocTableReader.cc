@@ -62,7 +62,7 @@ bool DocTableReader::LookupDocID(const DocID_t &docid,
       // Yes!  Extract the filename, using a stringstream and its "<<"
       // operator, fread()'ing a character at a time.
       std::stringstream ss;
-      for (int i = 0; i < header.filename_len; i++) {
+      for (HWSize_t i = 0; i < header.filename_len; i++) {
         uint8_t nextc;
 
         Verify333(fread(&nextc, 1, 1, file_) == 1);

@@ -72,7 +72,7 @@ FileIndexReader::FileIndexReader(std::string filename,
       HWSize_t read = sizeof(buf) < left_to_read ? sizeof(buf) : left_to_read;
       Verify333(fread(&buf, sizeof(*buf), read, file_) == read);
 
-      for (int i = 0; i < read; ++i) {
+      for (HWSize_t i = 0; i < read; ++i) {
         crcobj.FoldByteIntoCRC(buf[i]);
       }
 
