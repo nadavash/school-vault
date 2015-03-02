@@ -64,7 +64,8 @@ int main(int argc, char** argv) {
   }
 
   for (p = ai; p; p = p->ai_next) {
-    if (connect(soc, ai->ai_addr, ai->ai_addrlen) == 0) {
+    if (connect(soc, p->ai_addr, p->ai_addrlen) == 0) {
+      std::cout << "Sending file to server." << std::endl;
       WriteOut(soc, fd);
       break;
     }
