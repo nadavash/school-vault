@@ -96,10 +96,10 @@ hw3::QueryProcessor* GetQueryProcessor(int argc, char** argv);
 
 // A helper function to split the given string str by spaces into a vector of
 // string parts.
-std::vector<string>* SplitInputString(string& str);
+std::vector<string>* SplitInputString(const string& str);
 
 // A helper function to print the results vector to std::cout.
-void PrintResults(vector<hw3::QueryProcessor::QueryResult>& results);
+void PrintResults(const vector<hw3::QueryProcessor::QueryResult>& results);
 
 
 int main(int argc, char **argv) {
@@ -143,7 +143,7 @@ hw3::QueryProcessor* GetQueryProcessor(int argc, char** argv) {
   return new hw3::QueryProcessor(params);
 }
 
-vector<string>* SplitInputString(string& str) {
+vector<string>* SplitInputString(const string& str) {
   std::unique_ptr<vector<string>> parts(new vector<string>());
   std::istringstream iss(str);
   string part;
@@ -159,7 +159,7 @@ vector<string>* SplitInputString(string& str) {
   return parts.release();
 }
 
-void PrintResults(vector<hw3::QueryProcessor::QueryResult>& results) {
+void PrintResults(const vector<hw3::QueryProcessor::QueryResult>& results) {
   for (const auto& result : results) {
     std::cout << "  " << result.document_name << " (" << result.rank << ")"
               << std::endl;

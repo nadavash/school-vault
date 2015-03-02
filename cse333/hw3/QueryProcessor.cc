@@ -102,10 +102,9 @@ void QueryProcessor::ProcessQuery(const vector<string>& query, HWSize_t index,
   }
 
   for (auto iter = ++query.begin(); iter != query.end(); ++iter) {
-    std::cout << *iter << std::endl;
     std::unique_ptr<DocIDTableReader> currReader(
         itr_array_[index]->LookupWord(*iter));
-    if (reader == nullptr) {
+    if (currReader == nullptr) {
       return;
     }
 
