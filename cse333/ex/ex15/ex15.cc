@@ -24,7 +24,7 @@ void WriteOut(int outFd, int inFd) {
   while (true) {
     ssize_t res = sendfile(outFd, inFd, &offset, 1);
     if (res == 0) {
-      return
+      return;
     }
     if (res == -1) {
       if (errno == EAGAIN || errno == EINTR) continue;
@@ -57,13 +57,13 @@ int main(int argc, char** argv) {
   }
 
   // Make socket and connect
-  int soc = socket(a->ai_family, p->ai_socktype, p->ai_protocol);
+  int soc = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
   if (soc < 0) {
     std::cerr << "Failed to open socket: " << soc;
     return EXIT_FAILURE;
   }
 
-  if (connect(soc, a->ai_addr, a->ai_addrlen) == 0) {
+  if (connect(soc, ai->ai_addr, ai->ai_addrlen) == 0) {
 
   } else {
     std::cerr << "Faild to connect to server.";
