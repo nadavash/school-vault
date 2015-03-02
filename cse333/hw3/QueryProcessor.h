@@ -85,25 +85,26 @@ class QueryProcessor {
  private:
   class DocIDResult {
    public:
-    DocID_t   docid;
-    HWSize_t  rank;
+    DocID_t   docid;  // The name of a matching document.
+    HWSize_t  rank;   // The rank of the matching document.
   };
 
   // A private helper to get DocIDTableReaders from the indices for the given
   // string.
-  DocIDTableReader* ProcessQueryPart(const string& str);
+  void ProcessQuery(const vector<string>& query, HWSize_t index,
+                    list<QueryProcessor::QueryResult>* results);
 
   // A private helper to populate results from the given DocIDTableReaders.
-  void PopulateResults(DocIDTableReader& reader,
-                       list<DocIDResult>* finalResult);
-
-  // A private helper to get the name of the file for the given DocID.
-  bool GetDocName(const DocID_t& docid, string* str);
+  void PopulateResults(DocIDTableReader& reader, HWSize_t index,
+                       list<DocIDResult>* results);
 
   // A private helper to cross reference between two query results list and
   // ensure only results from both stay.
   void CrossReferenceResults(DocIDTableReader& reader,
                              list<DocIDResult>* final);
+
+  void ConvertToQueryResults(const list<DocIDResult>& idResults, HWSize_t index,
+                             list<QueryProcessor::QueryResult>* queryResults);
 
   // Disable the copy constructor and assignment operator.
   DISALLOW_COPY_AND_ASSIGN(QueryProcessor);

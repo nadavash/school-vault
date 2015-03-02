@@ -95,8 +95,8 @@ list<docid_element_header> DocIDTableReader::GetDocIDList() {
     // Seek to the next bucket_rec.  The "offset_" member
     // variable stores the offset of this docid table within
     // the index file .
-    Verify333(fseek(file_, offset_ + i * sizeof(bucket_rec), SEEK_SET) == 0);
-
+    Verify333(fseek(file_, offset_ + sizeof(header_) + i * sizeof(bucket_rec),
+                    SEEK_SET) == 0);
 
     // Read in the chain length and bucket position fields from
     // the bucket_rec.

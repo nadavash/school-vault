@@ -72,31 +72,12 @@ QueryProcessor::ProcessQuery(const vector<string> &query) {
   Verify333(query.size() > 0);
   vector<QueryProcessor::QueryResult> finalresult;
 
-  list<DocIDResult> tempResults;
-  std::unique_ptr<DocIDTableReader> reader(ProcessQueryPart(query[0]));
-  if (reader == nullptr) {
-    return finalresult;
-  }
-  PopulateResults(*reader, &tempResults);
-
-  for (auto iter = ++query.begin(); iter != query.end(); ++iter) {
-    std::unique_ptr<DocIDTableReader> currReader(ProcessQueryPart(*iter));
-    if (currReader == nullptr) {
-      return finalresult;
-    }
-
-    CrossReferenceResults(*currReader, &tempResults);
-    if (tempResults.empty()) {
-      return finalresult;
-    }
-  }
-
-  for (const auto& queryRes : tempResults) {
-    QueryResult result;
-    result.rank = queryRes.rank;
-    if (GetDocName(queryRes.docid, &result.document_name)) {
-      finalresult.push_back(result);
-    }
+  // Go through each index
+  for (HWSize_t i = 0; i < arraylen_; ++i) {
+    list<QueryProcessor::QueryResult> indexResults;
+    ProcessQuery(query, i, &indexResults);
+    finalresult.insert(finalresult.end(), indexResults.begin(),
+                       indexResults.end());
   }
 
   // Sort the final results.
@@ -104,50 +85,73 @@ QueryProcessor::ProcessQuery(const vector<string> &query) {
   return finalresult;
 }
 
-DocIDTableReader* QueryProcessor::ProcessQueryPart(const string& str) {
-  for (int i = 0; i < arraylen_; ++i) {
-    std::unique_ptr<DocIDTableReader> reader(itr_array_[i]->LookupWord(str));
-    if (reader != nullptr) {
-      return reader.release();
-    }
+void QueryProcessor::ProcessQuery(const vector<string>& query, HWSize_t index,
+                                  list<QueryProcessor::QueryResult>* results) {
+  Verify333(index < arraylen_);
+  Verify333(results != nullptr);
+  Verify333(!query.empty());
+
+  list<DocIDResult> tempResults;
+
+  std::unique_ptr<DocIDTableReader> reader(
+      itr_array_[index]->LookupWord(query[0]));
+  if (reader != nullptr) {
+    PopulateResults(*reader, index, &tempResults);
+  } else {
+    return;
   }
-  return nullptr;
+
+  for (auto iter = ++query.begin(); iter != query.end(); ++iter) {
+    std::unique_ptr<DocIDTableReader> currReader(
+        itr_array_[index]->LookupWord(*iter));
+    if (reader == nullptr) {
+      results->clear();
+      return;
+    }
+
+    CrossReferenceResults(*currReader, &tempResults);
+  }
+
+  ConvertToQueryResults(tempResults, index, results);
 }
 
 // A private helper to com
-void QueryProcessor::PopulateResults(DocIDTableReader& reader,
-                                     list<DocIDResult>* results) {
-  for (auto docid : reader.GetDocIDList()) {
+void QueryProcessor::PopulateResults(DocIDTableReader& reader, HWSize_t index,
+    list<DocIDResult>* results) {
+  for (const auto& docid : reader.GetDocIDList()) {
     list<DocPositionOffset_t> occurences;
-    if (!reader.LookupDocID(docid.docid, &occurences))
-      continue;
-
-    DocIDResult result;
-    result.docid = docid.docid;
-    result.rank = occurences.size();
-    results->push_back(result);
-  }
-}
-
-bool QueryProcessor::GetDocName(const DocID_t& docid, string* name) {
-  for (int i = 0; i < arraylen_; ++i) {
-    if (dtr_array_[i]->LookupDocID(docid, name)) {
-      return true;
+    if (reader.LookupDocID(docid.docid, &occurences)) {
+      DocIDResult result;
+      result.docid = docid.docid;
+      result.rank = occurences.size();
+      results->push_back(result);
     }
   }
-
-  return false;
 }
 
 void QueryProcessor::CrossReferenceResults(DocIDTableReader& reader,
-                                           list<DocIDResult>* final) {
+    list<DocIDResult>* final) {
   for (auto iter = final->begin(); iter != final->end(); iter++) {
     list<DocPositionOffset_t> occurences;
     if (reader.LookupDocID(iter->docid, &occurences)) {
       iter->rank += occurences.size();
     } else {
-      iter = final->erase(iter);
+      iter = --final->erase(iter);
     }
+  }
+}
+
+void QueryProcessor::ConvertToQueryResults(
+    const list<DocIDResult>& idResults, HWSize_t index,
+    list<QueryProcessor::QueryResult>* queryResults) {
+  for (const auto& idResult : idResults) {
+    QueryProcessor::QueryResult queryResult;
+    if (!dtr_array_[index]->LookupDocID(idResult.docid,
+                                        &queryResult.document_name)) {
+      continue;
+    }
+    queryResult.rank = idResult.rank;
+    queryResults->push_back(queryResult);
   }
 }
 
