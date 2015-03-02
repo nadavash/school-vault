@@ -57,13 +57,12 @@ int main(int argc, char** argv) {
   }
 
   // Make socket and connect
-  int soc = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-  if (soc < 0) {
-    std::cerr << "Failed to open socket: " << soc << std::endl;
-    return EXIT_FAILURE;
-  }
 
   for (p = ai; p; p = p->ai_next) {
+    int soc = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+    if (soc < 0) {
+      std::cerr << "Failed to open socket: " << soc << std::endl;
+    }
     if (connect(soc, p->ai_addr, p->ai_addrlen) == 0) {
       std::cout << "Sending file to server." << std::endl;
       WriteOut(soc, fd);
