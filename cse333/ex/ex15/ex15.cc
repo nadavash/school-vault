@@ -7,10 +7,10 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/sendfile.h>
+#include <netdb.h>
 #include <cstdlib>
 #include <string>
 #include <iostream>
-#include <netdb.h>
 
 // Prints the usage of the program.
 void PrintUsage(char* exeName) {
