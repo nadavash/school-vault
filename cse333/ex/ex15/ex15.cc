@@ -66,6 +66,7 @@ int main(int argc, char** argv) {
     if (connect(soc, p->ai_addr, p->ai_addrlen) == 0) {
       std::cout << "Sending file to server." << std::endl;
       WriteOut(soc, fd);
+      close(fd);
       break;
     }
   }
