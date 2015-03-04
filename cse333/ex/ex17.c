@@ -55,14 +55,12 @@ static int64_t ArraySumThreaded(int32_t a[], int32_t count,
                                 int32_t numThreads) {
   pthread_t* threads = malloc(numThreads * sizeof(pthread_t));
   if (threads == NULL) {
-    fprintf(stderr, "Failed to allocate memory for threads array in \
-                     ArraySumThreaded\n");
+    fprintf(stderr, "Failed to allocate memory in ArraySumThreaded\n");
     exit(EXIT_FAILURE);
   }
   SumParams* params = malloc(numThreads * sizeof(SumParams));
   if (params == NULL) {
-    fprintf(stderr, "Failed to allocate memory for params array in \
-                     ArraySumThreaded\n");
+    fprintf(stderr, "Failed to allocate memory in ArraySumThreaded\n");
     exit(EXIT_FAILURE);
   }
 
