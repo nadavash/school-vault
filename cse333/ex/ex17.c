@@ -43,8 +43,8 @@ int64_t ArraySum(int32_t a[], uint32_t lo, uint32_t hi) {
   return ans;
 }
 
-static void *HandleSum(void *arg) {
-  SumParams *params = (SumParams*)arg;
+static void* HandleSum(void* arg) {
+  SumParams* params = (SumParams*)arg;
   int64_t sum = ArraySum(params->a, params->lo, params->hi);
   int64_t* sumPtr = malloc(sizeof(sum));
   if (sumPtr == NULL) {
@@ -52,7 +52,6 @@ static void *HandleSum(void *arg) {
     exit(EXIT_FAILURE);
   }
   *sumPtr = sum;
-  free(arg);
   return sumPtr;
 }
 
@@ -75,9 +74,9 @@ static int64_t ArraySumThreaded(int32_t a[], int32_t count,
   for (int32_t i = 0; i < numThreads; ++i) {
     params[i].a = a;
     params[i].lo = i * blockSize;
-    params[i].hi = 2 * i * blockSize - 1;
+    params[i].hi = (i + 1) * blockSize - 1;
 
-    if (pthread_create(&threads[i], NULL, HandleSum, &params[i]) == 0) {
+    if (pthread_create(threads + i, NULL, HandleSum, params + i) == 0) {
       pthread_detach(threads[i]);
     } else {
       fprintf(stderr, "Can't create thread.\n");
@@ -88,11 +87,14 @@ static int64_t ArraySumThreaded(int32_t a[], int32_t count,
   int64_t sum = 0;
   for (int32_t i = 0; i < numThreads; ++i) {
     int64_t* partialSum;
-    if (pthread_join(threads[i], (void **)&partialSum) == 0) {
+    void* retVal;
+    int res = pthread_join(threads[i], &retVal);
+    if (res == 0) {
+      partialSum = (int64_t*) retVal;
       sum += *partialSum;
       free(partialSum);
     } else {
-      fprintf(stderr, "Can't join thread.\n");
+      fprintf(stderr, "Can't join thread: %d\n", res);
       exit(EXIT_FAILURE);
     }
   }
