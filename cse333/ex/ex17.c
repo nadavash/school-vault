@@ -58,7 +58,7 @@ static void *HandleSum(void *arg) {
 
 static int64_t ArraySumThreaded(int32_t a[], int32_t count,
                                 int32_t numThreads) {
-  pthread_t threads = malloc(numThreads * sizeof(pthread_t));
+  pthread_t* threads = malloc(numThreads * sizeof(pthread_t));
   if (threads == NULL) {
     fprintf(stderr, "Failed to allocate memory for threads array in \
                      ArraySumThreaded\n");
@@ -78,7 +78,7 @@ static int64_t ArraySumThreaded(int32_t a[], int32_t count,
     params[i].hi = 2 * i * blockSize - 1;
 
     if (pthread_create(&threads[i], NULL, HandleSum, &params[i]) == 0) {
-      pthread_detach(&threads[i]);
+      pthread_detach(threads[i]);
     } else {
       fprintf(stderr, "Can't create thread.\n");
       exit(EXIT_FAILURE);
@@ -88,7 +88,7 @@ static int64_t ArraySumThreaded(int32_t a[], int32_t count,
   int64_t sum = 0;
   for (int32_t i = 0; i < numThreads; ++i) {
     int64_t* partialSum;
-    if (pthread_join(&threads[i], (void **)&partialSum) == 0) {
+    if (pthread_join(threads[i], (void **)&partialSum) == 0) {
       sum += *partialSum;
       free(partialSum);
     } else {
