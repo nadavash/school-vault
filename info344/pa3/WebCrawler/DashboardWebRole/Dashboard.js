@@ -34,6 +34,7 @@
             $('#metric-indexed').text(totalCrawled);
             $('#metric-queued').text(results.d.NumQueuedUrls);
         });
+        GetErrors();
     }
 
     function Crawl() {
@@ -74,13 +75,15 @@
     function GetErrors() {
         console.log('Get errors.');
         MakeAjaxCall('GetErrors', {}, function (results) {
-            var list = $('#errors');
-            var errs = resuts.d;
+            var list = $('#errors').empty();
+            var errs = results.d;
             if (!errs) return;
-
+            console.log(results.d)
             for (var i = 0; i < errs.length; ++i) {
+                var msg = errs[i];
+                var text = msg.Message + ' ' + msg.Status + ' ' + msg.Url;
                 list.append(
-                    $('<li class="list-group-item">').text(errs[i].tostring()));
+                    $('<li class="list-group-item">').text(text));
             }
         });
     }

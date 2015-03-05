@@ -41,7 +41,7 @@ namespace DashboardWebRole
             if (uri == null)
                 return null;
 
-            string host = uri.GetComponents(UriComponents.Host, UriFormat.Unescaped);
+            string host = WebPageData.GetSimpleHost(url);
             string encoded = WebUtility.UrlEncode(
                 uri.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped));
             TableQuery<WebPageData> query = new TableQuery<WebPageData>()
@@ -71,19 +71,17 @@ namespace DashboardWebRole
         public CrawlerError[] GetErrors()
         {
             DateTime last = DateTime.UtcNow - TimeSpan.FromHours(1);
-            string val = String.Format("datetime'{0}'", last.ToString("s"));
-            Debug.WriteLine(val);
-            var query = new TableQuery<CrawlerError>()
-                .Where(TableQuery.CombineFilters(
-                    TableQuery.GenerateFilterCondition("PartitionKey",
-                                                       QueryComparisons.Equal, "CrawlerError"),
-                    "and",
-                    TableQuery.GenerateFilterCondition("Timestamp", QueryComparisons.GreaterThanOrEqual, val)));
+            string queryStr = String.Format("PartitionKey eq 'CrawlerError' and Timestamp ge datetime'{0}'", 
+                last.ToString("s"));
+            var query = new TableQuery<CrawlerError>().Where(queryStr);
 
             try
             {
                 var result = GetTable("workerstatus").ExecuteQuery(query);
-                return result.ToArray();
+                int count = Math.Min(result.Count(), 20);
+                if (count == 0)
+                    return null;
+                return result.Take(count).ToArray();
             }
             catch (Exception e)
             {
@@ -141,7 +139,7 @@ namespace DashboardWebRole
                 return e.ToString();
             }
 
-            return DeleteTable("workerstatus", "Url queue cleared.");
+            return "Url queue cleared.";
         }
 
         [WebMethod]
@@ -181,6 +179,9 @@ namespace DashboardWebRole
 
             data.NumQueuedUrls = msgCount != null ? msgCount.Value : 0;
             data.QueuedUrls =  msgs.Select(x => x.AsString).ToArray();
+
+            try { GetTable("crawlerindex"); }
+            catch (Exception) { }
 
             CloudTable crawlerStates = GetTable("workerstatus");
             TableQuery<CrawlerStateInfo> states = new TableQuery<CrawlerStateInfo>();

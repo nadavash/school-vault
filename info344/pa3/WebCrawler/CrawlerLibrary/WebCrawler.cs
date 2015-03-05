@@ -20,6 +20,8 @@ namespace CrawlerLibrary
 {
     public class WebCrawler
     {
+        private readonly Semaphore workLimiter = new Semaphore(150, 150);
+
         private string userAgent;
         private Dictionary<string, RobotsParser> robots;
         private CloudQueue urlsQueue;
@@ -139,6 +141,7 @@ namespace CrawlerLibrary
             if (url == null)
                 return false;
 
+            workLimiter.WaitOne();
             ThreadPool.QueueUserWorkItem(ParsePageCallback, url);
 
             return true;
@@ -146,46 +149,57 @@ namespace CrawlerLibrary
 
         private void ParsePageCallback(object context)
         {
-            ++NumUrlsCrawled;
-            string pageUrl = context.ToString();
-            HtmlDocument doc = GetLoadedDoc(pageUrl);
-            if (doc == null || stopLoading)
-                return;
-            Trace.TraceInformation("Parsing '{0}'.", pageUrl);
-
-                
-            var title = doc.DocumentNode.SelectSingleNode("//title");
-            if (title == null)
-                title = doc.DocumentNode.SelectSingleNode("//h1");
-            var date = doc.DocumentNode.SelectSingleNode("//meta[@itemprop='datePublished']");
-
-            if (title == null || string.IsNullOrEmpty(title.InnerText))
-                Trace.TraceInformation("Page title not found for '{0}'.", pageUrl);
-            else
+            try
             {
-                if (stopLoading)
+                ++NumUrlsCrawled;
+                string pageUrl = context.ToString();
+                HtmlDocument doc = GetLoadedDoc(pageUrl);
+                if (doc == null || stopLoading)
                     return;
+                
+                Trace.TraceInformation("Parsing '{0}'.", pageUrl);
 
-                WebPageData pageData = new WebPageData(pageUrl, title.InnerText);
-                if (date != null)
-                    pageData.DateCreated = date.GetAttributeValue("content", null);
 
-                TableOperation insertOp = TableOperation.InsertOrReplace(pageData);
-                indexTable.ExecuteAsync(insertOp);
-                AddToLastTen(pageUrl);
-                NumUrlsIndexed++;
-            }
+                var title = doc.DocumentNode.SelectSingleNode("//title");
+                if (title == null)
+                    title = doc.DocumentNode.SelectSingleNode("//h1");
+                var date = doc.DocumentNode.SelectSingleNode("//meta[@itemprop='datePublished']");
 
-            var links = doc.DocumentNode.SelectNodes("//a");
-            if (links != null)
-            {
-                foreach (var linkTag in links)
+                if (title == null || string.IsNullOrEmpty(title.InnerText))
+                    Trace.TraceInformation("Page title not found for '{0}'.", pageUrl);
+                else
                 {
                     if (stopLoading)
                         return;
-                    EnqueueUrlIfValid(linkTag.GetAttributeValue("href", ""),
-                                      WebPageData.GetSimpleHost(pageUrl));
+
+                    WebPageData pageData = new WebPageData(pageUrl, title.InnerText);
+                    if (date != null)
+                        pageData.DateCreated = date.GetAttributeValue("content", null);
+
+                    TableOperation insertOp = TableOperation.InsertOrReplace(pageData);
+                    indexTable.ExecuteAsync(insertOp);
+                    AddToLastTen(pageUrl);
+                    NumUrlsIndexed++;
                 }
+
+                var links = doc.DocumentNode.SelectNodes("//a");
+                if (links != null)
+                {
+                    foreach (var linkTag in links)
+                    {
+                        if (stopLoading)
+                        {
+                            return;
+                        }
+                        EnqueueUrlIfValid(linkTag.GetAttributeValue("href", ""),
+                                          WebPageData.GetSimpleHost(pageUrl));
+                    }
+                }
+            }
+            catch (Exception) { }
+            finally
+            {
+                workLimiter.Release();
             }
         }
 
@@ -238,19 +252,20 @@ namespace CrawlerLibrary
 
         private void EnqueueUrlIfValid(string url, string host)
         {
-            Uri hostUri;
-            Uri uri;
-            if (Uri.TryCreate("http://" + host, UriKind.Absolute, out hostUri) &&
-                Uri.TryCreate(hostUri, url, out uri))
-            {
-                try
-                {
-                    EnqueueUrlIfValid(uri.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped));
-                }
-                catch (Exception e) { Trace.TraceError(e.ToString()); }
-            }
-            else
-                EnqueueUrlIfValid(url);
+            //Uri hostUri;
+            //Uri uri;
+            //if (url.StartsWith("/") && !url.Contains(".com") &&
+            //    Uri.TryCreate("http://" + host, UriKind.Absolute, out hostUri) &&
+            //    Uri.TryCreate(hostUri, url, out uri))
+            //{
+            //    try
+            //    {
+            //        EnqueueUrlIfValid(uri.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped));
+            //    }
+            //    catch (Exception e) { Trace.TraceError(e.ToString()); }
+            //}
+            //else
+            EnqueueUrlIfValid(url);
         }
 
         private void EnqueueUrlIfValid(string url)
@@ -272,7 +287,7 @@ namespace CrawlerLibrary
 
             lock (urlsFound)
             {
-                if (urlsFound.Contains(url) || UrlCrawled(uri))
+                if (urlsFound.Contains(url))// && !UrlCrawled(uri))
                     return;
                 urlsFound.Add(url);
             }
@@ -316,14 +331,20 @@ namespace CrawlerLibrary
 
         private bool UrlCrawled(Uri uri)
         {
-            string url = uri.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
-            TableQuery<WebPageData> query = new TableQuery<WebPageData>()
-                .Where(TableQuery.CombineFilters(
-                        TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, WebUtility.UrlEncode(url)),
-                        TableOperators.And,
-                        TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, WebPageData.GetSimpleHost(url))));
-            int count = indexTable.ExecuteQuery(query).Count();
-            return count > 0;
+            try
+            {
+                string url = uri.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
+                TableQuery<WebPageData> query = new TableQuery<WebPageData>()
+                    .Where(TableQuery.CombineFilters(
+                            TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, WebUtility.UrlEncode(url)),
+                            TableOperators.And,
+                            TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, WebPageData.GetSimpleHost(url))));
+                int count = indexTable.ExecuteQuery(query).Count();
+                return count > 0;
+            }
+            catch (Exception e) { Trace.TraceError(e.ToString()); }
+
+            return false;
         }
 
         private Stream GetStreamFromUrl(string url)
@@ -346,9 +367,10 @@ namespace CrawlerLibrary
                 error.Message = webExp.Message;
                 TableOperation insertOp = TableOperation.InsertOrMerge(error);
                 errorTable.ExecuteAsync(insertOp);
-
-                return null;
             }
+            catch (Exception e) { Trace.TraceError(e.ToString()); }
+            
+            return null;
         }
 
         private HtmlDocument GetLoadedDoc(string url)

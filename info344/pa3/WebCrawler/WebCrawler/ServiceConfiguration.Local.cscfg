@@ -3,13 +3,13 @@
   <Role name="DashboardWebRole">
     <Instances count="1" />
     <ConfigurationSettings>
-      <Setting name="StorageConnectionString" value="UseDevelopmentStorage=true" />
+      <Setting name="StorageConnectionString" value="DefaultEndpointsProtocol=https;AccountName=i344storage;AccountKey=Zd9kYPFSAXzBBFGZHTQQRcKm3cip4CrPN069ZlSUE/dOV6DHE4muQ+oAR/wpP/wL8lE7l8OdtbxEVeelFaQsyQ==" />
     </ConfigurationSettings>
   </Role>
   <Role name="CrawlerWorkerRole">
     <Instances count="1" />
     <ConfigurationSettings>
-      <Setting name="StorageConnectionString" value="UseDevelopmentStorage=true" />
+      <Setting name="StorageConnectionString" value="DefaultEndpointsProtocol=https;AccountName=i344storage;AccountKey=Zd9kYPFSAXzBBFGZHTQQRcKm3cip4CrPN069ZlSUE/dOV6DHE4muQ+oAR/wpP/wL8lE7l8OdtbxEVeelFaQsyQ==" />
     </ConfigurationSettings>
   </Role>
 </ServiceConfiguration>

@@ -141,9 +141,10 @@ namespace CrawlerWorkerRole
                     if (crawler.IsLoading)
                     {
                         status = CrawlerStatus.Loading;
-                        crawler.CrawlNext();
+                        if (ramAvailable.NextValue() > 100)
+                            crawler.CrawlNext();
                     }
-                    else if (crawler.CrawlNext())
+                    else if (ramAvailable.NextValue() > 100 && crawler.CrawlNext())
                         status = CrawlerStatus.Crawling;
                     break;
                 case "pause":
@@ -196,7 +197,7 @@ namespace CrawlerWorkerRole
                     Thread.Sleep(1000);
                     break;
                 }
-                catch (Exception e) { }
+                catch (Exception) { }
             }
         }
 
