@@ -14,7 +14,7 @@ using Microsoft.WindowsAzure.ServiceRuntime;
 using System.Net;
 using System.Diagnostics;
 
-namespace NanoSearchWebRole
+namespace NanoSearch
 {
     /// <summary>
     /// Summary description for AdminWebService

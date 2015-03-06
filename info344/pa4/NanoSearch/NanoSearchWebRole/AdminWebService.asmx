@@ -1,1 +1,1 @@
-﻿<%@ WebService Language="C#" CodeBehind="AdminWebService.asmx.cs" Class="NanoSearchWebRole.AdminWebService" %>
+﻿<%@ WebService Language="C#" CodeBehind="AdminWebService.asmx.cs" Class="NanoSearch.AdminWebService" %>

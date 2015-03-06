@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+    <link rel="stylesheet" href="Dashboard.css" />
+
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+    <!-- toastr -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+    <!-- My scripts -->
+    <script src="Dashboard.js"></script>
+</head>
+<body>
+    <div id="main">
+        <div class="page-header">
+            <h1>Dashboard</h1>
+            <button id="refresh" class="btn btn-info"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Refresh</button>
+        </div>
+        <div id="dashboard">
+            <div class="panel">
+                <button id="play" class="btn btn-success"><span class="glyphicon glyphicon-play" aria-hidden="true"></span> Crawl</button>
+                <button id="pause" class="btn btn-warning"><span class="glyphicon glyphicon-pause" aria-hidden="true"></span> Pause</button><br /><br />
+                <button id="clear-urls" class="btn btn-danger"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Clear URLs</button>
+                <button id="clear-index" class="btn btn-danger"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Clear index</button>
+                <button id="clear-errors" class="btn btn-danger"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Clear errors</button>
+            </div>
+            <div class="panel panel-default">
+                <div class="input-group">
+                    <input id="query" type="text" class="form-control" placeholder="Search page title by url..." />
+                    <span class="input-group-btn">
+                        <button id="search" class="btn btn-default" type="button">Search</button>
+                    </span>
+                </div>
+                <div class="panel-heading" id="results"></div>
+            </div>
+            <div class="panel panel-default">
+                <!-- Default panel contents -->
+                <div class="panel-heading">System Stats</div>
+                <!-- Table -->
+                <table class="table">
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                    </tr>
+                    <tr>
+                        <td>Indexed URLs</td>
+                        <td id="metric-indexed"></td>
+                    </tr>
+                    <tr>
+                        <td>Queued URLs</td>
+                        <td id="metric-queued"></td>
+                    </tr>
+                </table>
+            </div>
+            <div id="default-state" class="panel panel-default" style="display: none">
+                <!-- Default panel contents -->
+                <div class="panel-heading state-heading">Crawler State: </div>
+                <!-- Table -->
+                <table class="table">
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                    </tr>
+                    <tr>
+                        <td>Urls crawled</td>
+                        <td class="metric-crawled"></td>
+                    </tr>
+                    <tr>
+                        <td>Urls indexed</td>
+                        <td class="metric-indexed"></td>
+                    </tr>
+                    <tr>
+                        <td># of errors</td>
+                        <td class="metric-errors"></td>
+                    </tr>
+                    <tr>
+                        <td>CPU usage</td>
+                        <td class="metric-cpu"></td>
+                    </tr>
+                    <tr>
+                        <td>Ram usage</td>
+                        <td class="metric-ram-used"></td>
+                    </tr>
+                    <tr>
+                        <td>Ram available</td>
+                        <td class="metric-ram-available"></td>
+                    </tr>
+                </table>
+                <div class="panel-heading">Last 10 URLs crawled</div>
+                <ul class="list-group">
+                </ul>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading state-heading">Errors in last 30 mins:</div>
+                <ul id="errors" class="list-group">
+
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
