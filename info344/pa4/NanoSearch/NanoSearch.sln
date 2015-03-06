@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "NanoSearch", "NanoSearch\NanoSearch.ccproj", "{4785E6DA-ECD5-4ADF-A910-6D84CCCC173B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrawlerLibrary", "..\..\pa3\WebCrawler\CrawlerLibrary\CrawlerLibrary.csproj", "{ED4E8C90-365D-45D6-ADDC-0F177BF13185}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrawlerWorkerRole", "..\..\pa3\WebCrawler\CrawlerWorkerRole\CrawlerWorkerRole.csproj", "{3A99E114-587D-446F-86C2-C24A88E44294}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DashboardWebRole", "..\..\pa3\WebCrawler\DashboardWebRole\DashboardWebRole.csproj", "{D1CF5E19-2E06-4BAE-9549-4ADB27B1551B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4785E6DA-ECD5-4ADF-A910-6D84CCCC173B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4785E6DA-ECD5-4ADF-A910-6D84CCCC173B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4785E6DA-ECD5-4ADF-A910-6D84CCCC173B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4785E6DA-ECD5-4ADF-A910-6D84CCCC173B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED4E8C90-365D-45D6-ADDC-0F177BF13185}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED4E8C90-365D-45D6-ADDC-0F177BF13185}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED4E8C90-365D-45D6-ADDC-0F177BF13185}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED4E8C90-365D-45D6-ADDC-0F177BF13185}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A99E114-587D-446F-86C2-C24A88E44294}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A99E114-587D-446F-86C2-C24A88E44294}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A99E114-587D-446F-86C2-C24A88E44294}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A99E114-587D-446F-86C2-C24A88E44294}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1CF5E19-2E06-4BAE-9549-4ADB27B1551B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1CF5E19-2E06-4BAE-9549-4ADB27B1551B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1CF5E19-2E06-4BAE-9549-4ADB27B1551B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1CF5E19-2E06-4BAE-9549-4ADB27B1551B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

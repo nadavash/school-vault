@@ -14,3 +14,14 @@ pa3/WebCrawler/WebCrawler/csx
 pa3/WebCrawler/CrawlerLibrary/bin
 pa3/WebCrawler/CrawlerLibrary/obj
 pa3/CrawlerTest
+
+pa4/NanoSearch/packages
+pa4/NanoSearch/CrawlerWorkerRole/bin
+pa4/NanoSearch/CrawlerWorkerRole/obj
+pa4/NanoSearch/NanoSearchWebRole/bin
+pa4/NanoSearch/NanoSearchWebRole/obj
+pa4/NanoSearch/NanoSearch/bin
+pa4/NanoSearch/NanoSearch/obj
+pa4/NanoSearch/NanoSearch/csx
+pa4/NanoSearch/CrawlerLibrary/bin
+pa4/NanoSearch/CrawlerLibrary/obj
