@@ -2,14 +2,37 @@
     color: rgb(170, 170, 170);
 }
 
-#main, #suggestions {
+#suggestions {
+    width: 100%;
+}
+
+#results {
+    margin-left: 100px;
     min-width: 600px;
     width: 60%;
-    margin-left: 100px;
+}
+
+h1 {
+    margin-right: 20px;
+    display: inline;
+}
+
+.respanel {
+    border: none;
 }
 
 #topbar {
+    margin-left: 20px;
+    margin-right: 20px;
     margin-bottom: 100px;
+}
+
+#search-box {
+    display: inline-block;
+    width: 70%;
+    min-width: 500px;
+    position: relative;
+    bottom: -5px;
 }
 
 #search-button {

@@ -14,6 +14,13 @@
             FetchPlayerData(query, DisplayPlayerData);
             FetchSearchResults(query, DisplaySearchResults);
         });
+        $('#query').keypress(function (e) {
+            if ((e.keyCode | e.which) === 13) {
+                var query = $('#query').val();
+                FetchPlayerData(query, DisplayPlayerData);
+                FetchSearchResults(query, DisplaySearchResults);
+            }
+        });
     });
 
     function FetchSuggestions(prefix, max, onsuccess) {
@@ -61,6 +68,12 @@
     }
 
     function FetchSearchResults(query, onsuccess) {
+        if (currentRequest !== null) {
+            currentRequest.abort();
+            currentRequest = null;
+        }
+        $('#suggestions').empty();
+
         $.ajax({
             type: 'get',
             url: 'SearchService.asmx/GetSearchResults',
@@ -74,11 +87,10 @@
     }
 
     function DisplaySearchResults(results) {
+        var $resultList = $('#results-list').empty();
         if (results.d === null) {
             return;
         }
-
-        var $resultList = $('#results-list').empty();
 
         var searchResults = results.d;
         for (var i = 0; i < searchResults.length; ++i) {
@@ -111,7 +123,6 @@
         if (results.players === null) {
             return;
         }
-        console.log(results);
         var $container = $('#players').empty();
         var players = results.players;
         for (var i = 0; i < players.length; ++i) {
