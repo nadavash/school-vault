@@ -1,0 +1,20 @@
+Nadav Ashkenazi
+CSE 333
+Exercise 6a
+
+1. The root cause of the problem stemmed from the 'munmap' function that may
+unmap memory with data that was buffered for a file write, but not actually
+written to disk. LevelDB was using its own buffering on top of the system
+'write' function to improve performance. Sometimes it has to unmap a memory
+region to allow for more space on the buffer to write. This is fine on Linux,
+which ensures that regions that are being unmapped are flushed to the disk,
+but Mac OSX does not provide such a guarantee. That caused the checksums to
+fail. The solution is to force a sync to avoid being under the grace of the
+OS to write dirty pages to disk. In this case, the fix was accomplished using
+the 'msync' function.
+
+2. The short answer: it depends.
+If we were to use the C standard fopen, fwrite, etc, that use buffering to
+improve performance, then we may well run into this issue. If we are simply
+using the POSIX write/read/etc functions without buffering, then we will not 
+run into this issue with Alice's notes files. 

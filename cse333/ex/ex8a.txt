@@ -1,0 +1,20 @@
+Nadav Ashkenazi
+CSE 333
+Exercise 8a
+
+1. The main function in the appendix is executed in the User Program area
+during the initial parts of the MapReduce process. The Map method of the
+WordCounter gets called in the workers on the left side of the figure,
+during the map phase. The Added Reduce method gets executed in the right
+hand side of the figure, during the reduce phase. WordCounter's Map method
+would then be provided with a string text that comes from the split files all
+the way on the left of the figure, and then it emits the results, which is a
+string representation of the word an a "1", to intermediate storage. Those
+are then sent over in an iterator to the Reducer, which finally sends its
+results to output files.
+
+2. The Master of the MapReduce figure will be in charge in handling failures
+of any of the MapReduce workers. Thus, if an error occures in
+WordCounter::Map() which causes the worker to crash, the worker sends a 
+"last gasp" message to the master and the master can then handle the issue. It
+can do this either by skipping the data, rerunning the worker, etc.
