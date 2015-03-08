@@ -74,4 +74,15 @@ class Player {
 	public function setPointsPerGame($pointsPerGame) {
 		$this->pointsPerGame = $pointsPerGame;
 	}
+
+	public function ToAssociativeArray() {
+		return array(
+			"playerName"           => $this->playerName,
+			"gamesPlayed"          => $this->gamesPlayed,
+			"fieldGoalPercentage"  => $this->fieldGoalPercentage,
+			"threePointPercentage" => $this->threePointPercentage,
+			"freeThrowPercentage"  => $this->freeThrowPercentage,
+			"pointsPerGame"        => $this->pointsPerGame
+		);
+	}
 }

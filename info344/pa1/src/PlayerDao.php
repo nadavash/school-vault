@@ -57,6 +57,31 @@ class PlayerDao {
 	}
 
 	/**
+	 * Gets the player data for players with the exact name provided.
+	 * @param  String $name The search string.
+	 * @return Array       An array of Player objects that match the name.
+	 */
+	public function getPlayersByExactName($name) {
+		$name = strtolower(trim($name));
+		try {
+			$stmt = $this->conn->prepare("SELECT * FROM Players WHERE PlayerName = 'LeBron James'");
+			//$stmt->bindValue(":player_name", $name, PDO::PARAM_STR);
+			$stmt->execute();
+			$results = $stmt->fetchAll();
+
+			$players = array();
+			foreach ($results as $row) {
+				array_push($players, $this->playerFromRow($row)->ToAssociativeArray());
+			}
+
+			return $players;
+		} catch (PDOException $e) {
+			print "Error!: " . $e->getMessage() . "<br/>";
+    		die();	
+		}
+	}
+
+	/**
 	 * Returns a player object for the given PlayerId. Returns null if PlayerId does not
 	 * exist in the database.
 	 * @param  int $id The id of the player to return.
