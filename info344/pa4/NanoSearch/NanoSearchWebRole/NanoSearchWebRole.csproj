@@ -88,6 +88,7 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="assets\stock.png" />
     <Content Include="index.html" />
     <Content Include="packages.config" />
     <None Include="Web.Debug.config">

@@ -57,7 +57,8 @@ namespace NanoSearch
 
             results = table.ExecuteQuery(tableQuery)
                 .GroupBy(x => x.Url)
-                .Select(x => new SearchResult(x.Key, x.ElementAt(0).Title, x.Count()))
+                .Select(x => new SearchResult(x.Key, x.ElementAt(0).Title, 
+                                              x.Select(y => y.Frequency).Sum()))
                 .OrderByDescending(x => x.Rank)
                 .ThenBy(x => x.Title)
                 .ToArray();

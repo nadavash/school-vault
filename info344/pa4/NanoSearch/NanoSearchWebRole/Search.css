@@ -8,6 +8,10 @@
     margin-left: 100px;
 }
 
+#topbar {
+    margin-bottom: 100px;
+}
+
 #search-button {
     width: 50px;
 }
@@ -17,4 +21,41 @@
     left: 0px;
     box-shadow: black 0px 0px 5px;
     z-index: 100;
+}
+
+/* Player view */
+tr, th {
+	text-align: center;
+}
+
+.player-img {
+	float: left;
+}
+
+.player-card {
+	overflow: hidden;
+	background: linear-gradient(white, lightblue);
+}
+
+.player-info {
+	position: relative;
+	overflow: hidden;
+	margin: 0;
+	background-color: rgba(255,255,255,0);
+	height: 185px;
+}
+
+.player-stats {
+	position: absolute;
+	bottom: 0px;
+	margin-bottom: 0px;
+}
+
+.player-stats-row > th {
+	border-color: black !important;
+}
+
+.top-banner {
+	display: block;
+	margin: auto;
 }
