@@ -19,4 +19,4 @@ $results = array(
 	"players" => $dao->getPlayersByExactName($query)
 );
 
-echo json_encode($results);
+echo "callback(" . json_encode($results) . ")";
