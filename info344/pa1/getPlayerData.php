@@ -1,6 +1,8 @@
 <?php
 require_once "src/PlayerDao.php";
 
+header('content-type: application/json; charset=utf-8');
+
 if (!isset($_GET["q"])) {
 	die("No query provided.");
 }

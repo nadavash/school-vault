@@ -64,8 +64,8 @@ class PlayerDao {
 	public function getPlayersByExactName($name) {
 		$name = strtolower(trim($name));
 		try {
-			$stmt = $this->conn->prepare("SELECT * FROM Players WHERE PlayerName = 'LeBron James'");
-			//$stmt->bindValue(":player_name", $name, PDO::PARAM_STR);
+			$stmt = $this->conn->prepare("SELECT * FROM Players WHERE PlayerName = :player_name");
+			$stmt->bindValue(":player_name", $name, PDO::PARAM_STR);
 			$stmt->execute();
 			$results = $stmt->fetchAll();
 
