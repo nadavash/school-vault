@@ -2,7 +2,6 @@
     var MAX_RESULTS = 10;
 
     var currentRequest = null;
-
     $(document).ready(function () {
         $('#query').focus()
             .on('input propertychange paste', function () {
@@ -11,7 +10,9 @@
                 });
             });
         $('#search-button').click(function () {
-            FetchSearchResults($('#query').val(), DisplaySearchResults)
+            var query = $('#query').val();
+            FetchPlayerData(query, DisplayPlayerData);
+            FetchSearchResults(query, DisplaySearchResults);
         });
     });
 
@@ -73,7 +74,7 @@
     }
 
     function DisplaySearchResults(results) {
-        if (results.d == null) {
+        if (results.d === null) {
             return;
         }
 
@@ -89,5 +90,65 @@
                     .text(searchResults[i].Url));
             $resultList.append($listResult);
         }
+    }
+
+    function FetchPlayerData(query, onsuccess) {
+        $.ajax({
+            type: 'get',
+            crossDomain: true,
+            url: 'http://ec2-54-149-235-53.us-west-2.compute.amazonaws.com/getPlayerData.php',
+            dataType: 'jsonp',
+            jsonpCallback: 'callback',
+            data: {
+                q: query,
+            },
+            contentType: 'application/json; charset=utf-8',
+            success: onsuccess
+        });
+    }
+
+    function DisplayPlayerData(results) {
+        if (results.players === null) {
+            return;
+        }
+        console.log(results);
+        var $container = $('#players').empty();
+        var players = results.players;
+        for (var i = 0; i < players.length; ++i) {
+            $container.append(BuildPlayerCard(players[i]));
+        }
+    }
+
+    function BuildPlayerCard(player) {
+        var imgUrl = 'http://i.cdn.turner.com/nba/nba/.element/img/2.0/sect/statscube/players/large/' 
+            + player.playerName.toLowerCase().replace(' ', '_') + '.png';
+        return $('<div class="player-card panel panel-default">')
+            .html('<img class="player-img" src="' + imgUrl + '" alt="player profile image" \
+                onerror="if (this.src != \'error.jpg\') this.src = \'/assets/stock.png\';" /> \
+                    <div class="player-info"> \
+                        <h3>' + player.playerName + '</h3> \
+                        <table class="player-stats table"> \
+                            <caption>Stats</caption> \
+                            <thead> \
+                                <tr class="player-stats-row"> \
+                                    <th>GP</th> \
+                                    <th>FGP</th> \
+                                    <th>TPP</th> \
+                                    <th>FTP</th> \
+                                    <th>PPG</th> \
+                                </tr> \
+                            </thead> \
+                            <tbody> \
+                                <tr> \
+                                    <td>' + player.gamesPlayed + '</td> \
+                                    <td>' + player.fieldGoalPercentage + '</td> \
+                                    <td>' + player.threePointPercentage + '</td> \
+                                    <td>' + player.freeThrowPercentage + '</td> \
+                                    <td>' + player.pointsPerGame + '</td> \
+                                </tr> \
+                            </tbody> \
+                        </table> \
+                    </div> \
+                </div>');
     }
 })();
