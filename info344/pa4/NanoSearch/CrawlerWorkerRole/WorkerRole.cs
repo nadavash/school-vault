@@ -141,10 +141,9 @@ namespace CrawlerWorkerRole
                     if (crawler.IsLoading)
                     {
                         status = CrawlerStatus.Loading;
-                        if (ramAvailable.NextValue() > 100)
-                            crawler.CrawlNext();
+                        crawler.CrawlNext();
                     }
-                    else if (ramAvailable.NextValue() > 100 && crawler.CrawlNext())
+                    else if (crawler.CrawlNext())
                         status = CrawlerStatus.Crawling;
                     break;
                 case "pause":

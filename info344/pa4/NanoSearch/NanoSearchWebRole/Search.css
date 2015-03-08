@@ -1,8 +1,20 @@
-﻿#main {
-    width: 60%;
-    margin: auto;
+﻿em {
+    color: rgb(170, 170, 170);
 }
 
-em {
-    color: rgb(170, 170, 170);
+#main, #suggestions {
+    min-width: 600px;
+    width: 60%;
+    margin-left: 100px;
+}
+
+#search-button {
+    width: 50px;
+}
+
+#suggestions {
+    position: absolute;
+    left: 0px;
+    box-shadow: black 0px 0px 5px;
+    z-index: 100;
 }

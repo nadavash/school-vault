@@ -27,13 +27,9 @@ namespace NanoSearch
         private static Trie prefixTree;
         private static Dictionary<string, int> pageCounts;
         private static PerformanceCounter memCounter;
-        private static Timer time;
 
         static QuerySuggestionsService()
         {
-            time = new Timer(1000.0);
-            time.Start();
-            time.Elapsed += time_Elapsed;
             memCounter = new PerformanceCounter("Memory", "Available MBytes");
             string folderPath = Environment.GetFolderPath(
                 Environment.SpecialFolder.ApplicationData).ToString();
@@ -60,11 +56,6 @@ namespace NanoSearch
                     pageCounts[split[0]] = int.Parse(split[1]);
                 }
             }
-        }
-
-        static void time_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            Debug.Print("Current memory usage: {0}MB", memCounter.NextValue());
         }
 
         /// <summary>

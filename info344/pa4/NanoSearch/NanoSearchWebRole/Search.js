@@ -10,6 +10,9 @@
                     DisplaySuggestions(results.d);
                 });
             });
+        $('#search-button').click(function () {
+            FetchSearchResults($('#query').val(), DisplaySearchResults)
+        });
     });
 
     function FetchSuggestions(prefix, max, onsuccess) {
@@ -53,6 +56,38 @@
                 .text('Could not find matches for "' +
                     $('#query').val() + '". How about...');
             $list.prepend($entry);
+        }
+    }
+
+    function FetchSearchResults(query, onsuccess) {
+        $.ajax({
+            type: 'get',
+            url: 'SearchService.asmx/GetSearchResults',
+            data: {
+                q: JSON.stringify(query),
+            },
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: onsuccess
+        });
+    }
+
+    function DisplaySearchResults(results) {
+        if (results.d == null) {
+            return;
+        }
+
+        var $resultList = $('#results-list').empty();
+
+        var searchResults = results.d;
+        for (var i = 0; i < searchResults.length; ++i) {
+            var $listResult = $('<li class="list-group-item">')
+                .append($('<a class="list-group-item-heading">')
+                    .html(searchResults[i].Title)
+                    .attr('href', searchResults[i].Url))
+                .append($('<p class="list-group-item-text">')
+                    .text(searchResults[i].Url));
+            $resultList.append($listResult);
         }
     }
 })();

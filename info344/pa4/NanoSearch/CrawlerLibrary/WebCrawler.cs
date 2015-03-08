@@ -15,6 +15,7 @@ using Microsoft.VisualBasic.CompilerServices;
 using Microsoft.VisualBasic;
 using Microsoft.WindowsAzure.Storage;
 using HtmlAgilityPack;
+using System.Text.RegularExpressions;
 
 namespace CrawlerLibrary
 {
@@ -137,12 +138,12 @@ namespace CrawlerLibrary
             if (stopLoading)
                 throw new InvalidOperationException("Cannot crawl before resetting.");
 
-            string url = DequeueUrl();
-            if (url == null)
+            var urlMsg = urlsQueue.GetMessage(TimeSpan.FromMinutes(1));
+            if (urlMsg == null)
                 return false;
 
             workLimiter.WaitOne();
-            ThreadPool.QueueUserWorkItem(ParsePageCallback, url);
+            ThreadPool.QueueUserWorkItem(ParsePageCallback, urlMsg);
 
             return true;
         }
@@ -152,32 +153,24 @@ namespace CrawlerLibrary
             try
             {
                 ++NumUrlsCrawled;
-                string pageUrl = context.ToString();
+                CloudQueueMessage msg = context as CloudQueueMessage;
+                string pageUrl = msg.AsString;
                 HtmlDocument doc = GetLoadedDoc(pageUrl);
                 if (doc == null || stopLoading)
                     return;
                 
                 Trace.TraceInformation("Parsing '{0}'.", pageUrl);
 
-
-                var title = doc.DocumentNode.SelectSingleNode("//title");
-                if (title == null)
-                    title = doc.DocumentNode.SelectSingleNode("//h1");
-                var date = doc.DocumentNode.SelectSingleNode("//meta[@itemprop='datePublished']");
-
-                if (title == null || string.IsNullOrEmpty(title.InnerText))
-                    Trace.TraceInformation("Page title not found for '{0}'.", pageUrl);
-                else
+                var batchOp = BuildIndexBatch(doc, pageUrl);
+                if (batchOp != null)
                 {
                     if (stopLoading)
                         return;
 
-                    WebPageData pageData = new WebPageData(pageUrl, title.InnerText);
-                    if (date != null)
-                        pageData.DateCreated = date.GetAttributeValue("content", null);
-
-                    TableOperation insertOp = TableOperation.InsertOrReplace(pageData);
-                    indexTable.ExecuteAsync(insertOp);
+                    foreach (var op in batchOp)
+                    {
+                        indexTable.ExecuteAsync(op);
+                    }
                     AddToLastTen(pageUrl);
                     NumUrlsIndexed++;
                 }
@@ -195,6 +188,8 @@ namespace CrawlerLibrary
                                           WebPageData.GetSimpleHost(pageUrl));
                     }
                 }
+
+                urlsQueue.DeleteMessageAsync(msg);
             }
             catch (Exception) { }
             finally
@@ -300,16 +295,6 @@ namespace CrawlerLibrary
             }, this);
         }
 
-        private string DequeueUrl()
-        {
-            CloudQueueMessage msg = urlsQueue.GetMessage();
-            if (msg == null)
-                return null;
-
-            urlsQueue.DeleteMessageAsync(msg);
-            return msg.AsString;
-        }
-
         private bool IsValidUrl(Uri uri)
         {
             string host = uri.GetComponents(UriComponents.Host, UriFormat.Unescaped);
@@ -412,6 +397,44 @@ namespace CrawlerLibrary
                     lastTen.Dequeue();
                 lastTen.Enqueue(url);
             }
+        }
+
+        private List<TableOperation> BuildIndexBatch(HtmlDocument doc, string pageUrl)
+        {
+            var titleNode = doc.DocumentNode.SelectSingleNode("//title");
+            if (titleNode == null)
+                titleNode = doc.DocumentNode.SelectSingleNode("//h1");
+            if (titleNode == null || string.IsNullOrEmpty(titleNode.InnerText))
+            {
+                Trace.TraceInformation("Page title not found for '{0}'.", pageUrl);
+                return null;
+            }
+            var date = doc.DocumentNode.SelectSingleNode("//meta[@itemprop='datePublished']");
+
+            var title = titleNode.InnerText;
+            var titleWords = Regex.Replace(title, @"[^\w\s]", "")
+                .Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            List<TableOperation> operation = new List<TableOperation>();
+            WebPageData pageData = new WebPageData(pageUrl, title);
+            if (date != null)
+                pageData.DateCreated = date.GetAttributeValue("content", null);
+            operation.Add(TableOperation.InsertOrReplace(pageData));
+
+            HashSet<string> words = new HashSet<string>();
+            foreach (var word in titleWords)
+            {
+                if (!words.Contains(word))
+                {
+                    int frequency = titleWords.Where(x => x == word).Count();
+                    InvertedIndexEntry entry = new InvertedIndexEntry(word, pageUrl, title, 
+                                                                      frequency);
+                    operation.Add(TableOperation.InsertOrReplace(entry));
+                    words.Add(word);
+                }
+            }
+
+            return operation;
         }
     }
 }
