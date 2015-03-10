@@ -1,0 +1,25 @@
+Nadav Ashkenazi - INFO 344 PA4 Writeup
+
+Implementing an end to end experience in this assigment was a simple matter of
+exposing a JSONP api from assignment 1, and then combining files from pa2 and 3
+into one azure service with a web role and worker role. There are some new
+features in this assignment, like querying the database by words, which I
+implemented in a separate service. Otherwise, it was all a simple matter of
+glueing the pieces together which, for the most part, was pretty quick and
+straightforward.
+
+Most of the code stayed the same from the previous assignments. Besides some
+small tweaks to the crawler and some now additions to the query suggestions
+service, there wasn't much new code in the old assignments. The core of the
+work was in working on the search service, which I implemented with another
+asmx file and used LINQ queries to fetch and process data from the azure table.
+I also made some utility objects for helping me with sending JSON over to the
+javascript frontend.
+
+Everything works when deployed to azure. The ec2 instance from assignment 1 is
+still live and running with the new JSONP api and seems to be stable. I added
+another WebJob to make sure that the trie for query suggestions stays in
+memory for as long as possible and that seems to be working as well. There were
+a few issues while converting my query suggestions website into a web role, but
+I managed to solve those using the specific facilities provided by the azure
+service.

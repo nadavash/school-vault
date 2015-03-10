@@ -111,11 +111,14 @@
         var searchResults = results.d;
         for (var i = 0; i < searchResults.length; ++i) {
             var $listResult = $('<li class="list-group-item">')
+                .append($('<span class="badge">')
+                    .text(searchResults[i].Rank))
                 .append($('<a class="list-group-item-heading">')
                     .html(searchResults[i].Title)
                     .attr('href', searchResults[i].Url))
                 .append($('<p class="list-group-item-text">')
                     .text(searchResults[i].Url));
+
             $resultList.append($listResult);
         }
     }
@@ -167,15 +170,19 @@
                             </thead> \
                             <tbody> \
                                 <tr> \
-                                    <td>' + player.gamesPlayed + '</td> \
-                                    <td>' + player.fieldGoalPercentage + '</td> \
-                                    <td>' + player.threePointPercentage + '</td> \
-                                    <td>' + player.freeThrowPercentage + '</td> \
-                                    <td>' + player.pointsPerGame + '</td> \
+                                    <td>' + ValueOrDash(player.gamesPlayed) + '</td> \
+                                    <td>' + ValueOrDash(player.fieldGoalPercentage) + '</td> \
+                                    <td>' + ValueOrDash(player.threePointPercentage) + '</td> \
+                                    <td>' + ValueOrDash(player.freeThrowPercentage) + '</td> \
+                                    <td>' + ValueOrDash(player.pointsPerGame) + '</td> \
                                 </tr> \
                             </tbody> \
                         </table> \
                     </div> \
                 </div>');
+    }
+
+    function ValueOrDash(val) {
+        return val !== null && val != 0 ? val : '--';
     }
 })();

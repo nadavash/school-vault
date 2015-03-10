@@ -1,0 +1,13 @@
+I implemented one extra credit in this assignment:
+
+1. Beautiful search results page
+
+I decided to take some time and tranfer over some of the nice stilying from pa1
+for the player display into the search results page. Player cards are big and
+beautiful. I used bootstrap as well to layout and organize my search page,
+which is pretty simple for the most part. Nothing to flashy besides some
+borders, shadows, and loading markers when a search query is taking a long time
+to process.
+
+Also, I made sure to include the nice query suggestions box from pa2 because it
+works well with the experience and looks good.

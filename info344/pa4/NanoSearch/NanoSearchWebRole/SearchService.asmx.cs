@@ -42,7 +42,7 @@ namespace NanoSearch
                 return null;
             Trace.TraceInformation("Getting search results for '{0}'", q);
             // Cleanup punctuation and lowercase the query.
-            q = Regex.Replace(q, @"[^\w\s]", "");
+            q = Regex.Replace(q.Replace("'", ""), @"[^\w\s]", " ");
             q = q.ToLower();
 
             CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
@@ -68,7 +68,7 @@ namespace NanoSearch
                 .Take(10)
                 .ToArray();
 
-            cache.Insert(q, results, null, Cache.NoAbsoluteExpiration, TimeSpan.FromMinutes(20));
+            cache.Insert(q, results, null, Cache.NoAbsoluteExpiration, TimeSpan.FromHours(1));
 
             return results;
         }

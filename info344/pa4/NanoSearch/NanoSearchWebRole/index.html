@@ -28,7 +28,19 @@
                 <ul id="suggestions" class="list-group"></ul>
             </div>
         </div>
+        <div id="add">
+            <script type="text/javascript">
+                (function () {
+                    if (window.CHITIKA === undefined) { window.CHITIKA = { 'units': [] }; };
+                    var unit = { "calltype": "async[2]", "publisher": "NadavAsh", "width": 420, "height": 300, "sid": "Chitika Default" };
+                    var placement_id = window.CHITIKA.units.length;
+                    window.CHITIKA.units.push(unit);
+                    document.write('<div id="chitikaAdBlock-' + placement_id + '"></div>');
+                }());
+            </script>
+        </div>
         <div id="results">
+            <script type="text/javascript" src="//cdn.chitika.net/getads.js" async></script>
             <img id="player-load" class="loading" src="assets/circle-loading-animation.gif" alt="loading" />
             <div id="players" class="panel panel-default respanel">
             </div>
@@ -36,16 +48,6 @@
                 <img id="link-load" class="loading" src="assets/circle-loading-animation.gif" alt="loading" />
                 <ul id="results-list" class="list-group"></ul>
             </div>
-            <script type="text/javascript">
-                (function () {
-                    if (window.CHITIKA === undefined) { window.CHITIKA = { 'units': [] }; };
-                    var unit = { "calltype": "async[2]", "publisher": "NadavAsh", "width": 550, "height": 250, "sid": "Chitika Default" };
-                    var placement_id = window.CHITIKA.units.length;
-                    window.CHITIKA.units.push(unit);
-                    document.write('<div id="chitikaAdBlock-' + placement_id + '"></div>');
-                }());
-            </script>
-            <script type="text/javascript" src="//cdn.chitika.net/getads.js" async></script>
         </div>
     </div>
 </body>

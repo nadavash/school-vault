@@ -412,7 +412,7 @@ namespace CrawlerLibrary
             var date = doc.DocumentNode.SelectSingleNode("//meta[@itemprop='datePublished']");
 
             var title = titleNode.InnerText;
-            var titleWords = Regex.Replace(title, @"[^\w\s]", " ")
+            var titleWords = Regex.Replace(title.Replace("'", ""), @"[^\w\s]", " ")
                 .Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
             List<TableOperation> operation = new List<TableOperation>();
