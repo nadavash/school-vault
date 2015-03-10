@@ -24,9 +24,12 @@
         $('#search-button').click(function () {
             DoQuery();
         });
-        $('#query').keypress(function (e) {
-            if ((e.keyCode | e.which) === 13) {
+        $('#query').keydown(function (e) {
+            var key = (e.keyCode | e.which);
+            if (key === 13) {
                 DoQuery();
+            } else if (key === 27) {
+                $('#suggestions').empty();
             }
         });
     });
