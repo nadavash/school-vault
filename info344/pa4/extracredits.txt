@@ -1,4 +1,4 @@
-I implemented one extra credit in this assignment:
+I implemented two extra credits in this assignment:
 
 1. Beautiful search results page
 
@@ -11,6 +11,13 @@ to process.
 
 Also, I made sure to include the nice query suggestions box from pa2 because it
 works well with the experience and looks good.
+
+2. Google Instant!
+
+I am querying 200ms after last keystroke of the user to allow for the user to
+type without having to query on every keystroke. This works very well for
+results that are already cached, but may be a little longer for results that
+arent.
 
 ### Extra extra credit? ###
 
