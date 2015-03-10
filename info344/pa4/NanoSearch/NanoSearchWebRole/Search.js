@@ -1,8 +1,10 @@
 ﻿(function () {
     var MAX_RESULTS = 10;
+    var TIMEOUT = 200;
 
     var currentRequest = null;
     var currentSearch = null;
+    var instantTimeout = null;
 
     $(document).ready(function () {
         $('#query').focus()
@@ -10,6 +12,14 @@
                 FetchSuggestions($(this).val(), MAX_RESULTS, function (results) {
                     DisplaySuggestions(results.d);
                 });
+                
+                if (instantTimeout !== null) {
+                    clearTimeout(instantTimeout);
+                }
+                instantTimeout = setTimeout(function () {
+                    instantTimeout = null;
+                    DoQuery(true);
+                }, TIMEOUT);
             });
         $('#search-button').click(function () {
             DoQuery();
@@ -21,14 +31,17 @@
         });
     });
 
-    function DoQuery() {
+    function DoQuery(instant) {
         if (currentRequest !== null) {
             currentRequest.abort();
             currentRequest = null;
         }
         var query = $('#query').val();
+        if (query.trim() === '') {
+            return;
+        }
         $('.loading').show();
-        $('#suggestions').empty();
+        if (!instant) { $('#suggestions').empty(); }
         $('#players').empty();
         $('#results-list').empty();
         FetchPlayerData(query, DisplayPlayerData);
@@ -84,7 +97,6 @@
             currentSearch.abort();
             currentSearch = null;
         }
-        $('#suggestions').empty();
 
         currentSearch = $.ajax({
             type: 'get',

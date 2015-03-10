@@ -1,0 +1,16 @@
+Nadav Ashkenazi
+CSE 333
+Exercise 18
+
+1. The Eraser signals a data race when the set of possible locks for any
+variable v is the empty set. This condition is chosen because when all
+candidate locks are eliminated for any v, that means v is not consistently
+protected by any lock, which is a pretty good sign that there may be a data
+race.
+
+2. Eraser may signal a false positive in cases where programs used their own
+memory managment and locking facilities. Eraser can also raise false alarms for
+variables that are protected by multiple protecting locks (essentially single 
+write, multi read functionality). For false negatives, Eraser may miss 
+reporting on races if there was no attempted access to v by one thread while 
+another is initializing it.
