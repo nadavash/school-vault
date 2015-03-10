@@ -40,6 +40,7 @@
     <Folder Include="CrawlerWorkerRoleContent\" />
     <Folder Include="DashboardWebRoleContent\" />
     <Folder Include="NanoSearchWebRoleContent\" />
+    <Folder Include="Profiles" />
   </ItemGroup>
   <ItemGroup>
     <DiagnosticsConfiguration Include="CrawlerWorkerRoleContent\diagnostics.wadcfgx" />
@@ -63,6 +64,9 @@
       <RoleName>NanoSearchWebRole</RoleName>
       <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PublishProfile Include="Profiles\nanosearchProduction.azurePubxml" />
   </ItemGroup>
   <!-- Import the target files for this project template -->
   <PropertyGroup>

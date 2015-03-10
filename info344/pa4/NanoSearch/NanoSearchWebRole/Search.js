@@ -2,6 +2,8 @@
     var MAX_RESULTS = 10;
 
     var currentRequest = null;
+    var currentSearch = null;
+
     $(document).ready(function () {
         $('#query').focus()
             .on('input propertychange paste', function () {
@@ -10,18 +12,28 @@
                 });
             });
         $('#search-button').click(function () {
-            var query = $('#query').val();
-            FetchPlayerData(query, DisplayPlayerData);
-            FetchSearchResults(query, DisplaySearchResults);
+            DoQuery();
         });
         $('#query').keypress(function (e) {
             if ((e.keyCode | e.which) === 13) {
-                var query = $('#query').val();
-                FetchPlayerData(query, DisplayPlayerData);
-                FetchSearchResults(query, DisplaySearchResults);
+                DoQuery();
             }
         });
     });
+
+    function DoQuery() {
+        if (currentRequest !== null) {
+            currentRequest.abort();
+            currentRequest = null;
+        }
+        var query = $('#query').val();
+        $('.loading').show();
+        $('#suggestions').empty();
+        $('#players').empty();
+        $('#results-list').empty();
+        FetchPlayerData(query, DisplayPlayerData);
+        FetchSearchResults(query, DisplaySearchResults);
+    }
 
     function FetchSuggestions(prefix, max, onsuccess) {
         if (currentRequest !== null) {
@@ -68,13 +80,13 @@
     }
 
     function FetchSearchResults(query, onsuccess) {
-        if (currentRequest !== null) {
-            currentRequest.abort();
-            currentRequest = null;
+        if (currentSearch !== null) {
+            currentSearch.abort();
+            currentSearch = null;
         }
         $('#suggestions').empty();
 
-        $.ajax({
+        currentSearch = $.ajax({
             type: 'get',
             url: 'SearchService.asmx/GetSearchResults',
             data: {
@@ -87,8 +99,12 @@
     }
 
     function DisplaySearchResults(results) {
+        $('#link-load').hide();
         var $resultList = $('#results-list').empty();
-        if (results.d === null) {
+        if (results.d === null || results.d.length === 0) {
+            $resultList.append($('<p>')
+                    .append('Could not find search results for <strong>'
+                        + $('#query').val() + '</strong>'));
             return;
         }
 
@@ -120,14 +136,14 @@
     }
 
     function DisplayPlayerData(results) {
-        if (results.players === null) {
+        $('#player-load').hide();
+        var $container = $('#players').empty();
+        if (results.players === null || results.players.length === 0) {
             return;
         }
-        var $container = $('#players').empty();
+
         var players = results.players;
-        for (var i = 0; i < players.length; ++i) {
-            $container.append(BuildPlayerCard(players[i]));
-        }
+        $container.append(BuildPlayerCard(players[0]));
     }
 
     function BuildPlayerCard(player) {

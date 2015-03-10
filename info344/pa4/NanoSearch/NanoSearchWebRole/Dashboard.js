@@ -35,6 +35,7 @@
             $('#metric-queued').text(results.d.NumQueuedUrls);
         });
         GetErrors();
+        GetTrieData();
     }
 
     function Crawl() {
@@ -85,6 +86,34 @@
                 list.append(
                     $('<li class="list-group-item">').text(text));
             }
+        });
+    }
+
+    function GetTrieData() {
+        console.log('Get trie data.');
+        $.ajax({
+            type: 'get',
+            url: 'QuerySuggestionsService.asmx/NumUrls',
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (results) {
+                $('#metric-trie').text(results.d);
+            }
+        }).fail(function (jxhr, msg, errorThrown) {
+            toastr.error(msg + ': ' + errorThrown);
+        });
+
+        $.ajax({
+            type: 'get',
+            url: 'QuerySuggestionsService.asmx/LastTitle',
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (results) {
+                var title = results.d === null ? '' : results.d;
+                $('#metric-title').text(title);
+            }
+        }).fail(function (jxhr, msg, errorThrown) {
+            toastr.error(msg + ': ' + errorThrown);
         });
     }
 

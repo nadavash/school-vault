@@ -1,4 +1,5 @@
-﻿using Microsoft.WindowsAzure.Storage;
+﻿using Microsoft.WindowsAzure.ServiceRuntime;
+using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System;
 using System.Collections.Generic;
@@ -26,13 +27,12 @@ namespace NanoSearch
         public const string PAGECOUNTS_FILE = "\\pagecounts.txt";
         private static Trie prefixTree;
         private static Dictionary<string, int> pageCounts;
-        private static PerformanceCounter memCounter;
 
         static QuerySuggestionsService()
         {
-            memCounter = new PerformanceCounter("Memory", "Available MBytes");
-            string folderPath = Environment.GetFolderPath(
-                Environment.SpecialFolder.ApplicationData).ToString();
+            string folderPath = RoleEnvironment.GetLocalResource("LocalStorage").RootPath;
+                //Environment.GetFolderPath(
+                //Environment.SpecialFolder.ApplicationData).ToString();
 
             if (!File.Exists(folderPath + WIKI_FILE)
                 || !File.Exists(folderPath + PAGECOUNTS_FILE))
@@ -129,6 +129,20 @@ namespace NanoSearch
             return results;
         }
 
+        [WebMethod]
+        [ScriptMethod(UseHttpGet = true)]
+        public int NumUrls()
+        {
+            return prefixTree.Count;
+        }
+
+        [WebMethod]
+        [ScriptMethod(UseHttpGet = true)]
+        public string LastTitle()
+        {
+            return prefixTree.LastTitle;
+        }
+
         private KeyValuePair<string, int>[] RankSuggestions(List<string> suggestions, int numFuzzy)
         {
             var sorted = new List<KeyValuePair<string,int>>();
@@ -162,7 +176,7 @@ namespace NanoSearch
         private static void DownloadFromBlob(string folderPath)
         {
             CloudStorageAccount storage = CloudStorageAccount.Parse(
-                    ConfigurationManager.AppSettings["StorageConnectionString"]);
+                RoleEnvironment.GetConfigurationSettingValue("StorageConnectionString"));
             CloudBlobClient blobClient = storage.CreateCloudBlobClient();
             CloudBlobContainer container = blobClient.GetContainerReference("live-suggestions");
             Stream stream = null;

@@ -4,6 +4,7 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -39,6 +40,7 @@ namespace NanoSearch
         {
             if (string.IsNullOrEmpty(q))
                 return null;
+            Trace.TraceInformation("Getting search results for '{0}'", q);
             // Cleanup punctuation and lowercase the query.
             q = Regex.Replace(q, @"[^\w\s]", "");
             q = q.ToLower();
@@ -51,16 +53,19 @@ namespace NanoSearch
             if (results != null)
                 return results;
 
-            TableQuery<InvertedIndexEntry> tableQuery = GenerateQuery(q);
-            if (tableQuery == null)
+            var queries = GenerateQueries(q);
+            if (queries == null)
                 return null;
 
-            results = table.ExecuteQuery(tableQuery)
+            results = ExecuteQueries(table, queries)
                 .GroupBy(x => x.Url)
                 .Select(x => new SearchResult(x.Key, x.ElementAt(0).Title, 
-                                              x.Select(y => y.Frequency).Sum()))
+                                              x.Select(y => y.Frequency).Sum() *
+                                              x.Count()))
+                .GroupBy(x => x.Title).Select(x => x.FirstOrDefault())
                 .OrderByDescending(x => x.Rank)
                 .ThenBy(x => x.Title)
+                .Take(10)
                 .ToArray();
 
             cache.Insert(q, results, null, Cache.NoAbsoluteExpiration, TimeSpan.FromMinutes(20));
@@ -68,7 +73,7 @@ namespace NanoSearch
             return results;
         }
 
-        private TableQuery<InvertedIndexEntry> GenerateQuery(string queryString)
+        private TableQuery<InvertedIndexEntry>[] GenerateQueries(string queryString)
         {
             var filters = queryString.Split()
                 .Select(word => TableQuery.GenerateFilterCondition("PartitionKey",
@@ -76,18 +81,29 @@ namespace NanoSearch
                                                                    word))
                 .ToArray();
 
-            string tableQueryString = null;
             if (filters.Length == 0)
                 return null;
 
-            tableQueryString = filters[0];
-            
-            foreach (var filter in filters.Skip(1))
+            var queries = new TableQuery<InvertedIndexEntry>[filters.Length];
+
+            for (int i = 0; i < queries.Length; ++i)
             {
-                tableQueryString = TableQuery.CombineFilters(tableQueryString, TableOperators.Or, filter);
+                queries[i] = new TableQuery<InvertedIndexEntry>().Where(filters[i]);
             }
 
-            return new TableQuery<InvertedIndexEntry>().Where(tableQueryString);
+            return queries;
+        }
+
+        private IEnumerable<InvertedIndexEntry> ExecuteQueries(CloudTable table,
+                                                               TableQuery<InvertedIndexEntry>[] queries)
+        {
+            List<InvertedIndexEntry> results = new List<InvertedIndexEntry>();
+            foreach (var query in queries)
+            {
+                results.AddRange(table.ExecuteQuery(query));
+            }
+
+            return results;
         }
 
         public class SearchResult
