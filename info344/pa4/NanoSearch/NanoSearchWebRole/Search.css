@@ -22,6 +22,14 @@ h1 {
     display: inline;
 }
 
+.title-link {
+    font-size: 13pt;
+}
+
+.link-url {
+    color: #006621;
+}
+
 .respanel {
     border: none;
 }

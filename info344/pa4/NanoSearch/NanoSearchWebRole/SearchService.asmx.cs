@@ -64,6 +64,7 @@ namespace NanoSearch
                                               x.Count()))
                 .GroupBy(x => x.Title).Select(x => x.FirstOrDefault())
                 .OrderByDescending(x => x.Rank)
+                .ThenBy(x => x.Title.Length)
                 .ThenBy(x => x.Title)
                 .Take(10)
                 .ToArray();

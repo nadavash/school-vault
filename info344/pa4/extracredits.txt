@@ -11,3 +11,13 @@ to process.
 
 Also, I made sure to include the nice query suggestions box from pa2 because it
 works well with the experience and looks good.
+
+### Extra extra credit? ###
+
+I implemented frequency count for words within page title and added that to my
+search algorithm.
+
+For example, if a title contains the word 'lebron' twice, it will store that
+frequency in the azure table index entry. I later add up the ferquency counts
+and calculate a rank, which may give better results than if I don't use the 
+frequency. Can this count for some sort of extra credit?

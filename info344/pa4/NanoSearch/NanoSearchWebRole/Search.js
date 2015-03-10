@@ -113,10 +113,10 @@
             var $listResult = $('<li class="list-group-item">')
                 .append($('<span class="badge">')
                     .text(searchResults[i].Rank))
-                .append($('<a class="list-group-item-heading">')
+                .append($('<a class="title-link list-group-item-heading">')
                     .html(searchResults[i].Title)
                     .attr('href', searchResults[i].Url))
-                .append($('<p class="list-group-item-text">')
+                .append($('<p class="link-url list-group-item-text">')
                     .text(searchResults[i].Url));
 
             $resultList.append($listResult);
