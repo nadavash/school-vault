@@ -247,20 +247,20 @@ namespace CrawlerLibrary
 
         private void EnqueueUrlIfValid(string url, string host)
         {
-            //Uri hostUri;
-            //Uri uri;
-            //if (url.StartsWith("/") && !url.Contains(".com") &&
-            //    Uri.TryCreate("http://" + host, UriKind.Absolute, out hostUri) &&
-            //    Uri.TryCreate(hostUri, url, out uri))
-            //{
-            //    try
-            //    {
-            //        EnqueueUrlIfValid(uri.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped));
-            //    }
-            //    catch (Exception e) { Trace.TraceError(e.ToString()); }
-            //}
-            //else
-            EnqueueUrlIfValid(url);
+            Uri hostUri;
+            Uri uri;
+            if (url.StartsWith("/") && !url.Contains(".com") &&
+                Uri.TryCreate("http://" + host, UriKind.Absolute, out hostUri) &&
+                Uri.TryCreate(hostUri, url, out uri))
+            {
+                try
+                {
+                    EnqueueUrlIfValid(uri.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped));
+                }
+                catch (Exception e) { Trace.TraceError(e.ToString()); }
+            }
+            else
+                EnqueueUrlIfValid(url);
         }
 
         private void EnqueueUrlIfValid(string url)
