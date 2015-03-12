@@ -100,10 +100,10 @@ HttpRequest HttpConnection::ParseRequest(size_t end) {
   // whitespace from the end of a string, and (c) converting a string
   // to lowercase.
   std::vector<std::string> lines;
-  boost::split(lines, str, boost::is_any_of("\r\n"));
+  boost::split(lines, str, boost::is_any_of("\r\n"), boost::token_compress_on);
   if (lines.size() > 0) {
     std::vector<std::string> parts;
-    boost::split(parts, str, boost::is_any_of(" "));
+    boost::split(parts, str, boost::is_any_of(" "), boost::token_compress_on);
     req.URI = parts[1];
   }
 
@@ -111,7 +111,7 @@ HttpRequest HttpConnection::ParseRequest(size_t end) {
     boost::algorithm::to_lower(*iter);
 
     std::vector<std::string> parts;
-    boost::split(parts, *iter, boost::is_any_of(":"));
+    boost::split(parts, *iter, boost::is_any_of(":"), boost::token_compress_on);
     req.headers[boost::trim_copy(parts[0])] = boost::trim_copy(parts[1]);
   }
 
