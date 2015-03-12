@@ -23,6 +23,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
+#include <memory>
 
 extern "C" {
   #include "libhw2/fileparser.h"
