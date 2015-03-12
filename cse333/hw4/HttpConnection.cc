@@ -112,7 +112,9 @@ HttpRequest HttpConnection::ParseRequest(size_t end) {
 
     std::vector<std::string> parts;
     boost::split(parts, *iter, boost::is_any_of(":"), boost::token_compress_on);
-    req.headers[boost::trim_copy(parts[0])] = boost::trim_copy(parts[1]);
+    if (parts.size() >= 2) {
+      req.headers[boost::trim_copy(parts[0])] = boost::trim_copy(parts[1]);
+    }
   }
 
   buffer_ = buffer_.substr(end);
