@@ -27,6 +27,7 @@
 #include <errno.h>       // for errno, used by strerror()
 #include <string.h>      // for memset, strerror()
 #include <iostream>      // for std::cerr, etc.
+#include <cinttypes>
 
 #include "./ServerSocket.h"
 
@@ -54,10 +55,44 @@ bool ServerSocket::BindAndListen(int ai_family, int *listen_fd) {
   // Use "getaddrinfo," "socket," "bind," and "listen" to
   // create a listening socket on port port_.  Return the
   // listening socket through the output parameter "listen_fd".
+  const int backlog = 10;
+  addrinfo *ai;
+  addrinfo hints = {0};
+  hints.ai_family = ai_family;
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_flags = AI_PASSIVE;
 
-  // MISSING:
+  char port[5];
+  snprintf(port, sizeof(port), "%" PRIu16, port_);
+  int res = getaddrinfo(NULL, port, &hints, &ai);
+  if (res) {
+    return false;
+  }
 
+  int fd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+  if (fd < 0) {
+    freeaddrinfo(ai);
+    close(fd);
+    return false;
+  }
 
+  if (bind(fd, ai->ai_addr, ai->ai_addrlen)) {
+    freeaddrinfo(ai);
+    close(fd);
+    return false;
+  }
+
+  if (listen(fd, backlog)) {
+    freeaddrinfo(ai);
+    close(fd);
+    return false;
+  }
+
+  sock_family_ = ai_family;
+  listen_sock_fd_ = fd;
+  *listen_fd = fd;
+
+  freeaddrinfo(ai);
   return true;
 }
 
@@ -71,9 +106,34 @@ bool ServerSocket::Accept(int *accepted_fd,
   // (Block until a new connection arrives.)  Return the newly accepted
   // socket, as well as information about both ends of the new connection,
   // through the various output parameters.
+  sockaddr_storage clt_addr;
+  socklen_t clt_addrlen = sizeof(clt_addr);
+  char clt_dns[NI_MAXHOST], clt_ip[NI_MAXHOST], clt_port[NI_MAXSERV];
 
-  // MISSING:
+  sockaddr_storage srv_addr;
+  socklen_t srv_addrlen = sizeof(srv_addr);
+  char srv_dns[NI_MAXHOST], srv_ip[NI_MAXHOST];
 
+  int newfd = accept(listen_sock_fd_, (sockaddr *)&clt_addr, &clt_addrlen);
+  if (newfd < 0) {
+    return false;
+  }
+
+  getnameinfo((sockaddr *)&clt_addr, clt_addrlen, clt_dns, sizeof(clt_dns),
+              NULL, 0, 0);
+  getnameinfo((sockaddr *)&clt_addr, clt_addrlen, clt_ip, sizeof(clt_ip),
+              clt_port, sizeof(clt_port), NI_NUMERICHOST | NI_NUMERICSERV);
+  *client_addr = clt_ip;
+  *client_port = atoi(clt_port);
+  *client_dnsname = clt_dns;
+
+  getsockname(newfd, (sockaddr *)&srv_addr, &srv_addrlen);
+  getnameinfo((sockaddr *)&srv_addr, srv_addrlen, srv_dns, sizeof(srv_dns),
+              NULL, 0, 0);
+  getnameinfo((sockaddr *)&srv_addr, srv_addrlen, srv_ip, sizeof(srv_ip),
+              NULL, 0, NI_NUMERICHOST);
+  *server_addr = srv_ip;
+  *server_dnsname = srv_dns;
 
   return true;
 }
