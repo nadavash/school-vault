@@ -109,6 +109,7 @@ bool ServerSocket::Accept(int *accepted_fd,
   if (newfd < 0) {
     return false;
   }
+  *accepted_fd = newfd;
 
   getnameinfo((sockaddr *)&clt_addr, clt_addrlen, clt_dns, sizeof(clt_dns),
               NULL, 0, 0);

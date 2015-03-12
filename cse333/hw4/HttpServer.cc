@@ -98,7 +98,7 @@ void HttpServer_ThrFn(ThreadPool::Task *t) {
        << "(IP address " << hst->caddr << ")" << " connected." << endl;
 
   HttpConnection conn(hst->client_fd);
-
+  cout << " fd: " << hst->client_fd;
   bool done = false;
   while (!done) {
     // Use the HttpConnection class to read in the next request from
@@ -107,9 +107,7 @@ void HttpServer_ThrFn(ThreadPool::Task *t) {
     // client sent a "Connection: close\r\n" header, then shut down
     // the connection.
     HttpRequest request;
-    std::cout << hst->client_fd;
     if (conn.GetNextRequest(&request)) {
-      std::cout << "Writing reponse..." << std::endl;
       auto response = ProcessRequest(request, hst->basedir, hst->indices);
       conn.WriteResponse(response);
       if (request.headers["connection"] == "close") {

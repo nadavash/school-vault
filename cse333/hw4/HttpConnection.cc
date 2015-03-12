@@ -109,7 +109,7 @@ HttpRequest HttpConnection::ParseRequest(size_t end) {
 
   for (auto iter = ++lines.begin(); iter != lines.end(); ++iter) {
     boost::algorithm::to_lower(*iter);
-
+    printf("%s\n", iter->c_str());
     std::vector<std::string> parts;
     boost::split(parts, *iter, boost::is_any_of(":"), boost::token_compress_on);
     if (parts.size() >= 2) {
@@ -117,7 +117,11 @@ HttpRequest HttpConnection::ParseRequest(size_t end) {
     }
   }
 
-  buffer_ = buffer_.substr(end);
+  if (end >= buffer_.size()) {
+    buffer_.clear();
+  } else {
+    buffer_ = buffer_.substr(end);
+  }
 
   return req;
 }
