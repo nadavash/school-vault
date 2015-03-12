@@ -54,6 +54,9 @@ HttpResponse ProcessFileRequest(const std::string &uri,
 HttpResponse ProcessQueryRequest(const std::string &uri,
                                  const std::list<std::string> *indices);
 
+// Get the content-type string for the given file.
+static std::string GetContentType(const std::string& fname);
+
 bool HttpServer::Run(void) {
   // Create the server listening socket.
   int listen_fd;
@@ -94,6 +97,8 @@ void HttpServer_ThrFn(ThreadPool::Task *t) {
   cout << "  client " << hst->cdns << ":" << hst->cport << " "
        << "(IP address " << hst->caddr << ")" << " connected." << endl;
 
+  HttpConnection conn(hst->client_fd);
+
   bool done = false;
   while (!done) {
     // Use the HttpConnection class to read in the next request from
@@ -101,9 +106,23 @@ void HttpServer_ThrFn(ThreadPool::Task *t) {
     // use the HttpConnection class to write the response.  If the
     // client sent a "Connection: close\r\n" header, then shut down
     // the connection.
-
-    // MISSING:
+    HttpRequest request;
+    std::cout << hst->client_fd;
+    if (conn.GetNextRequest(&request)) {
+      std::cout << "Writing reponse..." << std::endl;
+      auto response = ProcessRequest(request, hst->basedir, hst->indices);
+      conn.WriteResponse(response);
+      if (request.headers["connection"] == "close") {
+        done = true;
+      }
+    } else {
+      done = true;
+    }
   }
+
+  cout << "  client " << hst->cdns << ":" << hst->cport << " "
+       << "(IP address " << hst->caddr << ")" << " closed." << endl;
+  close(hst->client_fd);
 }
 
 HttpResponse ProcessRequest(const HttpRequest &req,
@@ -143,9 +162,21 @@ HttpResponse ProcessFileRequest(const std::string &uri,
   // in the HttpResponse as well.
   std::string fname = "";
 
-  // MISSING:
+  URLParser parser;
+  parser.Parse(uri);
+  fname = parser.get_path();
 
+  std::string file_contents;
+  FileReader freader(basedir, fname);
+  if (freader.ReadFile(&file_contents)) {
+    ret.headers["Content-type"] = GetContentType(fname);
 
+    ret.protocol = "HTTP/1.1";
+    ret.response_code = 200;
+    ret.message = "Success";
+    ret.body += file_contents;
+    return ret;
+  }
 
   // If you couldn't find the file, return an HTTP 404 error.
   ret.protocol = "HTTP/1.1";
@@ -187,6 +218,20 @@ HttpResponse ProcessQueryRequest(const std::string &uri,
 
 
   return ret;
+}
+
+static std::string GetContentType(const std::string& fname) {
+  if (boost::algorithm::ends_with(fname, ".html") ||
+      boost::algorithm::ends_with(fname, ".htm")) {
+    return "text/html";
+  } else if (boost::algorithm::ends_with(fname, ".jpeg") ||
+             boost::algorithm::ends_with(fname, ".jpg")) {
+    return "image/jpeg";
+  } else if (boost::algorithm::ends_with(fname, ".png")) {
+    return "image/png";
+  } else {
+    return "text/text";
+  }
 }
 
 }  // namespace hw4

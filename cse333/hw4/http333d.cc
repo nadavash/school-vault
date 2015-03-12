@@ -18,6 +18,7 @@
  *  along with 333proj.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <algorithm>
 #include <dirent.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -28,6 +29,7 @@
 #include <cstdio>
 #include <iostream>
 #include <list>
+#include <boost/regex.hpp>
 
 #include "./ServerSocket.h"
 #include "./HttpServer.h"
@@ -101,7 +103,38 @@ void GetPortAndPath(int argc,
   //  (c) that "path" (i.e., argv[2]) is a readable directory
   //  (d) that you have at least one index, and that all indices
   //      are readable files.
+  if (argc < 4) {
+    Usage(argv[0]);
+  }
 
-  // MISSING:
+  long int portNum = std::strtol(argv[1], NULL, 10);
+  cout << sizeof(*port) << std::endl;
+  if (portNum == 0) {
+    cout << argv[1] << " isn't a valid port number." << std::endl;
+    Usage(argv[0]);
+  }
+  cout << portNum << std::endl;
+  *port = std::min((long int)USHRT_MAX, portNum);
+
+  struct stat fstat;
+  if (stat(argv[2], &fstat) != 0) {
+    cout << argv[2] << " isn't a valid, readable directory." << std::endl;
+    Usage(argv[0]);
+  }
+  if (!S_ISDIR(fstat.st_mode)) {
+    cout << argv[2] << " isn't a directory." << std::endl;
+    Usage(argv[0]);
+  } else if (!fstat.st_mode & S_IRUSR) {
+    cout << argv[2] << " isn't readable." << std::endl;
+    Usage(argv[0]);
+  }
+  *path = argv[2];
+
+  for (int i = 3; i < argc; ++i) {
+    if (access(argv[i], R_OK) != 0) {
+      cout << argv[i] << " isn't a regular file. Skipping." << std::endl;
+    }
+    indices->push_back(argv[i]);
+  }
 }
 
