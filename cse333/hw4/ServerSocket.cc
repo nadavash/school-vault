@@ -62,7 +62,7 @@ bool ServerSocket::BindAndListen(int ai_family, int *listen_fd) {
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE;
 
-  char port[5];
+  char port[NI_MAXSERV];
   snprintf(port, sizeof(port), "%" PRIu16, port_);
   int res = getaddrinfo(NULL, port, &hints, &ai);
   if (res) {
@@ -70,19 +70,10 @@ bool ServerSocket::BindAndListen(int ai_family, int *listen_fd) {
   }
 
   int fd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-  if (fd < 0) {
-    freeaddrinfo(ai);
-    close(fd);
-    return false;
-  }
-
-  if (bind(fd, ai->ai_addr, ai->ai_addrlen)) {
-    freeaddrinfo(ai);
-    close(fd);
-    return false;
-  }
-
-  if (listen(fd, backlog)) {
+  if (fd < 0
+      || setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &res, sizeof(res))
+      || bind(fd, ai->ai_addr, ai->ai_addrlen)
+      || listen(fd, backlog)) {
     freeaddrinfo(ai);
     close(fd);
     return false;

@@ -48,9 +48,14 @@ bool FileReader::ReadFile(std::string *str) {
   // memory.  Alternatively, you can use a unique_ptr with a malloc/free
   // deleter to automatically manage this for you; see the comment in
   // HttpUtils.h above the MallocDeleter class for details.
+  HWSize_t size;
+  std::unique_ptr<char, MallocDeleter<char>> file_contents(
+      ::ReadFile(fullfile.c_str(), &size));
+  if (file_contents == NULL) {
+    return false;
+  }
 
-  // MISSING:
-
+  *str = file_contents.get();
 
   return true;
 }
