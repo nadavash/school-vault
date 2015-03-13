@@ -54,7 +54,6 @@ bool HttpConnection::GetNextRequest(HttpRequest *request) {
 
   int res;
   size_t end_index;
-  // TODO(nadavash): Improve perfomance of buffer search.
   while ((end_index = buffer_.find(header)) == std::string::npos) {
     res = WrappedRead(fd_, buf, sizeof(buf));
     if (res < 0) {
