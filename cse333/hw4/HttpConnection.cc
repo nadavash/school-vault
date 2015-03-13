@@ -63,7 +63,7 @@ bool HttpConnection::GetNextRequest(HttpRequest *request) {
       break;
     }
 
-    buffer_.append((char *)buf, (size_t)res);
+    buffer_.append(reinterpret_cast<char *>(buf), (size_t)res);
   }
 
   end_index = end_index + header.size() - 1;

@@ -105,25 +105,27 @@ bool ServerSocket::Accept(int *accepted_fd,
   socklen_t srv_addrlen = sizeof(srv_addr);
   char srv_dns[NI_MAXHOST], srv_ip[NI_MAXHOST];
 
-  int newfd = accept(listen_sock_fd_, (sockaddr *)&clt_addr, &clt_addrlen);
+  int newfd = accept(listen_sock_fd_, reinterpret_cast<sockaddr *>(&clt_addr),
+                     &clt_addrlen);
   if (newfd < 0) {
     return false;
   }
   *accepted_fd = newfd;
 
-  getnameinfo((sockaddr *)&clt_addr, clt_addrlen, clt_dns, sizeof(clt_dns),
-              NULL, 0, 0);
-  getnameinfo((sockaddr *)&clt_addr, clt_addrlen, clt_ip, sizeof(clt_ip),
-              clt_port, sizeof(clt_port), NI_NUMERICHOST | NI_NUMERICSERV);
+  getnameinfo(reinterpret_cast<sockaddr *>(&clt_addr), clt_addrlen, clt_dns,
+              sizeof(clt_dns), NULL, 0, 0);
+  getnameinfo(reinterpret_cast<sockaddr *>(&clt_addr), clt_addrlen, clt_ip,
+              sizeof(clt_ip), clt_port, sizeof(clt_port),
+              NI_NUMERICHOST | NI_NUMERICSERV);
   *client_addr = clt_ip;
   *client_port = atoi(clt_port);
   *client_dnsname = clt_dns;
 
-  getsockname(newfd, (sockaddr *)&srv_addr, &srv_addrlen);
-  getnameinfo((sockaddr *)&srv_addr, srv_addrlen, srv_dns, sizeof(srv_dns),
-              NULL, 0, 0);
-  getnameinfo((sockaddr *)&srv_addr, srv_addrlen, srv_ip, sizeof(srv_ip),
-              NULL, 0, NI_NUMERICHOST);
+  getsockname(newfd, reinterpret_cast<sockaddr *>(&srv_addr), &srv_addrlen);
+  getnameinfo(reinterpret_cast<sockaddr *>(&srv_addr), srv_addrlen, srv_dns,
+              sizeof(srv_dns), NULL, 0, 0);
+  getnameinfo(reinterpret_cast<sockaddr *>(&srv_addr), srv_addrlen, srv_ip,
+              sizeof(srv_ip), NULL, 0, NI_NUMERICHOST);
   *server_addr = srv_ip;
   *server_dnsname = srv_dns;
 
