@@ -130,6 +130,8 @@ void HttpServer_ThrFn(ThreadPool::Task *t) {
         done = true;
       }
     } else {
+      cerr << "  client " << hst->cdns << ":" << hst->cport << " "
+          << "(IP address " << hst->caddr << ")" << " failed read." << endl;
       done = true;
     }
   }
