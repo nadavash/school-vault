@@ -34,6 +34,7 @@
 using std::cerr;
 using std::cout;
 using std::endl;
+using hw3::QueryProcessor;
 
 namespace hw4 {
 
@@ -56,6 +57,22 @@ HttpResponse ProcessQueryRequest(const std::string &uri,
 
 // Get the content-type string for the given file.
 static std::string GetContentType(const std::string& fname);
+
+// Helper method to get query terms from the given uri.
+static std::vector<std::string> GetQueryTerms(const std::string& uri,
+                                              std::string* query);
+
+// Helper method to fill the given string with html query results.
+static void FillHtmlResults(
+    const std::string& query,
+    const std::vector<QueryProcessor::QueryResult>& queryResults,
+    std::string *content);
+
+// Fills the top of the html page for search.
+static void FillHtmlTop(std::string *content);
+
+// Fills the bottom of the html page
+static void FillHtmlBottom(std::string *content);
 
 bool HttpServer::Run(void) {
   // Create the server listening socket.
@@ -98,7 +115,6 @@ void HttpServer_ThrFn(ThreadPool::Task *t) {
        << "(IP address " << hst->caddr << ")" << " connected." << endl;
 
   HttpConnection conn(hst->client_fd);
-  cout << " fd: " << hst->client_fd;
   bool done = false;
   while (!done) {
     // Use the HttpConnection class to read in the next request from
@@ -163,6 +179,7 @@ HttpResponse ProcessFileRequest(const std::string &uri,
   URLParser parser;
   parser.Parse(uri);
   fname = parser.get_path();
+  fname.replace(0, 8, "");
 
   std::string file_contents;
   FileReader freader(basedir, fname);
@@ -211,8 +228,25 @@ HttpResponse ProcessQueryRequest(const std::string &uri,
   //  - in your generated search results, see if you can figure out
   //    how to hyperlink results to the file contents, like we did
   //    in our solution_binaries/http333d.
+  ret.protocol = "HTTP/1.1";
+  ret.response_code = 200;
+  ret.message = "success";
+  FillHtmlTop(&ret.body);
 
-  // MISSING:
+  std::string query;
+  auto terms = GetQueryTerms(uri, &query);
+  if (!terms.empty()) {
+    hw3::QueryProcessor processor(*indices, false);
+    auto results = processor.ProcessQuery(terms);
+    if (!results.empty()) {
+      FillHtmlResults(query, results, &ret.body);
+    } else {
+      ret.body += "No results found for <strong>";
+      ret.body += query + "</strong>";
+    }
+  }
+
+  FillHtmlBottom(&ret.body);
 
 
   return ret;
@@ -222,14 +256,81 @@ static std::string GetContentType(const std::string& fname) {
   if (boost::algorithm::ends_with(fname, ".html") ||
       boost::algorithm::ends_with(fname, ".htm")) {
     return "text/html";
+  } else if (boost::algorithm::ends_with(fname, ".css")) {
+    return "text/css";
+  } else if (boost::algorithm::ends_with(fname, ".js")) {
+    return "text/javascript";
   } else if (boost::algorithm::ends_with(fname, ".jpeg") ||
              boost::algorithm::ends_with(fname, ".jpg")) {
     return "image/jpeg";
   } else if (boost::algorithm::ends_with(fname, ".png")) {
     return "image/png";
   } else {
-    return "text/text";
+    return "text/plain";
   }
+}
+
+static std::vector<std::string> GetQueryTerms(const std::string& uri,
+                                              std::string* query) {
+  std::vector<std::string> results;
+  URLParser parser;
+  parser.Parse(uri);
+
+  auto args = parser.get_args();
+  if (args.count("terms") > 0) {
+    boost::split(results, args["terms"], boost::is_any_of(" "),
+                 boost::token_compress_on);
+    *query = args["terms"];
+  }
+
+  return results;
+}
+
+
+static void FillHtmlResults(
+    const std::string& query,
+    const std::vector<QueryProcessor::QueryResult>& queryResults,
+    std::string *content) {
+  *content += "<p><br>";
+  *content += std::to_string(queryResults.size());
+  *content += " result(s) found for <strong>";
+  *content += query + "</strong></p>";
+
+  *content += "<ul>";
+  for (const auto& result : queryResults) {
+    *content += "<li><a href=\"";
+    if (!boost::starts_with(result.document_name, "http://")) {
+      *content += "/static/";
+    }
+    *content += result.document_name + "\">";
+    *content += result.document_name;
+    *content += "</a>";
+    *content += " [" + std::to_string(result.rank) + "]";
+  }
+  *content += "</ul>";
+}
+
+static void FillHtmlTop(std::string *content) {
+  *content = "<html><head><title>333gle</title></head><body>";
+  *content += "<center style=\"font-size:500%;\">";
+  *content += "<span style=\"position:relative;bottom:-0.33em;color:orange;\">";
+  *content += "3</span>";
+  *content += "<span style=\"color:red;\">3</span><span style=\"color:gold;\">";
+  *content += "3</span>";
+  *content += "<span style=\"color:blue;\">g";
+  *content += "</span><span style=\"color:green;\">";
+  *content += "l</span>";
+  *content += "<span style=\"color:red;\">e</span>";
+  *content += "</center><p><center>";
+  *content += "<div style=\"height:20px;\"></div>";
+  *content += "<form action=\"/query\" method=\"get\">";
+  *content += "<input type=\"text\" size=30 name=\"terms\" />";
+  *content += "<input type=\"submit\" value=\"Search\" />";
+  *content += "</form></center><p>";
+}
+
+static void FillHtmlBottom(std::string *content) {
+  *content += "</body></html>";
 }
 
 }  // namespace hw4

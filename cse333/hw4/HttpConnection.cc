@@ -53,8 +53,9 @@ bool HttpConnection::GetNextRequest(HttpRequest *request) {
   const std::string header = "\r\n\r\n";
 
   int res;
+  size_t end_index;
   // TODO(nadavash): Improve perfomance of buffer search.
-  while (buffer_.find(header) == std::string::npos) {
+  while ((end_index = buffer_.find(header)) == std::string::npos) {
     res = WrappedRead(fd_, buf, sizeof(buf));
     if (res < 0) {
       return false;
@@ -65,7 +66,7 @@ bool HttpConnection::GetNextRequest(HttpRequest *request) {
     buffer_.append((char *)buf, (size_t)res);
   }
 
-  size_t end_index = buffer_.find(header) + header.size();
+  end_index = end_index + header.size() - 1;
   *request = ParseRequest(end_index);
 
   return true;
@@ -100,16 +101,18 @@ HttpRequest HttpConnection::ParseRequest(size_t end) {
   // whitespace from the end of a string, and (c) converting a string
   // to lowercase.
   std::vector<std::string> lines;
+
   boost::split(lines, str, boost::is_any_of("\r\n"), boost::token_compress_on);
   if (lines.size() > 0) {
     std::vector<std::string> parts;
     boost::split(parts, str, boost::is_any_of(" "), boost::token_compress_on);
-    req.URI = parts[1];
+    if (parts.size() >= 2) {
+      req.URI = parts[1];
+    }
   }
 
   for (auto iter = ++lines.begin(); iter != lines.end(); ++iter) {
     boost::algorithm::to_lower(*iter);
-    printf("%s\n", iter->c_str());
     std::vector<std::string> parts;
     boost::split(parts, *iter, boost::is_any_of(":"), boost::token_compress_on);
     if (parts.size() >= 2) {

@@ -56,7 +56,8 @@ bool FileReader::ReadFile(std::string *str) {
     return false;
   }
 
-  *str = file_contents.get();
+  std::string contents(file_contents.get(), size);
+  *str = contents;
 
   return true;
 }

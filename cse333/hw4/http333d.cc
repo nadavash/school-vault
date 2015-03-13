@@ -108,31 +108,29 @@ void GetPortAndPath(int argc,
   }
 
   long int portNum = std::strtol(argv[1], NULL, 10);
-  cout << sizeof(*port) << std::endl;
   if (portNum == 0) {
-    cout << argv[1] << " isn't a valid port number." << std::endl;
+    cerr << argv[1] << " isn't a valid port number." << std::endl;
     Usage(argv[0]);
   }
-  cout << portNum << std::endl;
   *port = std::min((long int)USHRT_MAX, portNum);
 
   struct stat fstat;
   if (stat(argv[2], &fstat) != 0) {
-    cout << argv[2] << " isn't a valid, readable directory." << std::endl;
+    cerr << argv[2] << " isn't a valid, readable directory." << std::endl;
     Usage(argv[0]);
   }
   if (!S_ISDIR(fstat.st_mode)) {
-    cout << argv[2] << " isn't a directory." << std::endl;
+    cerr << argv[2] << " isn't a directory." << std::endl;
     Usage(argv[0]);
   } else if (!fstat.st_mode & S_IRUSR) {
-    cout << argv[2] << " isn't readable." << std::endl;
+    cerr << argv[2] << " isn't readable." << std::endl;
     Usage(argv[0]);
   }
   *path = argv[2];
 
   for (int i = 3; i < argc; ++i) {
     if (access(argv[i], R_OK) != 0) {
-      cout << argv[i] << " isn't a regular file. Skipping." << std::endl;
+      cerr << argv[i] << " isn't a regular file. Skipping." << std::endl;
     }
     indices->push_back(argv[i]);
   }
