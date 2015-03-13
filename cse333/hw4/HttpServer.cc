@@ -183,12 +183,12 @@ HttpResponse ProcessFileRequest(const std::string &uri,
 
   std::string file_contents;
   FileReader freader(basedir, fname);
-  if (freader.ReadFile(&file_contents)) {
+  if (IsPathSafe(basedir, basedir + fname) &&
+      freader.ReadFile(&file_contents)) {
     ret.headers["Content-type"] = GetContentType(fname);
-
     ret.protocol = "HTTP/1.1";
     ret.response_code = 200;
-    ret.message = "Success";
+    ret.message = "OK";
     ret.body += file_contents;
     return ret;
   }
@@ -230,11 +230,13 @@ HttpResponse ProcessQueryRequest(const std::string &uri,
   //    in our solution_binaries/http333d.
   ret.protocol = "HTTP/1.1";
   ret.response_code = 200;
-  ret.message = "success";
+  ret.message = "OK";
   FillHtmlTop(&ret.body);
 
   std::string query;
   auto terms = GetQueryTerms(uri, &query);
+  query = EscapeHTML(query);
+
   if (!terms.empty()) {
     hw3::QueryProcessor processor(*indices, false);
     auto results = processor.ProcessQuery(terms);
