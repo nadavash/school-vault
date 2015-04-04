@@ -1,0 +1,19 @@
+Nadav Ashkenazi
+CSE 333
+Exercise 19
+
+1. I found the "Null Pointer Dereferencre" bug in the second paper to be the
+interesting bug because it is an optimization that makes sense but also breaks
+major programs like the linux kernel. Finally, it seems like a bug that I could
+definitely encounter myself because it deals with something rather common, like
+dereferencing a null pointer which may happen every once in a while if I'm not
+careful.
+
+2. Ironically, the most time consuming bug I encountered was a simple null
+dereference issue which threw a segfault for me in assigment 3. I had copied
+some code with a null check and changed the variable names, but forgot to
+change it for the null check as well. Since we were dealing with loading data
+from files in assigment 3, I thought I got garbage data from the file possibly
+and I started looking and the index reader objects to see if the issue came
+from there. I eventually noticed that my null check was checking the wrong
+variable name.
