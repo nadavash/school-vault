@@ -14,10 +14,20 @@
     <ConfigurationSettings>
       <Setting name="StorageConnectionString" />
     </ConfigurationSettings>
+    <LocalResources>
+      <LocalStorage name="LocalStorage" cleanOnRoleRecycle="false" />
+    </LocalResources>
+    <Imports>
+      <Import moduleName="RemoteAccess" />
+    </Imports>
   </WebRole>
   <WorkerRole name="CrawlerWorkerRole" vmsize="Small">
     <ConfigurationSettings>
       <Setting name="StorageConnectionString" />
     </ConfigurationSettings>
+    <Imports>
+      <Import moduleName="RemoteAccess" />
+      <Import moduleName="RemoteForwarder" />
+    </Imports>
   </WorkerRole>
 </ServiceDefinition>

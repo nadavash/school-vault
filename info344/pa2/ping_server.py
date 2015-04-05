@@ -1,7 +1,7 @@
 import urllib
 import urllib2
 
-url = "http://info344na.azurewebsites.net/QuerySuggestionsService.asmx/GetSuggestionsRanked?%s"
+url = "http://nanosearch.cloudapp.net/QuerySuggestionsService.asmx/GetSuggestionsRanked?%s"
 prefix = "test"
 num = 5
 

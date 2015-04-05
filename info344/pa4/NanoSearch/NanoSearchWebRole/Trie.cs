@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Web;
@@ -17,6 +18,9 @@ namespace NanoSearch
         public const int MAX_LEN_DIFF = 3;
 
         private TrieNode root;
+
+        public int Count { get; private set; }
+        public string LastTitle { get; private set; }
 
         /// <summary>
         /// Creates a new Trie.
@@ -46,7 +50,9 @@ namespace NanoSearch
         /// <param name="word">The word to add.</param>
         public void Add(string word)
         {
+            ++Count;
             AddFrom(root, word);
+            LastTitle = word;
         }
 
         private void AddFrom(TrieNode source, string word)
