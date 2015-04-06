@@ -35,7 +35,7 @@
     });
 
     function DoQuery(instant) {
-        if (currentRequest !== null) {
+        if (!instant && currentRequest !== null) {
             currentRequest.abort();
             currentRequest = null;
         }
