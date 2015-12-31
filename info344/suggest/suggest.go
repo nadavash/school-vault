@@ -1,11 +1,14 @@
 package main
 
 import (
+    "bufio"
     "fmt"
-    "log"
-    "net"
+    // "log"
+    "os"
+    // "net"
     "net/http"
-    "net/rpc"
+    // "net/rpc"
+    "strings"
 )
 
 var suggest = new(SuggestService)
@@ -18,8 +21,24 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
     fmt.Println("Hello, world!")
+    reader := bufio.NewReader(os.Stdin)
 
-    rpc.Register(suggest)
+    words, err := os.Open("C:\\Users\\Nadav\\Downloads\\words.txt")
+    if err != nil {
+        panic(err.Error())
+    }
+    trie := NewTrieFromStream(words)
+    fmt.Println(trie.Count())
+
+    for {
+        input, _ := reader.ReadString('\n')
+        if input == "\\q" {
+            return
+        }
+        fmt.Println(trie.PrefixSearch(strings.TrimSpace(input), 5))
+    }
+
+    /*rpc.Register(suggest)
     rpc.HandleHTTP()
     l, e := net.Listen("tcp", ":8008")
     if e != nil {
@@ -29,8 +48,5 @@ func main() {
     http.HandleFunc("/Hello", handler)
 
     go http.Serve(l, nil)
-    go http.ListenAndServe(":8080", nil)
-
-    for {
-    }
+    http.ListenAndServe(":8080", nil)*/
 }
