@@ -44,7 +44,7 @@ func (t *Trie) AddString(val string) {
 
     index := 0
     // Iterate over each character in the string traverse the trie.
-    for index < len(val) {
+    for ; index < len(val); index++ {
         // If the character value exists in the current node, continue
         // traversing. Otherwise, create the necessary node.
         if next, ok := current.children[val[index]]; ok {
@@ -54,8 +54,6 @@ func (t *Trie) AddString(val string) {
             current.children[val[index]] = child
             current = child
         }
-
-        index++
     }
 
     // Increase our counter only if the added string value didn't exist
@@ -72,7 +70,7 @@ func (t *Trie) PrefixSearch(query string, max int) []string {
     current := t.root
 
     level := 0
-    for level < len(query) {
+    for ; level < len(query); level++ {
         if len(current.children) == 0 {
             return nil
         }
@@ -82,7 +80,6 @@ func (t *Trie) PrefixSearch(query string, max int) []string {
             return nil
         }
         current = next
-        level++
     }
 
     results := make([]string, 0, max)

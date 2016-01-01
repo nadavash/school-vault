@@ -1,7 +1,12 @@
 package main
 
+import (
+    "github.com/nadava/school-vault/info344/suggest/trie"
+)
+
 // SuggestService defines service methods for search query completion.
 type SuggestService struct {
+    prefixTree trie.Trie
 }
 
 // Hello returns a 'hello' message.

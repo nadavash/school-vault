@@ -1,15 +1,11 @@
 package main
 
 import (
-    "bufio"
     "fmt"
-    "github.com/nadava/school-vault/info344/suggest/trie"
-    // "log"
-    "os"
-    // "net"
+    "log"
+    "net"
     "net/http"
-    // "net/rpc"
-    "strings"
+    "net/rpc"
 )
 
 var suggest = new(SuggestService)
@@ -22,26 +18,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
     fmt.Println("Hello, world!")
-    reader := bufio.NewReader(os.Stdin)
-
-    words, err := os.Open("C:\\Users\\Nadav\\Downloads\\words.txt")
-    if err != nil {
-        panic(err.Error())
-    }
-    trie := trie.NewTrieFromStream(words)
-    fmt.Println(trie.Count())
-
-    for {
-        fmt.Print(" > ")
-        input, _ := reader.ReadString('\n')
-        if input == "\\q" {
-            return
-        }
-        fmt.Println(trie.Count())
-        fmt.Println(trie.PrefixSearch(strings.TrimSpace(input), 5))
-    }
-
-    /*rpc.Register(suggest)
+    rpc.Register(suggest)
     rpc.HandleHTTP()
     l, e := net.Listen("tcp", ":8008")
     if e != nil {
@@ -51,5 +28,5 @@ func main() {
     http.HandleFunc("/Hello", handler)
 
     go http.Serve(l, nil)
-    http.ListenAndServe(":8080", nil)*/
+    http.ListenAndServe(":8080", nil)
 }
