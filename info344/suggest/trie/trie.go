@@ -1,15 +1,19 @@
-package main
+package trie
 
 import (
     "bufio"
     "io"
+    "sort"
 )
 
+// Trie represents a tree data structure useful useful for performing
+// a prefix search over a set of string values.
 type Trie struct {
     root *trieNode
     count int32
 }
 
+// NewTrie creates an empty trie.
 func NewTrie() *Trie {
     t := new(Trie)
     t.root = newTrieNode(0)
@@ -17,6 +21,8 @@ func NewTrie() *Trie {
     return t
 }
 
+// NewTrieFromStream creates a new trie with entries from the given |lines|
+// stream with newline-separated entries.
 func NewTrieFromStream(lines io.Reader) *Trie {
     t := NewTrie()
     scan := bufio.NewScanner(lines)
@@ -27,10 +33,12 @@ func NewTrieFromStream(lines io.Reader) *Trie {
     return t
 }
 
+// Count returns the number of entries in the trie.
 func (t *Trie) Count() int32 {
     return t.count
 }
 
+// AddString adds an entry to the try.
 func (t *Trie) AddString(val string) {
     current := t.root
 
@@ -58,16 +66,18 @@ func (t *Trie) AddString(val string) {
     }
 }
 
+// PrefixSearch performs a prefix searcs over the trie with the given |query|
+// and returns up to |max| number of matching results.
 func (t *Trie) PrefixSearch(query string, max int) []string {
     current := t.root
 
     level := 0
-    for char := range query {
+    for level < len(query) {
         if len(current.children) == 0 {
             return nil
         }
 
-        next, ok := current.children[query[char]]
+        next, ok := current.children[query[level]]
         if !ok {
             return nil
         }
@@ -86,12 +96,21 @@ func findEntriesInNode(node *trieNode, prefix string, max int, results *[]string
         *results = append(*results, prefix)
     }
 
-    for char, node := range node.children {
+    keys := make([]int, 0, len(node.children))
+    for key := range node.children {
+        keys = append(keys, int(key))
+    }
+    sort.Ints(keys)
+
+    for _, key := range keys {
         if len(*results) >= max {
             return
         }
 
-        findEntriesInNode(node, prefix + string(char), max, results)
+        findEntriesInNode(node.children[byte(key)],
+                          prefix + string(node.children[byte(key)].value),
+                          max,
+                          results)
     }
 }
 

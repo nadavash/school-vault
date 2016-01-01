@@ -3,6 +3,7 @@ package main
 import (
     "bufio"
     "fmt"
+    "github.com/nadava/school-vault/info344/suggest/trie"
     // "log"
     "os"
     // "net"
@@ -27,14 +28,16 @@ func main() {
     if err != nil {
         panic(err.Error())
     }
-    trie := NewTrieFromStream(words)
+    trie := trie.NewTrieFromStream(words)
     fmt.Println(trie.Count())
 
     for {
+        fmt.Print(" > ")
         input, _ := reader.ReadString('\n')
         if input == "\\q" {
             return
         }
+        fmt.Println(trie.Count())
         fmt.Println(trie.PrefixSearch(strings.TrimSpace(input), 5))
     }
 
