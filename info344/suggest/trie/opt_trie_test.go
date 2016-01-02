@@ -9,12 +9,6 @@ import (
 	"testing"
 )
 
-const (
-	OptQueryStringsFile      string = "testdata/query_strings.txt"
-	OptResourceFile          string = "testdata/words.txt"
-	OptResourceFileLineCount int32  = 109582
-)
-
 func TestNewOptTrieConstructor(t *testing.T) {
 	tr := trie.NewOptTrie()
 	if tr == nil {
@@ -36,8 +30,8 @@ func TestOptTrieFromStream(t *testing.T) {
 		t.Error("Trie constructor returned nil.")
 	}
 
-	if tr.Count() != OptResourceFileLineCount {
-		t.Errorf("Trie should have count %d after construction; has %d instead.", OptResourceFileLineCount, tr.Count())
+	if tr.Count() != resourceFileLineCount {
+		t.Errorf("Trie should have count %d after construction; has %d instead.", resourceFileLineCount, tr.Count())
 	}
 
 	resCount := len(tr.PrefixSearch("blahblahblah", 0))
@@ -103,7 +97,7 @@ func TestOptAddString(t *testing.T) {
 }
 
 func BenchmarkOptPrefixSearch(b *testing.B) {
-	file, err := os.Open(OptQueryStringsFile)
+	file, err := os.Open(queryStringsFile)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -126,7 +120,7 @@ func BenchmarkOptPrefixSearch(b *testing.B) {
 }
 
 func loadOptTrieFromFile() (*trie.OptTrie, error) {
-	file, err := os.Open(OptResourceFile)
+	file, err := os.Open(resourceFile)
 	if err != nil {
 		return nil, err
 	}

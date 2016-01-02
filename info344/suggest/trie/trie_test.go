@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	QueryStringsFile      string = "testdata/query_strings.txt"
-	ResourceFile          string = "testdata/words.txt"
-	ResourceFileLineCount int32  = 109582
+	queryStringsFile      string = "testdata/query_strings.txt"
+	resourceFile          string = "testdata/words.txt"
+	resourceFileLineCount int32  = 109582
 )
 
 func TestNewTrieConstructor(t *testing.T) {
@@ -36,8 +36,8 @@ func TestTrieFromStream(t *testing.T) {
 		t.Error("Trie constructor returned nil.")
 	}
 
-	if tr.Count() != ResourceFileLineCount {
-		t.Errorf("Trie should have count %d after construction; has %d instead.", ResourceFileLineCount, tr.Count())
+	if tr.Count() != resourceFileLineCount {
+		t.Errorf("Trie should have count %d after construction; has %d instead.", resourceFileLineCount, tr.Count())
 	}
 
 	resCount := len(tr.PrefixSearch("blahblahblah", 0))
@@ -103,7 +103,7 @@ func TestAddString(t *testing.T) {
 }
 
 func BenchmarkPrefixSearch(b *testing.B) {
-	file, err := os.Open(QueryStringsFile)
+	file, err := os.Open(queryStringsFile)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -126,7 +126,7 @@ func BenchmarkPrefixSearch(b *testing.B) {
 }
 
 func loadTrieFromFile() (*trie.Trie, error) {
-	file, err := os.Open(ResourceFile)
+	file, err := os.Open(resourceFile)
 	if err != nil {
 		return nil, err
 	}
