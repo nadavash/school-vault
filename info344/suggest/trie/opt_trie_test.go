@@ -10,13 +10,13 @@ import (
 )
 
 const (
-	QueryStringsFile      string = "testdata/query_strings.txt"
-	ResourceFile          string = "testdata/words.txt"
-	ResourceFileLineCount int32  = 109582
+	OptQueryStringsFile      string = "testdata/query_strings.txt"
+	OptResourceFile          string = "testdata/words.txt"
+	OptResourceFileLineCount int32  = 109582
 )
 
-func TestNewTrieConstructor(t *testing.T) {
-	tr := trie.NewTrie()
+func TestNewOptTrieConstructor(t *testing.T) {
+	tr := trie.NewOptTrie()
 	if tr == nil {
 		t.Error("Trie constructor returned nil.")
 	}
@@ -26,8 +26,8 @@ func TestNewTrieConstructor(t *testing.T) {
 	}
 }
 
-func TestTrieFromStream(t *testing.T) {
-	tr, err := loadTrieFromFile()
+func TestOptTrieFromStream(t *testing.T) {
+	tr, err := loadOptTrieFromFile()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -36,8 +36,8 @@ func TestTrieFromStream(t *testing.T) {
 		t.Error("Trie constructor returned nil.")
 	}
 
-	if tr.Count() != ResourceFileLineCount {
-		t.Errorf("Trie should have count %d after construction; has %d instead.", ResourceFileLineCount, tr.Count())
+	if tr.Count() != OptResourceFileLineCount {
+		t.Errorf("Trie should have count %d after construction; has %d instead.", OptResourceFileLineCount, tr.Count())
 	}
 
 	resCount := len(tr.PrefixSearch("blahblahblah", 0))
@@ -69,8 +69,8 @@ func TestTrieFromStream(t *testing.T) {
 	}
 }
 
-func TestAddString(t *testing.T) {
-	tr := trie.NewTrie()
+func TestOptAddString(t *testing.T) {
+	tr := trie.NewOptTrie()
 
 	resCount := len(tr.PrefixSearch("hello", 1))
 	if resCount != 0 {
@@ -102,8 +102,8 @@ func TestAddString(t *testing.T) {
 	}
 }
 
-func BenchmarkPrefixSearch(b *testing.B) {
-	file, err := os.Open(QueryStringsFile)
+func BenchmarkOptPrefixSearch(b *testing.B) {
+	file, err := os.Open(OptQueryStringsFile)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -115,7 +115,7 @@ func BenchmarkPrefixSearch(b *testing.B) {
 
 	queries := strings.Split(string(contents), "\n")
 
-	tr, err := loadTrieFromFile()
+	tr, err := loadOptTrieFromFile()
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -125,12 +125,12 @@ func BenchmarkPrefixSearch(b *testing.B) {
 	}
 }
 
-func loadTrieFromFile() (*trie.Trie, error) {
-	file, err := os.Open(ResourceFile)
+func loadOptTrieFromFile() (*trie.OptTrie, error) {
+	file, err := os.Open(OptResourceFile)
 	if err != nil {
 		return nil, err
 	}
-	tr := trie.NewTrieFromStream(file)
+	tr := trie.NewOptTrieFromStream(file)
 	file.Close()
 
 	return tr, nil
