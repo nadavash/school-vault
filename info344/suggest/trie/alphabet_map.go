@@ -8,7 +8,7 @@ import (
 // character.
 type AlphabetMap struct {
 	elements []alphabetMapNode
-	count    int
+	length   int
 }
 
 // NewAlphabetMap creates an empty map with available range of keys from a-z
@@ -16,8 +16,13 @@ type AlphabetMap struct {
 func NewAlphabetMap() *AlphabetMap {
 	return &AlphabetMap{
 		elements: make([]alphabetMapNode, 27),
-		count:    0,
+		length:   0,
 	}
+}
+
+// Len returns the number of elements in this AlphabetMap.
+func (am *AlphabetMap) Len() int {
+	return am.length
 }
 
 // ForEach iterates over the keys in the AlphabetMap with none-nil values and
@@ -46,6 +51,9 @@ func (am *AlphabetMap) Get(char byte) (interface{}, bool) {
 func (am *AlphabetMap) Put(char byte, value interface{}) {
 	index := letterToIndex(char)
 	if index != -1 {
+		if !am.elements[index].isSet {
+			am.length++
+		}
 		am.elements[index].isSet = true
 		am.elements[index].value = value
 	}

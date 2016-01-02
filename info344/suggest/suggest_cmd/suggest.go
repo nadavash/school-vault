@@ -16,7 +16,7 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-	trie := trie.NewTrieFromStream(words)
+	trie := trie.NewOptTrieFromStream(words)
 	fmt.Println(trie.Count())
 
 	for {
