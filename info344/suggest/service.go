@@ -34,7 +34,9 @@ func suggestHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("content-type", "application/json")
 	err = json.NewEncoder(w).Encode(suggestions)
-	log.Println(err)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func main() {
@@ -51,11 +53,12 @@ func main() {
 	rpc.HandleHTTP()
 	l, e := net.Listen("tcp", ":8008")
 	if e != nil {
-		log.Fatal("listen error:", e)
+		log.Fatalln("listen error:", e)
 	}
 
 	http.HandleFunc("/suggest", suggestHandler)
+	http.Handle("/", http.FileServer(http.Dir("web")))
 
 	go http.Serve(l, nil)
-	http.ListenAndServe(":8080", nil)
+	log.Fatalln(http.ListenAndServe(":80", nil))
 }

@@ -1,0 +1,26 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/search.css" />
+
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+    <!-- My scripts -->
+    <script src="/search.js"></script>
+</head>
+<body>
+    <div id="main">
+        <div class="page-header">
+            <h1>WikiSearch <small>Wikipedia search with query suggestions</small></h1>
+        </div>
+        <div id="search-box">
+            <input type="text" name="q" class="form-control" id="query" autocomplete="off" placeholder="Enter query">
+            <ul id="suggestions" class="list-group"></ul>
+        </div>
+    </div>
+</body>
+</html>
