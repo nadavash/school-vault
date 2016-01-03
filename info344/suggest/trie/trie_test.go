@@ -1,7 +1,7 @@
 package trie_test
 
 import (
-	"github.com/nadava/school-vault/info344/suggest/trie"
+	"github.com/nadavash/school-vault/info344/suggest/trie"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -12,7 +12,7 @@ import (
 const (
 	queryStringsFile      string = "testdata/query_strings.txt"
 	resourceFile          string = "testdata/words.txt"
-	resourceFileLineCount int32  = 109582
+	resourceFileLineCount int    = 109582
 )
 
 func TestNewTrieConstructor(t *testing.T) {

@@ -9,7 +9,7 @@ import (
 // a prefix search over a set of string values.
 type OptTrie struct {
 	root  *optNode
-	count int32
+	count int
 }
 
 // NewOptTrie creates an empty trie.
@@ -33,7 +33,7 @@ func NewOptTrieFromStream(lines io.Reader) *OptTrie {
 }
 
 // Count returns the number of entries in the trie.
-func (t *OptTrie) Count() int32 {
+func (t *OptTrie) Count() int {
 	return t.count
 }
 

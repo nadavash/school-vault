@@ -1,7 +1,7 @@
 package trie_test
 
 import (
-	"github.com/nadava/school-vault/info344/suggest/trie"
+	"github.com/nadavash/school-vault/info344/suggest/trie"
 	"testing"
 )
 

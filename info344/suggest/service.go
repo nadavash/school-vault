@@ -1,23 +1,52 @@
 package main
 
 import (
+	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
 	"net/rpc"
+	"os"
+	"strconv"
 )
 
-var suggest = new(SuggestService)
+var entriesFile = flag.String("entries_file", "~/Downloads/words.txt", "Filepath to entries text file.")
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	var resp string
-	suggest.Hello(nil, &resp)
-	w.Write([]byte(resp))
+var suggest *SuggestService
+
+func suggestHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("In 'suggestHandler.")
+	var suggestions []string
+
+	num, err := strconv.ParseInt(r.URL.Query().Get("n"), 10, 32)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	err = suggest.Suggest(&SuggestArgs{r.URL.Query().Get("q"), int(num)}, &suggestions)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	w.Header().Add("content-type", "text/json")
+	err = json.NewEncoder(w).Encode(suggestions)
+	log.Println(err)
 }
 
 func main() {
-	fmt.Println("Hello, world!")
+	flag.Parse()
+
+	file, err := os.Open(*entriesFile)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	suggest = NewSuggestService(file)
+
+	fmt.Println("Running Suggest!")
 	rpc.Register(suggest)
 	rpc.HandleHTTP()
 	l, e := net.Listen("tcp", ":8008")
@@ -25,7 +54,7 @@ func main() {
 		log.Fatal("listen error:", e)
 	}
 
-	http.HandleFunc("/Hello", handler)
+	http.HandleFunc("/suggest", suggestHandler)
 
 	go http.Serve(l, nil)
 	http.ListenAndServe(":8080", nil)
