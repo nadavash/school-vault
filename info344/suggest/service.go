@@ -32,7 +32,7 @@ func suggestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Add("content-type", "text/json")
+	w.Header().Add("content-type", "application/json")
 	err = json.NewEncoder(w).Encode(suggestions)
 	log.Println(err)
 }
