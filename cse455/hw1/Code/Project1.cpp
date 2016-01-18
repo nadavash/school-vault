@@ -1,3 +1,6 @@
+#include <array>
+#include <memory>
+
 #include "mainwindow.h"
 #include "math.h"
 #include "ui_mainwindow.h"
@@ -175,74 +178,52 @@ void MainWindow::HalfImage(QImage &image)
 
 void MainWindow::GaussianBlurImage(QImage *image, double sigma)
 {
-    int radius = (int)sigma;
-    // Add your code here.  Look at MeanBlurImage to get yourself started.
-    if(radius == 0)
-        return;
+	if (sigma <= 0) 
+	{
+		return;
+	}
 
-    int r, c, rd, cd, i;
-    QRgb pixel;
+	const int radius = 2;
+	const int size = radius * 2;
+	QImage buffer = image->copy(-radius, -radius, 
+		image->width() + radius * 2, image->height() + radius * 2);
 
-    // This is the size of the kernel
-    int size = 2*radius + 1;
+	double* kernel(new double[size * size]);
+	for (int i = 0; i < size * size; ++i)
+	{
+		int u = i % size - radius;
+		int v = i / size - radius;
+		// Distance from center pixel.
+		double d = sqrt(u * u + v * v);
+		double numerator = pow(M_E, -(d * d) / (2 * sigma * sigma));
+		double denominator = sqrt(2 * M_PI) * sigma;
+		kernel[i] = numerator / denominator;
+	}
+	
+	for (int r = 0; r < image->height(); ++r)
+	{
+		for (int c = 0; c < image->width(); ++c)
+		{
+			double rgb[3] {0, 0, 0};
 
-    // Create a buffer image so we're not reading and writing to the same image during filtering.
-    QImage buffer;
-    int w = image->width();
-    int h = image->height();
+			for (int rd = -radius; rd <= radius; ++rd)
+			{
+				for (int cd = -radius; cd <= radius; ++cd)
+				{
+					QRgb pixel = buffer.pixel(c + cd + radius, r + rd + radius);
+					double weight = kernel[(rd + radius) * size + cd + radius];
+					rgb[0] += weight * (double)qRed(pixel);
+					rgb[1] += weight * (double)qGreen(pixel);
+					rgb[2] += weight * (double)qBlue(pixel);
+				}
+			}
 
-    // This creates an image of size (w + 2*radius, h + 2*radius) with black borders.
-    // This could be improved by filling the pixels using a different padding technique (reflected, fixed, etc.)
-    buffer = image->copy(-radius, -radius, w + 2*radius, h + 2*radius);
+			image->setPixel(c, r, qRgb(floor(rgb[0] + 0.5), floor(rgb[1] + 0.5), floor(rgb[2] + 0.5)));
+		}
+	}
 
-    // Compute kernel to convolve with the image.
-    double *kernel = new double [size*size];
-
-    for(i=0;i<size*size;i++)
-    {
-        kernel[i] = 1.0;
-    }
-
-    // Make sure kernel sums to 1
-    double denom = 0.000001;
-    for(i=0;i<size*size;i++)
-        denom += kernel[i];
-    for(i=0;i<size*size;i++)
-        kernel[i] /= denom;
-
-    // For each pixel in the image...
-    for(r=0;r<h;r++)
-    {
-        for(c=0;c<w;c++)
-        {
-            double rgb[3];
-
-            rgb[0] = 0.0;
-            rgb[1] = 0.0;
-            rgb[2] = 0.0;
-
-            // Convolve the kernel at each pixel
-            for(rd=-radius;rd<=radius;rd++)
-                for(cd=-radius;cd<=radius;cd++)
-                {
-                     // Get the pixel value
-                     pixel = buffer.pixel(c + cd + radius, r + rd + radius);
-
-                     // Get the value of the kernel
-                     double weight = kernel[(rd + radius)*size + cd + radius];
-
-                     rgb[0] += weight*(double) qRed(pixel);
-                     rgb[1] += weight*(double) qGreen(pixel);
-                     rgb[2] += weight*(double) qBlue(pixel);
-                }
-
-            // Store mean pixel in the image to be returned.
-            image->setPixel(c, r, qRgb((int) floor(rgb[0] + 0.5), (int) floor(rgb[1] + 0.5), (int) floor(rgb[2] + 0.5)));
-        }
-    }
-
-    // Clean up.
-    delete [] kernel;
+	delete[] kernel;
+	kernel = nullptr;
 }
 
 void MainWindow::SeparableGaussianBlurImage(QImage *image, double sigma)
