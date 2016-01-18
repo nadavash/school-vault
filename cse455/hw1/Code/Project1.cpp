@@ -178,17 +178,17 @@ void MainWindow::HalfImage(QImage &image)
 
 void MainWindow::GaussianBlurImage(QImage *image, double sigma)
 {
-	if (sigma <= 0) 
+	if (sigma == 0)
 	{
 		return;
 	}
 
-	const int radius = 2;
+	const int radius = (int)(3 * sigma);
 	const int size = radius * 2 + 1;
 	QImage buffer = image->copy(-radius, -radius, 
 		image->width() + radius * 2, image->height() + radius * 2);
 
-	double* kernel(new double[size * size]);
+	std::vector<double> kernel(size * size);
 	for (int i = 0; i < size * size; ++i)
 	{
 		int u = i % size - radius;
@@ -199,6 +199,13 @@ void MainWindow::GaussianBlurImage(QImage *image, double sigma)
 		double denominator = sqrt(2 * M_PI) * sigma;
 		kernel[i] = numerator / denominator;
 	}
+
+	// Make sure kernel sums to 1
+	double denom = 0.000001;
+	for (int i = 0; i < size * size; ++i)
+		denom += kernel[i];
+	for (int i = 0; i < size * size; ++i)
+		kernel[i] /= denom;
 	
 	for (int r = 0; r < image->height(); ++r)
 	{
@@ -218,12 +225,9 @@ void MainWindow::GaussianBlurImage(QImage *image, double sigma)
 				}
 			}
 
-			image->setPixel(c, r, qRgb(floor(rgb[0] + 0.5), floor(rgb[1] + 0.5), floor(rgb[2] + 0.5)));
+			image->setPixel(c, r, qRgb((int)floor(rgb[0] + 0.5), (int)floor(rgb[1] + 0.5), (int)floor(rgb[2] + 0.5)));
 		}
 	}
-
-	delete[] kernel;
-	kernel = nullptr;
 }
 
 void MainWindow::SeparableGaussianBlurImage(QImage *image, double sigma)
