@@ -5,7 +5,7 @@ CC = gcc
 CXX = g++
 
 # define useful flags to cc/ld/etc.
-CFLAGS = -g -Wall -Wpedantic -I. -I./libhw1 -I./libhw2 -I./libhw3 -I.. -O0 -std=c++11
+CFLAGS = -g -Wall -Wpedantic -I. -I./libhw1 -I./libhw2 -I./libhw3 -I.. -I/usr/local/include -O0 -std=c++11
 LDFLAGS = -L. -L./libhw1 -L./libhw2 -L./libhw3 -lhw4 -lhw3 -lhw2 -lhw1 -lpthread
 CPPUNITFLAGS = -L../gtest -lgtest
 
