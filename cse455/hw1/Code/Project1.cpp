@@ -184,7 +184,7 @@ void MainWindow::GaussianBlurImage(QImage *image, double sigma)
 	}
 
 	const int radius = 2;
-	const int size = radius * 2;
+	const int size = radius * 2 + 1;
 	QImage buffer = image->copy(-radius, -radius, 
 		image->width() + radius * 2, image->height() + radius * 2);
 
