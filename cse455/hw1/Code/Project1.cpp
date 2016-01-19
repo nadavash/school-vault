@@ -14,7 +14,8 @@
 // Helpers
 namespace {
 
-static void NormalizeKernel(double* kernel, int length) {
+static void NormalizeKernel(double* kernel, int length)
+{
 	double denom = 0.000001;
 	for (int i = 0; i < length; ++i) {
 		denom += kernel[i];
@@ -22,6 +23,48 @@ static void NormalizeKernel(double* kernel, int length) {
 
 	for (int i = 0; i < length; ++i) {
 		kernel[i] /= denom;
+	}
+}
+
+static QRgb PixelAt(const QImage& image, int x, int y)
+{
+	if (x >= 0 && y >= 0 && x < image.width() && y < image.height())
+		return image.pixel(x, y);
+
+	return 0;
+}
+
+static void ConvolveImage(QImage* image, const double* kernel, int radius)
+{
+	QImage buffer = image->copy(-radius, -radius, image->width() + radius * 2, image->height() + radius * 2);
+	int size = radius * 2 + 1;
+	for (int r = 0; r < image->height(); ++r)
+	{
+		for (int c = 0; c < image->width(); ++c)
+		{
+			double rgb[3] {0, 0, 0};
+
+			for (int rd = -radius; rd <= radius; ++rd)
+			{
+				for (int cd = -radius; cd <= radius; ++cd)
+				{
+					QRgb pixel = buffer.pixel(c + cd + radius, r + rd + radius);
+
+					// Get the value of the kernel
+					double weight = kernel[(rd + radius) * size + cd + radius];
+
+					rgb[0] += weight * (double)qRed(pixel);
+					rgb[1] += weight * (double)qGreen(pixel);
+					rgb[2] += weight * (double)qBlue(pixel);
+				}
+			}
+
+			rgb[0] += 128;
+			rgb[1] += 128;
+			rgb[2] += 128;
+
+			image->setPixel(c, r, qRgb((int)floor(rgb[0] + 0.5), (int)floor(rgb[1] + 0.5), (int)floor(rgb[2] + 0.5)) );
+		}
 	}
 }
 
@@ -312,6 +355,15 @@ void MainWindow::SeparableGaussianBlurImage(QImage *image, double sigma)
 void MainWindow::FirstDerivImage(QImage *image, double sigma)
 {
     // Add your code here.
+	if (sigma == 0)
+		return;
+
+	std::vector<double> kernel{ 
+		0, 0, 0,
+		-1, 0, 1,
+		0, 0, 0,
+	};
+	ConvolveImage(image, kernel.data(), 1);
 }
 
 void MainWindow::SecondDerivImage(QImage *image, double sigma)
