@@ -11,7 +11,21 @@
   other files control the UI (in case you want to make changes.)
 ************************************************************************/
 
+// Helpers
+namespace {
 
+static void NormalizeKernel(double* kernel, int length) {
+	double denom = 0.000001;
+	for (int i = 0; i < length; ++i) {
+		denom += kernel[i];
+	}
+
+	for (int i = 0; i < length; ++i) {
+		kernel[i] /= denom;
+	}
+}
+
+}
 // The first four functions provide example code to help get you started
 
 // Convert an image to grey-scale
@@ -193,19 +207,13 @@ void MainWindow::GaussianBlurImage(QImage *image, double sigma)
 	{
 		int u = i % size - radius;
 		int v = i / size - radius;
-		// Distance from center pixel.
-		double d = sqrt(u * u + v * v);
-		double numerator = pow(M_E, -(d * d) / (2 * sigma * sigma));
+		double numerator = pow(M_E, -(u * u + v * v) / (2 * sigma * sigma));
 		double denominator = sqrt(2 * M_PI) * sigma;
 		kernel[i] = numerator / denominator;
 	}
 
 	// Make sure kernel sums to 1
-	double denom = 0.000001;
-	for (int i = 0; i < size * size; ++i)
-		denom += kernel[i];
-	for (int i = 0; i < size * size; ++i)
-		kernel[i] /= denom;
+	NormalizeKernel(kernel.data(), size * size);
 	
 	for (int r = 0; r < image->height(); ++r)
 	{
@@ -233,6 +241,68 @@ void MainWindow::GaussianBlurImage(QImage *image, double sigma)
 void MainWindow::SeparableGaussianBlurImage(QImage *image, double sigma)
 {
     // Add your code here.  Done right, you should be able to copy most of the code from GaussianBlurImage.
+	if (sigma == 0)
+	{
+		return;
+	}
+
+	const int radius = (int)(3 * sigma);
+	const int size = radius * 2 + 1;
+	QImage buffer = image->copy(-radius, -radius,
+		image->width() + radius * 2, image->height() + radius * 2);
+
+	std::vector<double> kernel(size);
+	for (int i = 0; i < size; ++i)
+	{
+		// Only calculate a single distance, horizontal for reference.
+		int u = i - radius;
+		double numerator = pow(M_E, -(u * u) / (2 * sigma * sigma));
+		double denominator = sqrt(2 * M_PI) * sigma;
+		kernel[i] = numerator / denominator;
+	}
+
+	// Make sure kernel sums to 1
+	NormalizeKernel(kernel.data(), size);
+
+	QImage temp = QImage(image->width() + size, image->height() + size, image->format());
+	for (int r = 0; r < image->height(); ++r)
+	{
+		for (int c = 0; c < image->width(); ++c)
+		{
+			double rgb[3] {0, 0, 0};
+
+			for (int cd = -radius; cd <= radius; ++cd)
+			{
+				QRgb pixel = buffer.pixel(c + cd + radius, r + radius);
+				double weight = kernel[cd + radius];
+				rgb[0] += weight * (double)qRed(pixel);
+				rgb[1] += weight * (double)qGreen(pixel);
+				rgb[2] += weight * (double)qBlue(pixel);
+			}
+
+			temp.setPixel(c + radius, r + radius, qRgb((int)floor(rgb[0] + 0.5), (int)floor(rgb[1] + 0.5), (int)floor(rgb[2] + 0.5)));
+
+		}
+	}
+
+	for (int r = 0; r < image->height(); ++r)
+	{
+		for (int c = 0; c < image->width(); ++c)
+		{
+			double rgb[3] {0, 0, 0};
+
+			for (int rd = -radius; rd <= radius; ++rd)
+			{
+				QRgb pixel = temp.pixel(c + radius, r + rd + radius);
+				double weight = kernel[rd + radius];
+				rgb[0] += weight * (double)qRed(pixel);
+				rgb[1] += weight * (double)qGreen(pixel);
+				rgb[2] += weight * (double)qBlue(pixel);
+			}
+
+			image->setPixel(c, r, qRgb((int)floor(rgb[0] + 0.5), (int)floor(rgb[1] + 0.5), (int)floor(rgb[2] + 0.5)));
+		}
+	}
 }
 
 void MainWindow::FirstDerivImage(QImage *image, double sigma)
