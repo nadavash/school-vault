@@ -34,7 +34,7 @@ static QRgb PixelAt(const QImage& image, int x, int y)
 	return 0;
 }
 
-static void ConvolveImage(QImage* image, const double* kernel, int radius)
+static void ConvolveImage(QImage* image, const double* kernel, int radius, QRgb addColor)
 {
 	QImage buffer = image->copy(-radius, -radius, image->width() + radius * 2, image->height() + radius * 2);
 	int size = radius * 2 + 1;
@@ -59,11 +59,11 @@ static void ConvolveImage(QImage* image, const double* kernel, int radius)
 				}
 			}
 
-			rgb[0] += 128;
-			rgb[1] += 128;
-			rgb[2] += 128;
+			rgb[0] = min(255., max(0., rgb[0] + qRed(addColor)));
+			rgb[1] = min(255., max(0., rgb[1] + qGreen(addColor)));
+			rgb[2] = min(255., max(0., rgb[2] + qBlue(addColor)));
 
-			image->setPixel(c, r, qRgb((int)floor(rgb[0] + 0.5), (int)floor(rgb[1] + 0.5), (int)floor(rgb[2] + 0.5)) );
+			image->setPixel(c, r, qRgb((int)floor(rgb[0] + 0.5), (int)floor(rgb[1] + 0.5), (int)floor(rgb[2] + 0.5)));
 		}
 	}
 }
@@ -358,34 +358,28 @@ void MainWindow::FirstDerivImage(QImage *image, double sigma)
 	if (sigma == 0)
 		return;
 
-	/*std::vector<double> kernel{
+	std::vector<double> kernel{
 		0, 0, 0,
 		-1, 0, 1,
 		0, 0, 0,
 	};
-	ConvolveImage(image, kernel.data(), 1);*/
-
-	QImage buffer = image->copy(0, 0, image->width(), image->height());
-	for (int r = 0; r < image->height(); ++r)
-	{
-		for (int c = 0; c < image->width(); ++c)
-		{
-			QRgb left = PixelAt(buffer, c - 1, r);
-			QRgb right = PixelAt(buffer, c + 1, r);
-			int red = qRed(right) - qRed(left) + 128;
-			int green = qGreen(right) - qGreen(left) + 128;
-			int blue = qBlue(right) - qBlue(left) + 128;
-			red = min(255, max(0, red));
-			green = min(255, max(0, green));
-			blue = min(255, max(0, blue));
-			image->setPixel(c, r, qRgb((int)floor(red + 0.5), (int)floor(green + 0.5), (int)floor(blue + 0.5)));
-		}
-	}
+	ConvolveImage(image, kernel.data(), 1, qRgb(128, 128, 128));
+	SeparableGaussianBlurImage(image, sigma);
 }
 
 void MainWindow::SecondDerivImage(QImage *image, double sigma)
 {
-    // Add your code here.
+	// Add your code here.
+	if (sigma == 0)
+		return;
+
+	std::vector<double> kernel{
+		0, 1, 0,
+		1, -4, 1,
+		0, 1, 0,
+	};
+	ConvolveImage(image, kernel.data(), 1, qRgb(128, 128, 128));
+	SeparableGaussianBlurImage(image, sigma);
 }
 
 void MainWindow::SharpenImage(QImage *image, double sigma, double alpha)
