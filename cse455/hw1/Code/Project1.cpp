@@ -264,7 +264,10 @@ void MainWindow::SeparableGaussianBlurImage(QImage *image, double sigma)
 	// Make sure kernel sums to 1
 	NormalizeKernel(kernel.data(), size);
 
-	QImage temp = QImage(image->width() + size, image->height() + size, image->format());
+	QImage temp = QImage(image->width() + radius * 2, image->height() + radius * 2, image->format());
+	temp.fill(Qt::GlobalColor::black);
+
+	// Horizontal pass
 	for (int r = 0; r < image->height(); ++r)
 	{
 		for (int c = 0; c < image->width(); ++c)
@@ -285,6 +288,7 @@ void MainWindow::SeparableGaussianBlurImage(QImage *image, double sigma)
 		}
 	}
 
+	// Vertical pass
 	for (int r = 0; r < image->height(); ++r)
 	{
 		for (int c = 0; c < image->width(); ++c)
