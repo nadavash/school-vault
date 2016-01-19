@@ -358,12 +358,29 @@ void MainWindow::FirstDerivImage(QImage *image, double sigma)
 	if (sigma == 0)
 		return;
 
-	std::vector<double> kernel{ 
+	/*std::vector<double> kernel{
 		0, 0, 0,
 		-1, 0, 1,
 		0, 0, 0,
 	};
-	ConvolveImage(image, kernel.data(), 1);
+	ConvolveImage(image, kernel.data(), 1);*/
+
+	QImage buffer = image->copy(0, 0, image->width(), image->height());
+	for (int r = 0; r < image->height(); ++r)
+	{
+		for (int c = 0; c < image->width(); ++c)
+		{
+			QRgb left = PixelAt(buffer, c - 1, r);
+			QRgb right = PixelAt(buffer, c + 1, r);
+			int red = qRed(right) - qRed(left) + 128;
+			int green = qGreen(right) - qGreen(left) + 128;
+			int blue = qBlue(right) - qBlue(left) + 128;
+			red = min(255, max(0, red));
+			green = min(255, max(0, green));
+			blue = min(255, max(0, blue));
+			image->setPixel(c, r, qRgb((int)floor(red + 0.5), (int)floor(green + 0.5), (int)floor(blue + 0.5)));
+		}
+	}
 }
 
 void MainWindow::SecondDerivImage(QImage *image, double sigma)
