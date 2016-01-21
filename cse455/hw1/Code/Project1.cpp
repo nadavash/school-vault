@@ -68,6 +68,26 @@ static void ConvolveImage(QImage* image, const double* kernel, int radius, QRgb 
 	}
 }
 
+static double ApplyFilterAt(const QImage& image, int x, int y, const double* kernel, int radius)
+{
+	double intensity;
+	int size = 2 * radius + 1;
+	for (int rd = -radius; rd <= radius; ++rd)
+	{
+		for (int cd = -radius; cd <= radius; ++cd)
+		{
+			QRgb pixel = PixelAt(image, x + cd + radius, y + rd + radius);
+
+			// Get the value of the kernel
+			double weight = kernel[(rd + radius) * size + cd + radius];
+
+			intensity += weight * (double)qRed(pixel);
+		}
+	}
+
+	return intensity;
+}
+
 }
 // The first four functions provide example code to help get you started
 
@@ -360,7 +380,7 @@ void MainWindow::FirstDerivImage(QImage *image, double sigma)
 
 	std::vector<double> kernel{
 		0, 0, 0,
-		-1, 0, 1,
+		1, 0, -1,
 		0, 0, 0,
 	};
 	ConvolveImage(image, kernel.data(), 1, qRgb(128, 128, 128));
@@ -385,6 +405,17 @@ void MainWindow::SecondDerivImage(QImage *image, double sigma)
 void MainWindow::SharpenImage(QImage *image, double sigma, double alpha)
 {
     // Add your code here.  It's probably easiest to call SecondDerivImage as a helper function.
+	// Add your code here.
+	if (sigma == 0)
+		return;
+
+	SeparableGaussianBlurImage(image, sigma);
+	std::vector<double> kernel{
+		0,          -1 * alpha,    0,
+		-1 * alpha, 1 + 4 * alpha, -1 * alpha,
+		0,          -1 * alpha,    0,
+	};
+	ConvolveImage(image, kernel.data(), 1, 0);
 }
 
 void MainWindow::BilateralImage(QImage *image, double sigmaS, double sigmaI)
@@ -419,6 +450,45 @@ void MainWindow::SobelImage(QImage *image)
     image->setPixel(c, r, qRgb( (int) (red), (int) (green), (int) (blue)));
 
     ************************************************************************/
+	BlackWhiteImage(image);
+	QImage buffer = image->copy(0, 0, image->width(), image->height());
+	
+	std::vector<double> sobelHorizontalMag{
+		1, 0, -1,
+		2, 0, -2,
+		1, 0, -1,
+	};
+
+	std::vector<double> sobelVerticalMag{
+		1, 2, 1,
+		0, 0, 0,
+		-1, -2, -1
+	};
+
+	for (int r = 0; r < image->height(); ++r)
+	{
+		for (int c = 0; c < image->width(); ++c)
+		{
+			double xMagnitude = ApplyFilterAt(buffer, c, r, sobelHorizontalMag.data(), 1);
+			double yMagnitude = ApplyFilterAt(buffer, c, r, sobelVerticalMag.data(), 1);
+
+			double magnitude = sqrt(xMagnitude * xMagnitude + yMagnitude * yMagnitude);
+			double orientation = atan2(yMagnitude, xMagnitude);
+
+			double red = (sin(orientation) + 1.0) / 2.0;
+			double green = (cos(orientation) + 1.0) / 2.0;
+			double blue = 1.0 - red - green;
+
+			red *= magnitude *4.0;
+			green *= magnitude * 4.0;
+			blue *= magnitude * 4.0;
+
+			red = min(255.0, max(0.0, red));
+			green = min(255.0, max(0.0, green));
+			blue = min(255.0, max(0.0, blue));
+			image->setPixel(c, r, qRgb((int)(red), (int)(green), (int)(blue)));
+		}
+	}
 }
 
 
