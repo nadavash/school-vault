@@ -88,6 +88,25 @@ static double ApplyFilterAt(const QImage& image, int x, int y, const double* ker
 	return intensity;
 }
 
+static std::vector<double> ScaleColor(QRgb color, double scale)
+{
+	std::vector<double> scaledColor(3);
+	scaledColor[0] = qRed(color) * scale;
+	scaledColor[1] = qGreen(color) * scale;
+	scaledColor[2] = qBlue(color) * scale;
+	return scaledColor;
+}
+
+static double Magnitude(double* vec, int dims)
+{
+	double sum = 0.0;
+	for (int i = 0; i < dims; ++i)
+	{
+		sum += vec[i] * vec[i];
+	}
+	return sqrt(sum);
+}
+
 }
 // The first four functions provide example code to help get you started
 
@@ -479,7 +498,7 @@ void MainWindow::SobelImage(QImage *image)
 			double green = (cos(orientation) + 1.0) / 2.0;
 			double blue = 1.0 - red - green;
 
-			red *= magnitude *4.0;
+			red *= magnitude * 4.0;
 			green *= magnitude * 4.0;
 			blue *= magnitude * 4.0;
 
@@ -495,6 +514,33 @@ void MainWindow::SobelImage(QImage *image)
 void MainWindow::BilinearInterpolation(QImage *image, double x, double y, double rgb[3])
 {
     // Add your code here.  Return the RGB values for the pixel at location (x,y) in double rgb[3].
+	if (x < 0 || y < 0 || x >= image->width() || y >= image->height())
+		return;
+
+	int x1 = (int)x;
+	int y1 = (int)y;
+	int x2 = x1 + 1;
+	int y2 = y1 + 1;
+	QRgb q11 = PixelAt(*image, x1, y1);
+	QRgb q12 = PixelAt(*image, x1, y2);
+	QRgb q21 = PixelAt(*image, x2, y1);
+	QRgb q22 = PixelAt(*image, x2, y2);
+	
+	double q11Scalar = ((double)x2 - x) * ((double)y2 - y);
+	double q12Scalar = (x - (double)x1) * ((double)y2 - y);
+	double q21Scalar = ((double)x2 - x) * (y - (double)y1);
+	double q22Scalar = (x - (double)x1) * (y - (double)y1);
+
+	std::vector<double> q11Scaled(ScaleColor(q11, q11Scalar));
+	std::vector<double> q12Scaled(ScaleColor(q12, q12Scalar));
+	std::vector<double> q21Scaled(ScaleColor(q21, q21Scalar));
+	std::vector<double> q22Scaled(ScaleColor(q22, q22Scalar));
+
+	double finalScalar = 1.0 / ((x2 - x1) * (y2 - y1));
+	for (int i = 0; i < 3; ++i)
+	{
+		rgb[i] = finalScalar * (q11Scaled[i] + q12Scaled[i] + q21Scaled[i] + q22Scaled[i]);
+	}
 }
 
 // Here is some sample code for rotating an image.  I assume orien is in degrees.
@@ -543,6 +589,37 @@ void MainWindow::RotateImage(QImage *image, double orien)
 void MainWindow::FindPeaksImage(QImage *image, double thres)
 {
     // Add your code here.
+	QImage sobelImage = image->copy(0, 0, image->width(), image->height());
+	SobelImage(&sobelImage);
+
+
+	for (int r = 0; r < image->height(); ++r)
+	{
+		for (int c = 0; c < image->width(); ++c)
+		{
+			QRgb pixel = sobelImage.pixel(c, r);
+			double gradient[3] { qRed(pixel), qGreen(pixel), qBlue(pixel) };
+			double gradientNormal[2] { gradient[1], -gradient[0] };
+			double normalMag = Magnitude(gradientNormal, 2);
+			gradientNormal[0] /= normalMag;
+			gradientNormal[1] /= normalMag;
+
+			double e0Vec[3];
+			BilinearInterpolation(image, c + gradientNormal[0], r + gradientNormal[1], e0Vec);
+			double e1Vec[3];
+			BilinearInterpolation(image, c - gradientNormal[0], r - gradientNormal[1], e1Vec);
+
+			double e0 = Magnitude(e0Vec, 2);
+			double e1 = Magnitude(e1Vec, 2);
+			double pixelMag = Magnitude(gradient, 2);
+
+			if (pixelMag > e0 && pixelMag > e1 && pixelMag > thres)
+				image->setPixel(c, r, qRgb(255, 255, 255));
+			else
+				image->setPixel(c, r, 0);
+		}
+	}
+
 }
 
 
