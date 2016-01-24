@@ -107,6 +107,25 @@ static double Magnitude(double* vec, int dims)
 	return sqrt(sum);
 }
 
+static double Distance(double* p1, double* p2, int dim)
+{
+	double dist = 0.0;
+	for (int i = 0; i < dim; ++i)
+	{
+		double dimDist = p1[i] - p2[i];
+		dist += dimDist * dimDist;
+	}
+	return sqrt(dist);
+}
+
+static void Add(const double* p1, const double* p2, int dim, double* dest)
+{
+	for (int i = 0; i < dim; ++i)
+	{
+		dest[i] = p1[i] + p2[1];
+	}
+}
+
 }
 // The first four functions provide example code to help get you started
 
@@ -514,33 +533,32 @@ void MainWindow::SobelImage(QImage *image)
 void MainWindow::BilinearInterpolation(QImage *image, double x, double y, double rgb[3])
 {
     // Add your code here.  Return the RGB values for the pixel at location (x,y) in double rgb[3].
-	if (x < 0 || y < 0 || x >= image->width() || y >= image->height())
-		return;
-
 	int x1 = (int)x;
 	int y1 = (int)y;
 	int x2 = x1 + 1;
 	int y2 = y1 + 1;
+
 	QRgb q11 = PixelAt(*image, x1, y1);
 	QRgb q12 = PixelAt(*image, x1, y2);
 	QRgb q21 = PixelAt(*image, x2, y1);
 	QRgb q22 = PixelAt(*image, x2, y2);
-	
-	double q11Scalar = ((double)x2 - x) * ((double)y2 - y);
-	double q12Scalar = (x - (double)x1) * ((double)y2 - y);
-	double q21Scalar = ((double)x2 - x) * (y - (double)y1);
-	double q22Scalar = (x - (double)x1) * (y - (double)y1);
+
+	double q11Scalar = (x2 - x) * (y2 - y);
+	double q12Scalar = (x - x1) * (y2 - y);
+	double q21Scalar = (x2 - x) * (y - y1);
+	double q22Scalar = (x - x1) * (y - y1);
 
 	std::vector<double> q11Scaled(ScaleColor(q11, q11Scalar));
 	std::vector<double> q12Scaled(ScaleColor(q12, q12Scalar));
 	std::vector<double> q21Scaled(ScaleColor(q21, q21Scalar));
 	std::vector<double> q22Scaled(ScaleColor(q22, q22Scalar));
-
+	
 	double finalScalar = 1.0 / ((x2 - x1) * (y2 - y1));
 	for (int i = 0; i < 3; ++i)
 	{
 		rgb[i] = finalScalar * (q11Scaled[i] + q12Scaled[i] + q21Scaled[i] + q22Scaled[i]);
 	}
+
 }
 
 // Here is some sample code for rotating an image.  I assume orien is in degrees.
@@ -641,6 +659,104 @@ void MainWindow::CrazyImage(QImage *image)
 void MainWindow::RandomSeedImage(QImage *image, int num_clusters)
 {
      // Add your code here
+	const int kMaxIter = 100;
+	const double kMinDist = 100;
+
+	std::vector<double[3]> kMeans(num_clusters);
+	// Randomly select initial clusters centroids
+	for (int k = 0; k < num_clusters; ++k)
+	{
+		bool repeat = false;
+		do
+		{
+			repeat = false;
+			kMeans[k][0] = (double)rand() / RAND_MAX * 255.0;
+			kMeans[k][1] = (double)rand() / RAND_MAX * 255.0;
+			kMeans[k][2] = (double)rand() / RAND_MAX * 255.0;
+
+			// Check distances
+			for (int i = k - 1; i >= 0; --i)
+			{
+				if (Distance(kMeans[k], kMeans[i], 3) < kMinDist) 
+				{
+					repeat = true;
+					break;
+				}
+			}
+		} while (repeat);
+	}
+
+	std::vector<int> pixelClusters(image->width() * image->height());
+	for (int iterCount = 1; iterCount <= kMaxIter; ++iterCount)
+	{
+		std::vector<int> clusterCount(num_clusters, 0);
+		// Pick cluster
+		for (int r = 0; r < image->height(); ++r)
+		{
+			for (int c = 0; c < image->width(); ++c)
+			{
+				auto pixel = ScaleColor(PixelAt(*image, c, r), 1);
+
+				double minDist = Distance(kMeans[0], pixel.data(), 3);
+				int minIndex = 0;
+				for (int i = 1; i < num_clusters; ++i)
+				{
+					double dist = Distance(kMeans[i], pixel.data(), 3);
+					if (dist < minDist)
+					{
+						minDist = dist;
+						minIndex = i;
+					}
+				}
+
+				pixelClusters[r * image->width() + c] = minIndex;
+				clusterCount[minIndex]++;
+			}
+		}
+
+		// Reset cluster means
+		for (int i = 0; i < num_clusters; ++i)
+		{
+			kMeans[i][0] = 0;
+			kMeans[i][1] = 0;
+			kMeans[i][2] = 0;
+		}
+
+		// Update the means
+		for (int i = 0; i < pixelClusters.size(); ++i)
+		{
+			int clusterIndex = pixelClusters[i];
+			int c = i % image->width();
+			int r = i / image->width();
+			auto pixel = ScaleColor(image->pixel(c, r), 1);
+			kMeans[clusterIndex][0] += pixel[0];
+			kMeans[clusterIndex][1] += pixel[1];
+			kMeans[clusterIndex][2] += pixel[2];
+		}
+
+		for (int i = 0; i < num_clusters; ++i)
+		{
+			if (clusterCount[i] != 0)
+			{
+				kMeans[i][0] /= clusterCount[i];
+				kMeans[i][1] /= clusterCount[i];
+				kMeans[i][2] /= clusterCount[i];
+			}
+		}
+	}
+
+	// Label image based on cluster
+	// Update the means
+	for (int r = 0; r < image->height(); ++r)
+	{
+		for (int c = 0; c < image->width(); ++c)
+		{
+			int clusterIndex = pixelClusters[r * image->width() + c];
+			const double* color = kMeans[clusterIndex];
+			image->setPixel(c, r, qRgb((int)floor(color[0] + 0.5), (int)floor(color[1] + 0.5), (int)floor(color[2] + 0.5)));
+		}
+	}
+
 }
 
 void MainWindow::PixelSeedImage(QImage *image, int num_clusters)
