@@ -4,6 +4,174 @@
 #include <QtGui>
 #include "Matrix.h"
 
+namespace {
+
+// Returns a pixel from the image at the given x,y coordinates. Returns black
+// if out of bounds.
+static double PixelAt(const double* image, int w, int h, int x, int y)
+{
+	x = min(max(x, 0), w - 1);
+	y = min(max(y, 0), h - 1);
+	return image[x + y * w];
+}
+
+// Normalize the given kernel of |length| size.
+static void NormalizeKernel(double* kernel, int length)
+{
+	double denom = 0.000001;
+	for (int i = 0; i < length; ++i) {
+		denom += kernel[i];
+	}
+
+	for (int i = 0; i < length; ++i) {
+		kernel[i] /= denom;
+	}
+}
+
+//
+static void BufferToImage(const double* buffer, QImage* image)
+{
+	int w = image->width();
+	int h = image->height();
+	for (int r = 0; r < h; ++r)
+	{
+		for (int c = 0; c < w; ++c)
+		{
+			int value = min(max((int)floor(buffer[c + r * w] + 0.5), 0), 255);
+			image->setPixel(c, r, qRgb(value, value, value));
+		}
+	}
+}
+
+// Convolves the given filter with the given radius over the image, then applies 
+// a final color to each pixel at the end of the operation.
+static void ConvolveImage(double* image, int w, int h, const double* kernel, int radius)
+{
+	std::vector<double> buffer(image, image + w * h);
+
+	int size = radius * 2 + 1;
+	for (int r = 0; r < h; ++r)
+	{
+		for (int c = 0; c < w; ++c)
+		{
+			double intensity = 0.0;
+
+			for (int rd = -radius; rd <= radius; ++rd)
+			{
+				for (int cd = -radius; cd <= radius; ++cd)
+				{
+					double pixel = PixelAt(buffer.data(), w, h, c + cd, r + rd);
+
+					// Get the value of the kernel
+					double weight = kernel[(rd + radius) * size + cd + radius];
+					intensity += weight * pixel;
+				}
+			}
+
+			image[c + r * w] = intensity;
+		}
+	}
+}
+
+// Multiplies the two given images with the provided with |w| and height |h|, and
+// returns the result in the |out| buffer.
+static void MultiplyImages(const double* image1, const double* image2, int w, int h, double* out)
+{
+	for (int i = 0; i < w * h; ++i)
+	{
+		out[i] = image1[i] * image2[i];
+	}
+}
+
+// Computes the response over the given derivative images, width, height, window size, sigma and threshold
+// and returns the results in |outImage|.
+static void ComputeResponse(const double* ix2, const double* iy2, const double* ixy, int w, int h, int windowSize, double sigma, double thres, double* outImage)
+{
+	int radius = windowSize / 2;
+	std::vector<double> kernel(windowSize * windowSize, 0);
+	for (int i = 0; i < windowSize * windowSize; ++i)
+	{
+		// Only calculate a single distance, horizontal for reference.
+		int u = i - radius;
+		double numerator = pow(M_E, -(u * u) / (2 * sigma * sigma));
+		double denominator = sqrt(2 * M_PI) * sigma;
+		kernel[i] = numerator / denominator;
+	}
+
+	// Make sure kernel sums to 1
+	NormalizeKernel(kernel.data(), windowSize * windowSize);
+
+	std::vector<double> responseImage(w * h);
+	for (int r = 0; r < h; ++r)
+	{
+		for (int c = 0; c < w; ++c)
+		{
+			double harrisMat[4]{ 0, 0, 0, 0 };
+
+			for (int rd = -radius; rd <= radius; ++rd)
+			{
+				for (int cd = -radius; cd <= radius; ++cd)
+				{
+					double weight = kernel[cd + radius + (rd + radius) * windowSize];
+					harrisMat[0] += weight * PixelAt(ix2, w, h, c + cd, r + rd);
+					harrisMat[1] += weight * PixelAt(ixy, w, h, c + cd, r + rd);
+					harrisMat[2] = harrisMat[1];
+					harrisMat[3] += weight * PixelAt(iy2, w, h, c + cd, r + rd);
+				}
+			}
+
+			// Compute response as det(H) / trace(H)
+			double det = harrisMat[0] * harrisMat[3] - harrisMat[1] * harrisMat[2];
+			double trace = harrisMat[0] + harrisMat[3];
+			double response = det / trace;
+			outImage[c + r * w] = response >= thres ? response : 0.0;
+		}
+	}
+}
+
+static double LocalMaxima(const double* image, int w, int h, int c, int r)
+{
+	const int kRadius = 1;
+	std::vector<double> buffer(image, image + w * h);
+
+	double pixel = image[c + r * w];
+	for (int rd = -kRadius; rd < kRadius; ++rd)
+	{
+		for (int cd = -kRadius; cd < kRadius; ++cd)
+		{
+			if (cd == 0 && rd == 0)
+				continue;
+
+			if (pixel <= PixelAt(image, w, h, c + cd, r + rd))
+				return false;
+		}
+	}
+
+	return true;
+}
+
+static void FindInterestPoints(const double* image, int w, int h, CIntPt** points, int& numPoints)
+{
+	std::vector<CIntPt> interestPoints;
+	for (int r = 0; r < h; ++r)
+	{
+		for (int c = 0; c < w; ++c)
+		{
+			if (LocalMaxima(image, w, h, c, r))
+			{
+				CIntPt point{ c, r };
+				interestPoints.push_back(point);
+			}
+		}
+	}
+
+	numPoints = interestPoints.size();
+	*points = new CIntPt[numPoints];
+	std::copy(interestPoints.begin(), interestPoints.end(), *points);
+}
+
+}  // namespace
+
 /*******************************************************************************
     The following are helper routines with code already written.
     The routines you'll need to write for the assignment are below.
@@ -263,7 +431,65 @@ void MainWindow::SeparableGaussianBlurImage(double *image, int w, int h, double 
     // Add your code here
 
     // To access the pixel (c,r), use image[r*width + c].
+	// Add your code here.  Done right, you should be able to copy most of the code from GaussianBlurImage.
+	if (sigma == 0)
+		return;
 
+	const int radius = (int)(3 * sigma);
+	const int size = radius * 2 + 1;
+	std::vector<double> buffer = std::vector<double>(image, image + (w * h));
+
+	std::vector<double> kernel(size * size);
+	for (int i = 0; i < size * size; ++i)
+	{
+		int u = i % size - radius;
+		int v = i / size - radius;
+		double numerator = pow(M_E, -(u * u + v * v) / (2 * sigma * sigma));
+		double denominator = sqrt(2 * M_PI) * sigma;
+		kernel[i] = numerator / denominator;
+	}
+
+	// Make sure kernel sums to 1
+	NormalizeKernel(kernel.data(), size);
+
+	std::vector<double> temp(w * h, 0.0);
+
+	// Horizontal pass
+	for (int r = 0; r < h; ++r)
+	{
+		for (int c = 0; c < w; ++c)
+		{
+			double intensity = 0.0;
+
+			for (int cd = -radius; cd <= radius; ++cd)
+			{
+				double pixel = PixelAt(image, w, h, c + cd, r);
+				double weight = kernel[cd + radius];
+				intensity += pixel * weight;
+			}
+
+			temp[c + r * w] = intensity;
+
+		}
+	}
+
+	// Vertical pass
+	for (int r = 0; r < h; ++r)
+	{
+		for (int c = 0; c < w; ++c)
+		{
+			double intensity = 0.0;
+
+			for (int rd = -radius; rd <= radius; ++rd)
+			{
+				QRgb pixel = PixelAt(temp.data(), w, h, c, r + rd);
+				double weight = kernel[rd + radius];
+				intensity += pixel * weight;
+			}
+
+			image[c + r * w] = intensity;
+		}
+	}
 }
 
 
@@ -278,6 +504,7 @@ Detect Harris corners.
 *******************************************************************************/
 void MainWindow::HarrisCornerDetector(QImage image, double sigma, double thres, CIntPt **interestPts, int &numInterestsPts, QImage &imageDisplay)
 {
+	const int kWindowSize = 5;
     int r, c;
     int w = image.width();
     int h = image.height();
@@ -286,16 +513,55 @@ void MainWindow::HarrisCornerDetector(QImage image, double sigma, double thres, 
 
     numInterestsPts = 0;
 
-    // Compute the corner response using just the green channel
+    // Compute the corner response graytone image
     for(r=0;r<h;r++)
        for(c=0;c<w;c++)
         {
             pixel = image.pixel(c, r);
 
-            buffer[r*w + c] = (double) qGreen(pixel);
+            buffer[r*w + c] = 0.21 * (double)qRed(pixel) + 0.72 * (double)qGreen(pixel) + 0.07 * (double)qBlue(pixel);
         }
 
     // Write your Harris corner detection code here.
+
+	// Compute image derivatives
+	std::vector<double> derivX(buffer, buffer + w * h);
+	std::vector<double> derivY(buffer, buffer + w * h);
+
+	std::vector<double> xKernel{
+		//-1, 0, 1,
+		//-2, 0, 2,
+		//-1, 0, 1,
+		0, 0, 0,
+		1, 0, -1,
+		0, 0, 0,
+	};
+	ConvolveImage(derivX.data(), w, h, xKernel.data(), 1);
+	std::vector<double> yKernel{
+		//-1, -2, -1,
+		//0, 0, 0,
+		//1, 2, 1,
+		0, 1, 0,
+		0, 0, 0,
+		0, -1, 0
+	};
+	ConvolveImage(derivY.data(), w, h, yKernel.data(), 1);
+
+	std::vector<double> ix2(w * h);
+	std::vector<double> iy2(w * h);
+	std::vector<double> ixy(w * h);
+	MultiplyImages(derivX.data(), derivX.data(), w, h, ix2.data());
+	MultiplyImages(derivY.data(), derivY.data(), w, h, iy2.data());
+	MultiplyImages(derivX.data(), derivY.data(), w, h, ixy.data());
+	SeparableGaussianBlurImage(ix2.data(), w, h, sigma);
+	SeparableGaussianBlurImage(iy2.data(), w, h, sigma);
+	SeparableGaussianBlurImage(ixy.data(), w, h, sigma);
+
+	std::vector<double> harrisImage(w * h, 0);
+	ComputeResponse(ix2.data(), iy2.data(), ixy.data(), w, h, kWindowSize, sigma, thres, harrisImage.data());
+
+	//BufferToImage(ixy.data(), &imageDisplay);
+	FindInterestPoints(harrisImage.data(), w, h, interestPts, numInterestsPts);
 
     // Once you uknow the number of interest points allocate an array as follows:
     // *interestPts = new CIntPt [numInterestsPts];
