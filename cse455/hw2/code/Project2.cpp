@@ -89,11 +89,11 @@ static void ComputeResponse(const double* ix2, const double* iy2, const double* 
 {
 	int radius = windowSize / 2;
 	std::vector<double> kernel(windowSize * windowSize, 0);
-	for (int i = 0; i < windowSize * windowSize; ++i)
+	for (int i = 0; i < kernel.size(); ++i)
 	{
-		// Only calculate a single distance, horizontal for reference.
-		int u = i - radius;
-		double numerator = pow(M_E, -(u * u) / (2 * sigma * sigma));
+		int u = i % windowSize - radius;
+		int v = i / windowSize - radius;
+		double numerator = pow(M_E, -(u * u + v * v) / (2 * sigma * sigma));
 		double denominator = sqrt(2 * M_PI) * sigma;
 		kernel[i] = numerator / denominator;
 	}
@@ -112,13 +112,13 @@ static void ComputeResponse(const double* ix2, const double* iy2, const double* 
 			{
 				for (int cd = -radius; cd <= radius; ++cd)
 				{
-					double weight = kernel[cd + radius + (rd + radius) * windowSize];
+					double weight = 1;// kernel[cd + radius + (rd + radius) * windowSize];
 					harrisMat[0] += weight * PixelAt(ix2, w, h, c + cd, r + rd);
 					harrisMat[1] += weight * PixelAt(ixy, w, h, c + cd, r + rd);
-					harrisMat[2] = harrisMat[1];
 					harrisMat[3] += weight * PixelAt(iy2, w, h, c + cd, r + rd);
 				}
 			}
+			harrisMat[2] = harrisMat[1];
 
 			// Compute response as det(H) / trace(H)
 			double det = harrisMat[0] * harrisMat[3] - harrisMat[1] * harrisMat[2];
@@ -131,7 +131,7 @@ static void ComputeResponse(const double* ix2, const double* iy2, const double* 
 
 static double LocalMaxima(const double* image, int w, int h, int c, int r)
 {
-	const int kRadius = 1;
+	const int kRadius = 2;
 	std::vector<double> buffer(image, image + w * h);
 
 	double pixel = image[c + r * w];
@@ -439,12 +439,12 @@ void MainWindow::SeparableGaussianBlurImage(double *image, int w, int h, double 
 	const int size = radius * 2 + 1;
 	std::vector<double> buffer = std::vector<double>(image, image + (w * h));
 
-	std::vector<double> kernel(size * size);
-	for (int i = 0; i < size * size; ++i)
+	std::vector<double> kernel(size);
+	for (int i = 0; i < size; ++i)
 	{
-		int u = i % size - radius;
-		int v = i / size - radius;
-		double numerator = pow(M_E, -(u * u + v * v) / (2 * sigma * sigma));
+		// Only calculate a single distance, horizontal for reference.
+		int u = i - radius;
+		double numerator = pow(M_E, -(u * u) / (2 * sigma * sigma));
 		double denominator = sqrt(2 * M_PI) * sigma;
 		kernel[i] = numerator / denominator;
 	}
@@ -529,38 +529,35 @@ void MainWindow::HarrisCornerDetector(QImage image, double sigma, double thres, 
 	std::vector<double> derivY(buffer, buffer + w * h);
 
 	std::vector<double> xKernel{
-		//-1, 0, 1,
-		//-2, 0, 2,
-		//-1, 0, 1,
-		0, 0, 0,
-		1, 0, -1,
-		0, 0, 0,
+		-1, 0, 1,
+		-2, 0, 2,
+		-1, 0, 1,
 	};
 	ConvolveImage(derivX.data(), w, h, xKernel.data(), 1);
 	std::vector<double> yKernel{
-		//-1, -2, -1,
-		//0, 0, 0,
-		//1, 2, 1,
-		0, 1, 0,
+		-1, -2, -1,
 		0, 0, 0,
-		0, -1, 0
+		1, 2, 1,
 	};
 	ConvolveImage(derivY.data(), w, h, yKernel.data(), 1);
+
+	std::vector<double> ix(derivX.begin(), derivX.end());
+	std::vector<double> iy(derivY.begin(), derivY.end());
+	/*SeparableGaussianBlurImage(ix.data(), w, h, sigma);
+	SeparableGaussianBlurImage(iy.data(), w, h, sigma);*/
 
 	std::vector<double> ix2(w * h);
 	std::vector<double> iy2(w * h);
 	std::vector<double> ixy(w * h);
-	MultiplyImages(derivX.data(), derivX.data(), w, h, ix2.data());
-	MultiplyImages(derivY.data(), derivY.data(), w, h, iy2.data());
-	MultiplyImages(derivX.data(), derivY.data(), w, h, ixy.data());
-	SeparableGaussianBlurImage(ix2.data(), w, h, sigma);
-	SeparableGaussianBlurImage(iy2.data(), w, h, sigma);
-	SeparableGaussianBlurImage(ixy.data(), w, h, sigma);
+	MultiplyImages(ix.data(), ix.data(), w, h, ix2.data());
+	MultiplyImages(iy.data(), iy.data(), w, h, iy2.data());
+	MultiplyImages(ix.data(), iy.data(), w, h, ixy.data());
+	//SeparableGaussianBlurImage(ixy.data(), w, h, sigma);
 
 	std::vector<double> harrisImage(w * h, 0);
 	ComputeResponse(ix2.data(), iy2.data(), ixy.data(), w, h, kWindowSize, sigma, thres, harrisImage.data());
 
-	//BufferToImage(ixy.data(), &imageDisplay);
+	//BufferToImage(harrisImage.data(), &imageDisplay);
 	FindInterestPoints(harrisImage.data(), w, h, interestPts, numInterestsPts);
 
     // Once you uknow the number of interest points allocate an array as follows:
