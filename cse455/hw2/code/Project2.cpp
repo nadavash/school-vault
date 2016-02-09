@@ -1,3 +1,5 @@
+#include <unordered_set>
+
 #include "mainwindow.h"
 #include "math.h"
 #include "ui_mainwindow.h"
@@ -112,7 +114,7 @@ static void ComputeResponse(const double* ix2, const double* iy2, const double* 
 			{
 				for (int cd = -radius; cd <= radius; ++cd)
 				{
-					double weight = 1;// kernel[cd + radius + (rd + radius) * windowSize];
+					double weight = kernel[cd + radius + (rd + radius) * windowSize];
 					harrisMat[0] += weight * PixelAt(ix2, w, h, c + cd, r + rd);
 					harrisMat[1] += weight * PixelAt(ixy, w, h, c + cd, r + rd);
 					harrisMat[3] += weight * PixelAt(iy2, w, h, c + cd, r + rd);
@@ -168,6 +170,18 @@ static void FindInterestPoints(const double* image, int w, int h, CIntPt** point
 	numPoints = interestPoints.size();
 	*points = new CIntPt[numPoints];
 	std::copy(interestPoints.begin(), interestPoints.end(), *points);
+}
+
+static double NormDistanceL1(CIntPt point1, CIntPt point2)
+{
+	double sum = 0;
+	for (int i = 0; i < DESC_SIZE; ++i)
+	{
+		double dist = point1.m_Desc[i] - point2.m_Desc[i];
+		sum += dist * dist;
+	}
+
+	return sqrt(sum);
 }
 
 }  // namespace
@@ -450,7 +464,7 @@ void MainWindow::SeparableGaussianBlurImage(double *image, int w, int h, double 
 	}
 
 	// Make sure kernel sums to 1
-	NormalizeKernel(kernel.data(), size);
+	NormalizeKernel(kernel.data(), kernel.size());
 
 	std::vector<double> temp(w * h, 0.0);
 
@@ -482,7 +496,7 @@ void MainWindow::SeparableGaussianBlurImage(double *image, int w, int h, double 
 
 			for (int rd = -radius; rd <= radius; ++rd)
 			{
-				QRgb pixel = PixelAt(temp.data(), w, h, c, r + rd);
+				double pixel = PixelAt(temp.data(), w, h, c, r + rd);
 				double weight = kernel[rd + radius];
 				intensity += pixel * weight;
 			}
@@ -543,8 +557,8 @@ void MainWindow::HarrisCornerDetector(QImage image, double sigma, double thres, 
 
 	std::vector<double> ix(derivX.begin(), derivX.end());
 	std::vector<double> iy(derivY.begin(), derivY.end());
-	/*SeparableGaussianBlurImage(ix.data(), w, h, sigma);
-	SeparableGaussianBlurImage(iy.data(), w, h, sigma);*/
+	SeparableGaussianBlurImage(ix.data(), w, h, sigma);
+	SeparableGaussianBlurImage(iy.data(), w, h, sigma);
 
 	std::vector<double> ix2(w * h);
 	std::vector<double> iy2(w * h);
@@ -552,7 +566,7 @@ void MainWindow::HarrisCornerDetector(QImage image, double sigma, double thres, 
 	MultiplyImages(ix.data(), ix.data(), w, h, ix2.data());
 	MultiplyImages(iy.data(), iy.data(), w, h, iy2.data());
 	MultiplyImages(ix.data(), iy.data(), w, h, ixy.data());
-	//SeparableGaussianBlurImage(ixy.data(), w, h, sigma);
+	SeparableGaussianBlurImage(ixy.data(), w, h, sigma);
 
 	std::vector<double> harrisImage(w * h, 0);
 	ComputeResponse(ix2.data(), iy2.data(), ixy.data(), w, h, kWindowSize, sigma, thres, harrisImage.data());
@@ -600,13 +614,48 @@ void MainWindow::MatchInterestPoints(QImage image1, CIntPt *interestPts1, int nu
     ComputeDescriptors(image1, interestPts1, numInterestsPts1);
     ComputeDescriptors(image2, interestPts2, numInterestsPts2);
 
+	std::vector<CMatches> tempMatches;
     // Add your code here for finding the best matches for each point.
+	for (int i = 0; i < numInterestsPts1; ++i)
+	{
+		CIntPt point1 = interestPts1[i];
+		if (point1.m_DescSize == 0)
+			continue;
+
+		int closestIndex = -1;
+		double minDist = std::numeric_limits<double>::max();
+		for (int j = 0; j < numInterestsPts2; ++j)
+		{
+			CIntPt point2 = interestPts2[j];
+			if (point2.m_DescSize == 0)
+				continue;
+
+			double dist = NormDistanceL1(point1, point2);
+			if (dist < minDist)
+			{
+				closestIndex = j;
+				minDist = dist;
+			}
+		}
+
+		if (closestIndex != -1)
+		{
+			// add match
+			tempMatches.push_back(CMatches{
+				point1.m_X, point1.m_Y,
+				interestPts2[closestIndex].m_X, interestPts2[closestIndex].m_Y
+			});
+		}
+	}
 
     // Once you uknow the number of matches allocate an array as follows:
     // *matches = new CMatches [numMatches];
     //
     // The position of the interest point in iamge 1 is (m_X1, m_Y1)
     // The position of the interest point in image 2 is (m_X2, m_Y2)
+	numMatches = tempMatches.size();
+	*matches = new CMatches[numMatches];
+	std::copy(tempMatches.begin(), tempMatches.end(), *matches);
 
     // Draw the matches
     DrawMatches(*matches, numMatches, image1Display, image2Display);
@@ -621,6 +670,11 @@ Project a point (x1, y1) using the homography transformation h
 void MainWindow::Project(double x1, double y1, double &x2, double &y2, double h[3][3])
 {
     // Add your code here.
+	x2 = h[0][0] * x1 + h[0][1] * y1 + h[0][2];
+	y2 = h[1][0] * x1 + h[1][1] * y1 + h[1][2];
+	double w = h[2][0] * x1 + h[2][1] * y1 + h[2][2];
+	x2 / w;
+	y2 / w;
 }
 
 /*******************************************************************************
@@ -634,9 +688,24 @@ Count the number of inliers given a homography.  This is a helper function for R
 *******************************************************************************/
 int MainWindow::ComputeInlierCount(double h[3][3], CMatches *matches, int numMatches, double inlierThreshold)
 {
+	int inlierCount = 0;
     // Add your code here.
+	for (int i = 0; i < numMatches; ++i)
+	{
+		CMatches match = matches[i];
 
-    return 0;
+		double projectedX, projectedY;
+		Project(match.m_X1, match.m_Y1, projectedX, projectedY, h);
+
+		double xDist = projectedX - match.m_X2;
+		double yDist = projectedY - match.m_Y2;
+		double dist = sqrt(xDist * xDist + yDist * yDist);
+
+		if (dist <= inlierThreshold)
+			++inlierCount;
+	}
+
+    return inlierCount;
 }
 
 
@@ -654,10 +723,55 @@ Compute homography transformation between images using RANSAC.
 void MainWindow::RANSAC(CMatches *matches, int numMatches, int numIterations, double inlierThreshold,
                         double hom[3][3], double homInv[3][3], QImage &image1Display, QImage &image2Display)
 {
+	double bestHom[3][3];
+	int maxInlierCount = INT_MIN;
+
     // Add your code here.
+	for (int i = 0; i < numIterations; ++i)
+	{
+		std::unordered_set<int> chosenIndices;
+		CMatches randomMatches[4];
+		for (int i = 0; i < 4; ++i)
+		{
+			int randIndex = rand() % numMatches;
+			if (chosenIndices.find(randIndex) == chosenIndices.end())
+				chosenIndices.insert(randIndex);
+			randomMatches[i] = matches[randIndex];
+		}
+
+		double tempHom[3][3];
+		ComputeHomography(randomMatches, 4, tempHom, true);
+		int inlierCount = ComputeInlierCount(tempHom, matches, numMatches, inlierThreshold);
+
+		if (inlierCount > maxInlierCount)
+		{
+			memcpy(bestHom, tempHom, sizeof(double) * 9);
+			maxInlierCount = inlierCount;
+		}
+	}
+
+	std::vector<CMatches> inliers;
+	// Add your code here.
+	for (int i = 0; i < numMatches; ++i)
+	{
+		CMatches match = matches[i];
+
+		double projectedX, projectedY;
+		Project(match.m_X1, match.m_Y1, projectedX, projectedY, bestHom);
+
+		double xDist = projectedX - match.m_X2;
+		double yDist = projectedY - match.m_Y2;
+		double dist = sqrt(xDist * xDist + yDist * yDist);
+
+		if (dist <= inlierThreshold)
+			inliers.push_back(match);
+	}
+
+	ComputeHomography(inliers.data(), inliers.size(), hom, true);
+	ComputeHomography(inliers.data(), inliers.size(), homInv, false);
 
     // After you're done computing the inliers, display the corresponding matches.
-    //DrawMatches(inliers, numInliers, image1Display, image2Display);
+    DrawMatches(inliers.data(), inliers.size(), image1Display, image2Display);
 
 }
 
