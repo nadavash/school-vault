@@ -8,8 +8,19 @@
 
 namespace {
 
-// Returns a pixel from the image at the given x,y coordinates. Returns black
-// if out of bounds.
+
+// Returns a pixel from the image at the given x,y coordinates. Uses the 'fixed' method.
+static QRgb PixelAt(const QImage& image, int x, int y)
+{
+	x = min(max(x, 0), image.width() - 1);
+	y = min(max(y, 0), image.height() - 1);
+	return image.pixel(x, y);
+
+	return 0;
+}
+
+
+// Returns a pixel from the image at the given x,y coordinates. Uses the 'fixed' method.
 static double PixelAt(const double* image, int w, int h, int x, int y)
 {
 	x = min(max(x, 0), w - 1);
@@ -30,7 +41,7 @@ static void NormalizeKernel(double* kernel, int length)
 	}
 }
 
-//
+// Converts the buffer to a QImage.
 static void BufferToImage(const double* buffer, QImage* image)
 {
 	int w = image->width();
@@ -131,11 +142,10 @@ static void ComputeResponse(const double* ix2, const double* iy2, const double* 
 	}
 }
 
+// Does a local maxima check over the given image at the given coordinates.
 static double LocalMaxima(const double* image, int w, int h, int c, int r)
 {
 	const int kRadius = 2;
-	std::vector<double> buffer(image, image + w * h);
-
 	double pixel = image[c + r * w];
 	for (int rd = -kRadius; rd < kRadius; ++rd)
 	{
@@ -152,6 +162,7 @@ static double LocalMaxima(const double* image, int w, int h, int c, int r)
 	return true;
 }
 
+// Finds the interest points in the given Harris image.
 static void FindInterestPoints(const double* image, int w, int h, CIntPt** points, int& numPoints)
 {
 	std::vector<CIntPt> interestPoints;
@@ -172,13 +183,13 @@ static void FindInterestPoints(const double* image, int w, int h, CIntPt** point
 	std::copy(interestPoints.begin(), interestPoints.end(), *points);
 }
 
+// Calculates the L1 Norm distance between the descriptors of the two points.
 static double NormDistanceL1(CIntPt point1, CIntPt point2)
 {
 	double sum = 0;
 	for (int i = 0; i < DESC_SIZE; ++i)
 	{
-		double dist = point1.m_Desc[i] - point2.m_Desc[i];
-		sum += dist * dist;
+		sum += abs(point1.m_Desc[i] - point2.m_Desc[i]);
 	}
 
 	return sqrt(sum);
@@ -543,15 +554,21 @@ void MainWindow::HarrisCornerDetector(QImage image, double sigma, double thres, 
 	std::vector<double> derivY(buffer, buffer + w * h);
 
 	std::vector<double> xKernel{
-		-1, 0, 1,
+		/*-1, 0, 1,
 		-2, 0, 2,
+		-1, 0, 1,*/
+		-0, 0, 0,
 		-1, 0, 1,
+		0, 0, 0,
 	};
 	ConvolveImage(derivX.data(), w, h, xKernel.data(), 1);
 	std::vector<double> yKernel{
-		-1, -2, -1,
+	/*	-1, -2, -1,
 		0, 0, 0,
-		1, 2, 1,
+		1, 2, 1,*/
+		0, -1, 0,
+		0, 0, 0,
+		0, 1, 0,
 	};
 	ConvolveImage(derivY.data(), w, h, yKernel.data(), 1);
 
@@ -673,8 +690,8 @@ void MainWindow::Project(double x1, double y1, double &x2, double &y2, double h[
 	x2 = h[0][0] * x1 + h[0][1] * y1 + h[0][2];
 	y2 = h[1][0] * x1 + h[1][1] * y1 + h[1][2];
 	double w = h[2][0] * x1 + h[2][1] * y1 + h[2][2];
-	x2 / w;
-	y2 / w;
+	x2 /= w;
+	y2 /= w;
 }
 
 /*******************************************************************************
@@ -701,7 +718,7 @@ int MainWindow::ComputeInlierCount(double h[3][3], CMatches *matches, int numMat
 		double yDist = projectedY - match.m_Y2;
 		double dist = sqrt(xDist * xDist + yDist * yDist);
 
-		if (dist <= inlierThreshold)
+		if (dist < inlierThreshold)
 			++inlierCount;
 	}
 
@@ -731,12 +748,14 @@ void MainWindow::RANSAC(CMatches *matches, int numMatches, int numIterations, do
 	{
 		std::unordered_set<int> chosenIndices;
 		CMatches randomMatches[4];
-		for (int i = 0; i < 4; ++i)
+		while (chosenIndices.size() < 4)
 		{
-			int randIndex = rand() % numMatches;
+			int randIndex = qrand() % numMatches;
 			if (chosenIndices.find(randIndex) == chosenIndices.end())
+			{
+				randomMatches[chosenIndices.size()] = matches[randIndex];
 				chosenIndices.insert(randIndex);
-			randomMatches[i] = matches[randIndex];
+			}
 		}
 
 		double tempHom[3][3];
@@ -763,7 +782,7 @@ void MainWindow::RANSAC(CMatches *matches, int numMatches, int numIterations, do
 		double yDist = projectedY - match.m_Y2;
 		double dist = sqrt(xDist * xDist + yDist * yDist);
 
-		if (dist <= inlierThreshold)
+		if (dist < inlierThreshold)
 			inliers.push_back(match);
 	}
 
@@ -786,6 +805,28 @@ Bilinearly interpolate image (helper function for Stitch)
 bool MainWindow::BilinearInterpolation(QImage *image, double x, double y, double rgb[3])
 {
     // Add your code here.
+	int h = image->height();
+	int w = image->width();
+
+	int x1 = (int)floor(x);
+	int y1 = (int)floor(y);
+	int x2 = (int)ceil(x + 0.00001);
+	int y2 = (int)ceil(y + 0.00001);
+
+	QRgb p11 = PixelAt(*image, x1, y1);
+	QRgb p12 = PixelAt(*image, x1, y2);
+	QRgb p21 = PixelAt(*image, x2, y1);
+	QRgb p22 = PixelAt(*image, x2, y2);
+
+	for (int i = 0; i < 3; ++i)
+	{
+		int(*color)(QRgb) = (i == 0 ? qRed : (i == 1 ? qGreen : qBlue));
+		rgb[i] = (1 / ((x2 - x1) * (y2 - y1))) *
+			(((*color)(p11)* (x2 - x) * (y2 - y)) +
+			((*color)(p21)* (x - x1) * (y2 - y)) +
+			((*color)(p12)* (x2 - x) * (y - y1)) +
+			((*color)(p22)* (x - x1) * (y - y1)));
+	}
 
     return true;
 }
@@ -806,9 +847,50 @@ void MainWindow::Stitch(QImage image1, QImage image2, double hom[3][3], double h
     int hs = 0;
 
     // Add your code to compute ws and hs here.
+	double topLeft[2];
+	double topRight[2];
+	double bottomLeft[2];
+	double bottomRight[2];
+	Project(0, 0, topLeft[0], topLeft[1], homInv);
+	Project(image2.width(), 0, topRight[0], topRight[1], homInv);
+	Project(0, image2.height(), bottomLeft[0], bottomLeft[1], homInv);
+	Project(image2.width(), image2.height(), bottomRight[0], bottomRight[1], homInv);
+	
+	double left = min(min(min(min(topLeft[0], bottomLeft[0]), topRight[0]), bottomRight[0]), 0.0);
+	double right = max(max(max(max(topRight[0], bottomRight[0]), bottomLeft[0]), bottomRight[0]), (double)image1.width());
+	double top = min(min(min(min(topLeft[1], topRight[1]), bottomRight[1]), bottomLeft[1]), 0.);
+	double bottom = max(max(max(max(bottomLeft[1], bottomRight[1]), topRight[1]), bottomRight[1]), (double)image1.height());
+	
+	ws = ceil(right - left);
+	hs = ceil(bottom - top);
 
     stitchedImage = QImage(ws, hs, QImage::Format_RGB32);
     stitchedImage.fill(qRgb(0,0,0));
+	
+	for (int r = 0; r < image1.height(); ++r)
+	{
+		for (int c = 0; c < image1.width(); ++c)
+		{
+			stitchedImage.setPixel(c - left, r - top, image1.pixel(c, r));
+		}
+	}
+
+	for (int r = 0; r < hs; ++r)
+	{
+		for (int c = 0; c < ws; ++c)
+		{
+			double pX = 0;
+			double pY = 0;
+			Project(c + left, r + top, pX, pY, hom);
+
+			if (pX >= 0 && pY >= 0 && pX < image2.width() && pY < image2.height())
+			{
+				double rgb[3];
+				BilinearInterpolation(&image2, pX, pY, rgb);
+				stitchedImage.setPixel(c, r, qRgb((int)floor(rgb[0] + 0.5), (int)floor(rgb[1] + 0.5), (int)floor(rgb[2] + 0.5)));
+			}
+		}
+	}
 
     // Add you code to warp image1 and image2 to stitchedImage here.
 }
