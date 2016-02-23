@@ -391,7 +391,7 @@ void MainWindow::SSD(QImage image1, QImage image2, int minDisparity, int maxDisp
 					for (int j = -offset; j <= offset; ++j)
 					{
 						double diff = PixelAt(buffer1.data(), w, h, c + i, r + j) -
-							PixelAt(buffer2.data(), w, h, c + i + d, r + j);
+							PixelAt(buffer2.data(), w, h, c + i - d, r + j);
 						difference += diff * diff;
 					}
 				}
@@ -719,15 +719,17 @@ void MainWindow::FindBestDisparity(double *matchCost, double *disparities, int w
 	for (int i = 0; i < w * h; ++i)
 	{
 		double min = matchCost[i];
+		int disparity = minDisparity;
 		for (int d = 1; d < numDisparities; ++d)
 		{
 			if (matchCost[d * w * h + i] < min)
 			{
 				min = matchCost[d * w * h + i];
+				disparity = d + minDisparity;
 			}
 		}
 
-		disparities[i] = min;
+		disparities[i] = disparity;
 	}
 }
 
