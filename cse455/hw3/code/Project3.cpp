@@ -384,7 +384,7 @@ void MainWindow::SSD(QImage image1, QImage image2, int minDisparity, int maxDisp
 		for (int c = 0; c < w; ++c)
 		{
 			for (int d = minDisparity; d < maxDisparity; ++d) {
-				double difference = 0.0;
+				double ssd = 0.0;
 
 				for (int i = -offset; i <= offset; ++i)
 				{
@@ -392,11 +392,11 @@ void MainWindow::SSD(QImage image1, QImage image2, int minDisparity, int maxDisp
 					{
 						double diff = PixelAt(buffer1.data(), w, h, c + i, r + j) -
 							PixelAt(buffer2.data(), w, h, c + i - d, r + j);
-						difference += diff * diff;
+						ssd += diff * diff;
 					}
 				}
 
-				matchCost[(d - minDisparity) * w * h + r * w + c] = difference;
+				matchCost[(d - minDisparity) * w * h + r * w + c] = ssd;
 			}
 
 		}
@@ -430,19 +430,19 @@ void MainWindow::SAD(QImage image1, QImage image2, int minDisparity, int maxDisp
 	   for (int c = 0; c < w; ++c)
 	   {
 		   for (int d = minDisparity; d < maxDisparity; ++d) {
-			   double difference = 0.0;
+			   double sad = 0.0;
 
 			   for (int i = -offset; i <= offset; ++i)
 			   {
 				   for (int j = -offset; j <= offset; ++j)
 				   {
 					   double diff = PixelAt(buffer1.data(), w, h, c + j, r + i) -
-						   PixelAt(buffer2.data(), w, h, c + j + d, r + i);
-					   difference += abs(diff);
+						   PixelAt(buffer2.data(), w, h, c + j - d, r + i);
+					   sad += abs(diff);
 				   }
 			   }
 
-			   matchCost[(d - minDisparity) * w * h + r * w + c] = difference;
+			   matchCost[(d - minDisparity) * w * h + r * w + c] = sad;
 
 		   }
 
@@ -477,20 +477,23 @@ void MainWindow::NCC(QImage image1, QImage image2, int minDisparity, int maxDisp
 	   for (int c = 0; c < w; ++c)
 	   {
 		   for (int d = minDisparity; d < maxDisparity; ++d) {
-			   double difference = 0.0;
+			   double i1i2 = 0;
+			   double i1Squared = 0;
+			   double i2Squared = 0;
 
 			   for (int i = -offset; i <= offset; ++i)
 			   {
 				   for (int j = -offset; j <= offset; ++j)
 				   {
-					   double diff = PixelAt(buffer1.data(), w, h, c + j, r + i) -
-						   PixelAt(buffer2.data(), w, h, c + j + d, r + i);
-					   difference += abs(diff);
+					   double i1 = PixelAt(buffer1.data(), w, h, c + j, r + i);
+					   double i2 = PixelAt(buffer2.data(), w, h, c + j - d, r + i);
+					   i1i2 += i1 * i2;
+					   i1Squared += i1 * i1;
+					   i2Squared += i2 * i2;
 				   }
 			   }
 
-			   matchCost[(d - minDisparity) * w * h + r * w + c] = difference;
-
+			   matchCost[(d - minDisparity) * w * h + r * w + c] = 1 - i1i2 / sqrt(i1Squared * i2Squared);
 		   }
 
 	   }
@@ -673,6 +676,37 @@ Compute the mean color and position for each segment (helper function for Segmen
 void MainWindow::ComputeSegmentMeans(QImage image, int *segment, int numSegments, double (*meanSpatial)[2], double (*meanColor)[3])
 {
     // Add your code here
+	int w = image.width();
+	int h = image.height();
+
+	std::vector<int> segmentCounts(numSegments, 0);
+
+	for (int r = 0; r < h; ++r)
+	{
+		for (int c = 0; c < w; ++c)
+		{
+			int seg = segment[r * w + c];
+			segmentCounts[seg]++;
+
+			meanSpatial[seg][0] += c;
+			meanSpatial[seg][1] += r;
+
+			QRgb pixel = image.pixel(c, r);
+			meanColor[seg][0] += qRed(pixel);
+			meanColor[seg][1] += qGreen(pixel);
+			meanColor[seg][2] += qBlue(pixel);
+		}
+	}
+
+	for (int s = 0; s < numSegments; ++s)
+	{
+		meanSpatial[s][0] /= segmentCounts[s];
+		meanSpatial[s][1] /= segmentCounts[s];
+
+		meanColor[s][0] /= segmentCounts[s];
+		meanColor[s][1] /= segmentCounts[s];
+		meanColor[s][2] /= segmentCounts[s];
+	}
 }
 
 /*******************************************************************************
@@ -689,6 +723,43 @@ void MainWindow::AssignPixelsToSegments(QImage image, int *segment, int numSegme
                             double spatialSigma, double colorSigma)
 {
     // Add your code here
+	int w = image.width();
+	int h = image.height();
+
+	double spatialSigma2 = spatialSigma * spatialSigma;
+	double colorSigma2 = colorSigma * colorSigma;
+
+	for (int r = 0; r < h; ++r)
+	{
+		for (int c = 0; c < w; ++c)
+		{
+			QRgb pixel = image.pixel(c, r);
+
+			double minDistance = std::numeric_limits<double>::max();
+			int closestSegment = -1;
+
+			for (int s = 0; s < numSegments; ++s)
+			{
+				double xDist = meanSpatial[s][0] - c;
+				double yDist = meanSpatial[s][1] - r;
+
+				double rDist = meanColor[s][0] - qRed(pixel);
+				double gDist = meanColor[s][1] - qGreen(pixel);
+				double bDist = meanColor[s][2] - qBlue(pixel);
+
+				double mDistance = (xDist * xDist + yDist * yDist) / spatialSigma2 +
+					(rDist * rDist + gDist * gDist + bDist * bDist) / colorSigma2;
+
+				if (mDistance < minDistance)
+				{
+					minDistance = mDistance;
+					closestSegment = s;
+				}
+			}
+
+			segment[r * w + c] = closestSegment;
+		}
+	}
 }
 
 /*******************************************************************************
@@ -704,6 +775,32 @@ void MainWindow::SegmentAverageMatchCost(int *segment, int numSegments,
                                          int w, int h, int numDisparities, double *matchCost)
 {
     // Add your code here
+	std::vector<double> segmentTotals(numSegments * numDisparities, 0);
+	std::vector<int> segmentCounts(numSegments, 0);
+
+	for (int i = 0; i < w * h; ++i)
+	{
+		int seg = segment[i];
+		segmentCounts[seg]++;
+
+		for (int d = 0; d < numDisparities; ++d)
+		{
+			segmentTotals[seg * numDisparities + d] += matchCost[d * w * h + i];
+		}
+	}
+
+	for (int i = 0; i < w * h; ++i)
+	{
+		int seg = segment[i];
+
+		for (int d = 0; d < numDisparities; ++d)
+		{
+			if (segmentCounts[seg] == 0)
+				matchCost[d * w * h + i];
+			else
+				matchCost[d * w * h + i] = segmentTotals[seg * numDisparities + d] / segmentCounts[seg];
+		}
+	}
 }
 
 /*******************************************************************************

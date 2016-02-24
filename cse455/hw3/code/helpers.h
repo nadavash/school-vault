@@ -3,13 +3,6 @@
 
 #include <qimage.h>
 
-QRgb RGBPixelAt(const QImage& image, int c, int r)
-{
-	c = std::min(std::max(c, 0), image.width() - 1);
-	r = std::min(std::max(r, 0), image.height() - 1);
-	return image.pixel(c, r);
-}
-
 // Returns a pixel from the image at the given x,y coordinates. Uses the 'fixed' method.
 static double PixelAt(const double* image, int w, int h, int x, int y)
 {
@@ -18,6 +11,7 @@ static double PixelAt(const double* image, int w, int h, int x, int y)
 	return image[x + y * w];
 }
 
+// Convert the given image to graytone.
 std::vector<double> GraytoneImage(const QImage& image)
 {
 	std::vector<double> buffer(image.width() * image.height());
