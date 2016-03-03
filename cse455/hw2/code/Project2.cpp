@@ -192,7 +192,7 @@ static double NormDistanceL1(CIntPt point1, CIntPt point2)
 		sum += abs(point1.m_Desc[i] - point2.m_Desc[i]);
 	}
 
-	return sqrt(sum);
+	return sum;
 }
 
 }  // namespace
