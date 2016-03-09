@@ -902,7 +902,7 @@ double MainWindow::FindBestClassifier(int *featureSortIdx, double *features, int
 	double faceSum = 0.0;
 	double backgroundSum = 0.0;
 
-	int bestThreshold = 0;
+	double bestThreshold = 0;
 	int bestPolarity = 0;
 	for (int i = 0; i < numTrainingExamples; ++i)
 	{
@@ -932,7 +932,6 @@ double MainWindow::FindBestClassifier(int *featureSortIdx, double *features, int
     //      bestClassifier->m_Weight - this is the alpha value in the course notes
 	bestClassifier->m_Threshold = bestThreshold;
 	bestClassifier->m_Polarity = bestPolarity;
-	
 	if (bestError == 0)
 	{
 		bestClassifier->m_Weight = log(1);
@@ -956,7 +955,32 @@ double MainWindow::FindBestClassifier(int *featureSortIdx, double *features, int
 *******************************************************************************/
 void MainWindow::UpdateDataWeights(double *features, int *trainingLabel, CWeakClassifiers weakClassifier, double *dataWeights, int numTrainingExamples)
 {
-	
+	double pWeight = weakClassifier.m_Polarity * weakClassifier.m_Weight;
+	for (int i = 0; i < numTrainingExamples; ++i)
+	{
+		bool correctClassification = false;
+		if (weakClassifier.m_Polarity == 1)
+		{
+			if (trainingLabel[i] == 1)
+				correctClassification = features[i] > weakClassifier.m_Threshold;
+			else
+				correctClassification = features[i] < weakClassifier.m_Threshold;
+		}
+		else
+		{
+			if (trainingLabel[i] == 1)
+				correctClassification = features[i] < weakClassifier.m_Threshold;
+			else
+				correctClassification = features[i] > weakClassifier.m_Threshold;
+		}
+
+		if (correctClassification)  // Correctly classified
+		{
+			dataWeights[i] = dataWeights[i] * exp(-weakClassifier.m_Weight);
+		}
+	}
+
+	Normalize(dataWeights, numTrainingExamples);
 }
 
 /*******************************************************************************

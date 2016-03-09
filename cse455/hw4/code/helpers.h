@@ -36,15 +36,15 @@ std::vector<double> GraytoneImage(const QImage& image)
 	return buffer;
 }
 
-// Normalize the given kernel of |length| size.
-static void NormalizeKernel(double* kernel, int length)
+// Normalize the given buffer of |length| size.
+static void Normalize(double* buff, int length)
 {
 	double denom = 0.000001;
 	for (int i = 0; i < length; ++i) {
-		denom += kernel[i];
+		denom += buff[i];
 	}
 
 	for (int i = 0; i < length; ++i) {
-		kernel[i] /= denom;
+		buff[i] /= denom;
 	}
 }
