@@ -4,12 +4,22 @@
 #include <qimage.h>
 
 // Returns a pixel from the image at the given x,y coordinates. Uses the 'fixed' method.
-static double PixelAt(const double* image, int w, int h, int x, int y)
+static double FixedPixelAt(const double* image, int w, int h, int x, int y)
 {
 	x = std::min(std::max(x, 0), w - 1);
 	y = std::min(std::max(y, 0), h - 1);
 	return image[x + y * w];
 }
+
+// Returns a pixel from the image at the given x,y coordinates.
+static double BlackPixelAt(const double* image, int w, int h, int x, int y)
+{
+	if (x < 0 || y < 0 || x >= w || y >= h)
+		return 0;
+
+	return image[x + y * w];
+}
+
 
 // Convert the given image to graytone.
 std::vector<double> GraytoneImage(const QImage& image)

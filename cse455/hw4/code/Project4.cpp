@@ -3,6 +3,7 @@
 #include "math.h"
 #include "ui_mainwindow.h"
 #include <QtGui>
+#include "helpers.h"
 
 /*******************************************************************************
     The following are helper routines with code already written.
@@ -774,7 +775,16 @@ void MainWindow::DisplayAverageFace(QImage *displayImage, double *trainingData, 
 *******************************************************************************/
 void MainWindow::IntegralImage(double *image, double *integralImage, int w, int h)
 {
-    // Add your code here.
+	for (int r = 0; r < h; ++r)
+	{
+		for (int c = 0; c < w; ++c)
+		{
+			integralImage[r * w + c] = image[r * w + c] +
+				BlackPixelAt(integralImage, w, h, c - 1, r) +
+				BlackPixelAt(integralImage, w, h, c, r - 1) -
+				BlackPixelAt(integralImage, w, h, c - 1, r -1);
+		}
+	}
 }
 
 /*******************************************************************************
@@ -785,9 +795,21 @@ void MainWindow::IntegralImage(double *image, double *integralImage, int w, int 
 *******************************************************************************/
 double MainWindow::BilinearInterpolation(double *image, double x, double y, int w)
 {
-    // Add your code here (or cut and paste from a previous assignment.)
+	int x1 = (int)floor(x);
+	int y1 = (int)floor(y);
+	int x2 = (int)ceil(x + 0.00001);
+	int y2 = (int)ceil(y + 0.00001);
 
-    return 0.0;
+	double p11 = image[y1 * w + x1];
+	double p12 = image[y2 * w + x1];
+	double p21 = image[y1 * w + x2];
+	double p22 = image[y2 * w + x2];
+
+	return (1 / ((x2 - x1) * (y2 - y1))) *
+		((p11 * (x2 - x) * (y2 - y)) +
+		(p21 * (x - x1) * (y2 - y)) +
+		(p12 * (x2 - x) * (y - y1)) +
+		(p22 * (x - x1) * (y - y1)));
 }
 
 /*******************************************************************************
@@ -799,9 +821,17 @@ double MainWindow::BilinearInterpolation(double *image, double x, double y, int 
 *******************************************************************************/
 double MainWindow::SumBox(double *integralImage, double x0, double y0, double x1, double y1, int w)
 {
+	double sum = 0.0;
     // Add your code here, use BilinearInterpolation as a helper function.
+	for (double x = x0; x < x1; x += 1.0)
+	{
+		for (double y = y0; y < y1; y += 1.0)
+		{
+			sum += BilinearInterpolation(integralImage, x, y, w);
+		}
+	}
 
-    return 0.0;
+    return sum;
 }
 
 /*******************************************************************************
@@ -825,7 +855,12 @@ void MainWindow::ComputeFeatures(double *integralImage, int c0, int r0, int size
         for(j=0;j<weakClassifiers[i].m_NumBoxes;j++)
         {
             // Add your code to compute the sum of the pixels within each box weakClassifiers[i].m_Box[j]
-            double sum = 0.0;
+			double x0 = weakClassifiers[i].m_Box[j][0][0] * size + c0;
+			double y0 = weakClassifiers[i].m_Box[j][0][1] * size + r0;
+			double x1 = weakClassifiers[i].m_Box[j][1][0] * size + c0;
+			double y1 = weakClassifiers[i].m_Box[j][1][1] * size + r0;
+
+            double sum = SumBox(integralImage, x0, y0, x1, y1, w);
 
             // Store the final feature value
             features[i] += weakClassifiers[i].m_BoxSign[j]*sum/((double) (size*size));
@@ -852,13 +887,60 @@ double MainWindow::FindBestClassifier(int *featureSortIdx, double *features, int
     // Copy the weak classifiers params
     candidateWeakClassifier.copy(bestClassifier);
 
-
     // Add your code here.
+	double faceWeightsTotal = 0.0;
+	double backgroundWeightsTotal = 0.0;
+
+	for (int i = 0; i < numTrainingExamples; ++i)
+	{
+		if (trainingLabel[i] == 1)
+			faceWeightsTotal += dataWeights[i];
+		else
+			backgroundWeightsTotal += dataWeights[i];
+	}
+
+	double faceSum = 0.0;
+	double backgroundSum = 0.0;
+
+	int bestThreshold = 0;
+	int bestPolarity = 0;
+	for (int i = 0; i < numTrainingExamples; ++i)
+	{
+		int index = featureSortIdx[i];
+
+		if (trainingLabel[index] == 1)
+			faceSum += dataWeights[index];
+		else
+			backgroundSum += dataWeights[index];
+
+		double left = backgroundSum + (faceWeightsTotal - faceSum);
+		double right = faceSum + (backgroundWeightsTotal - backgroundSum);
+		double error = min(left, right);
+
+		if (error < bestError)
+		{
+			//bestIndex = featureIndex;
+			bestError = error;
+			bestThreshold = features[index];
+			bestPolarity = left < right ? 0 : 1;
+		}
+	}
 
     // Once you find the best weak classifier, you'll need to update the following member variables:
     //      bestClassifier->m_Polarity
     //      bestClassifier->m_Threshold
     //      bestClassifier->m_Weight - this is the alpha value in the course notes
+	bestClassifier->m_Threshold = bestThreshold;
+	bestClassifier->m_Polarity = bestPolarity;
+	
+	if (bestError == 0)
+	{
+		bestClassifier->m_Weight = log(1);
+	}
+	else
+	{
+		bestClassifier->m_Weight = log((1 - bestError) / bestError);
+	}
 
     return bestError;
 
@@ -874,7 +956,7 @@ double MainWindow::FindBestClassifier(int *featureSortIdx, double *features, int
 *******************************************************************************/
 void MainWindow::UpdateDataWeights(double *features, int *trainingLabel, CWeakClassifiers weakClassifier, double *dataWeights, int numTrainingExamples)
 {
-    // Add you code here.
+	
 }
 
 /*******************************************************************************
