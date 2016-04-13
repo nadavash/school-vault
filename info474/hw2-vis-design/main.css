@@ -1,0 +1,10 @@
+/*#vis1-bar-chart {
+    width: 480px;
+    height: 400px;
+}*/
+
+#vis3 div {
+    width: 480px;
+    height: 400px;
+    display: inline-block;
+}
