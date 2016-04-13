@@ -1,6 +1,8 @@
 <html lang="en" >
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Bacterium Treatment Visualizations</title>
 
   <!-- Includes plotly.js -->
@@ -14,12 +16,37 @@
   <link rel="stylesheet" href="./main.css">
 </head>
 <body>
-  <div id="vis1-bar-chart"></div>
-  <div id="vis2-box-plot"></div>
-  <div id="vis3">
-    <div id="vis3-scatter1"></div>
-    <div id="vis3-scatter2"></div>
-    <div id="vis3-scatter3"></div>
+  <div class="mdl-layout mdl-layout--fixed-header mdl-js-layout">
+    <header class="mdl-layout__header mdl-layout__header--scroll">
+      <div class="mdl-layout__header-row">
+        <span class="mdl-layout-title">Bacteria & Antibiotics Visualization</span>
+      </div>
+    </header>
+    <div class="ribbon"></div>
+    <main class="vis-main mdl-layout__content">
+      <div class="vis-container mdl-grid">
+        <div class="vis-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grepy-800 mdl-cell mdl-cell--5-col">
+          <h2>Effectiveness of Antibotics on Certain Bacteria</h2>
+        </div>
+        <div class="vis-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grepy-800 mdl-cell mdl-cell--7-col">
+          <div id="vis1-bar-chart"></div>
+        </div>
+        <div class="vis-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grepy-800 mdl-cell mdl-cell--5-col">
+          <h2>Hi there!</h2>
+        </div>
+        <div class="vis-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grepy-800 mdl-cell mdl-cell--7-col">
+          <div id="vis2-box-plot"></div>
+        </div>
+        <div class="vis-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grepy-800 mdl-cell mdl-cell--5-col">
+          <h2>Hi there!</h2>
+        </div>
+        <div class="vis-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grepy-800 mdl-cell mdl-cell--7-col">
+          <div id="vis3-scatter1"></div>
+          <div id="vis3-scatter2"></div>
+          <div id="vis3-scatter3"></div>
+        </div>
+      </div>
+    </main>
   </div>
 
   <script src="https://code.jquery.com/jquery-2.2.2.min.js"></script>

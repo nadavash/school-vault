@@ -10,9 +10,6 @@
                 plotGramStaining(data);
                 plotCorrelation(data);
             })
-            .then(function() {
-                console.log('done loading')
-            });
     });
 
     function plotEffectiveness(data) {
@@ -44,7 +41,7 @@
             }
         };
 
-        Plotly.newPlot('vis1-bar-chart', barData, layout);
+        Plotly.newPlot('vis1-bar-chart', barData, layout, {staticPlot: true});
     }
 
     function plotGramStaining(data) {
@@ -135,7 +132,8 @@
             }
         };
 
-        Plotly.newPlot('vis3-scatter1', correlationData, layout);
+        Plotly.newPlot('vis3-scatter1', correlationData, layout,
+                       {staticPlot: true});
 
         var correlationData = [
             {
@@ -156,7 +154,8 @@
             }
         };
 
-        Plotly.newPlot('vis3-scatter2', correlationData, layout2);
+        Plotly.newPlot('vis3-scatter2', correlationData, layout2,
+                       {staticPlot: true});
 
         var correlationData = [
             {
@@ -177,7 +176,8 @@
             }
         };
 
-        Plotly.newPlot('vis3-scatter3', correlationData, layout3);
+        Plotly.newPlot('vis3-scatter3', correlationData, layout3,
+                       {staticPlot: true});
     }
 
     // Returns a promise to a ajax GET request to fetch the antibiotics csv
