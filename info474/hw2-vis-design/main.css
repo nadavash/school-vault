@@ -1,8 +1,3 @@
-/*#vis1-bar-chart {
-    width: 480px;
-    height: 400px;
-}*/
-
 #vis3 div {
     width: 480px;
     height: 400px;
@@ -12,7 +7,7 @@
 .ribbon {
     width: 100%;
     height: 80vh;
-    background-image: url('./header-img.jpg');
+    background-image: url('http://creationrevolution.com/wp-content/uploads/2014/01/image4.jpg');
     flex-shrink: 0;
 }
 
