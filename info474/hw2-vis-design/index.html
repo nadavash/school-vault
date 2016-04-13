@@ -19,26 +19,35 @@
   <div class="mdl-layout mdl-layout--fixed-header mdl-js-layout">
     <header class="mdl-layout__header mdl-layout__header--scroll">
       <div class="mdl-layout__header-row">
-        <span class="mdl-layout-title">Bacteria & Antibiotics Visualization</span>
+        <span class="mdl-layout-title">Bacteria & Antibiotics Visualization - Created by Nadav Ashkenazi</span>
       </div>
     </header>
     <div class="ribbon"></div>
     <main class="vis-main mdl-layout__content">
       <div class="vis-container mdl-grid">
         <div class="vis-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grepy-800 mdl-cell mdl-cell--5-col">
-          <h2>Visualizing Effectiveness of Antibotics on Certain Bacteria</h2>
+          <h2>Which antibiotic is most effective for each type of bacteria?</h2>
+          <p>For visualizing the effectiveness of antibiotics on bacteria, I found grouped bar charts to be the most logical solution. The most important part for this visualization was displaying each bacterium and the MIC score for each antibiotic’s effect on that bacterium. Therefore, I made an entry for each bacterium on the x-axis, and made the y-axis represent the MIC score. Each x-axis entry had 3 bars, each colored differently, that represent the MIC scores for penicillin, neomycin, and streptomycin.</p>
+          <p>The main (and only) elementary perceptual task for this visualization is the perception of position. When people look at bar charts the look at where the top of the bar hits on the y-axis (or x-axis for horizontal charts). This is the least error prone elementary perceptual task, and so I chose it to allow people to easily make judgments about which antibiotic is effective for which bacterium.</p>
+          <p>For this simple chart, I found it effective to limit to a single perceptual task. It seems that this single perceptual task can help reach more conclusions than the question I asked initially that produced this chart. It also helps show which bacteria are most treatable in general.</p>
         </div>
         <div class="vis-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grepy-800 mdl-cell mdl-cell--7-col">
           <div id="vis1-bar-chart"></div>
         </div>
         <div class="vis-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grepy-800 mdl-cell mdl-cell--5-col">
-          <h2>Visualizing Effectiveness of Antibiotics on Bacteria Based on Gram Staining</h2>
+          <h2>Does gram staining predict how treatable a certain bacterium is?</h2>
+          <p>This question required me to transform the data in order to effectively create the visualization I wanted. First, I had to separate the data set into MIC scores grouped by whether the bacteria scored positive or negative on gram staining. Then, for each positive/negative group of antibiotics, I averaged the MIC score by antibiotic. Then, I plotted the results on a stacked bar chart. Like the previous chart, the y-axis represented MIC scores. The x-axis represented the two groups, negative and positive gram-staining drugs.</p>
+          <p>Even though grouped bar plots are generally more effective, what I wanted to illustrate with this visualization was the overall treatability of each bacterium. The main perceptual task here is position perception for the entire group of antibiotics, each of which are color-coded separately. This effectively addresses my initial question. The breakdown for each antibiotic was useful as well. It requires perception of length, which is less effective than position. But again, that was not my concern with this question, so downgrading to a less effective elementary perceptual task proved reasonable.</p>
+          <p>Overall, it may still make sense to use a grouped instead of stacked bar chart. However, I answered my question effectively without it and maybe even a little better. Also, because of the inconvenient distribution of the data, averaging drug scores was especially useful in producing easy-to-navigate visualizations of the data.</p>
         </div>
         <div class="vis-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grepy-800 mdl-cell mdl-cell--7-col">
           <div id="vis2-box-plot"></div>
         </div>
         <div class="vis-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grepy-800 mdl-cell mdl-cell--5-col">
-          <h2>Hi there!</h2>
+          <h2>Is one antibiotic’s effectiveness correlated with another?</h2>
+          <p>Scatter plots illustrate correlation (or lack thereof) better than any other statistical visualization tool out there. Therefore, I decided to plot the MIC score for each antibiotic against each other antibiotic. I hoped that, when I chose this tool for the question, I would see a general patter of dots falling on a correlation line for effectiveness of penicillin to neomycin, for example. I produced 3 different scatter plots, so I essentially plotted similar data along non-aligned scales.</p>
+          <p>There are several elementary perceptual tasks at play for several axes. The first is position. People tend to look of the horizontal and vertical position of each dot to perceive the effectiveness of one antibiotic vs the effectiveness of another. The second perceptual task requires looking at the direction. To perceive correlation, the dots on the scatter plot must all seem to fall on linear, exponential, maybe even a logarithmic line.</p>
+          <p>As it turns out, these plots helped me identify very quickly that no interesting patterns exist between the effectiveness of one antibiotic and another in terms of correlation. It does seem like Neomycin and Streptomycin MIC scores have a little bit of correlation, but the data is inconclusive and the correlation seems to be weak.</p>
         </div>
         <div class="vis-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grepy-800 mdl-cell mdl-cell--7-col">
           <div id="vis3-scatter1"></div>

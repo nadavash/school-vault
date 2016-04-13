@@ -84,7 +84,7 @@
                 name: 'Penicilin',
                 x: keys,
                 y: [negStain['Penicilin'], posStain['Penicilin']],
-                type: 'bar'
+                type: 'bar',
             },
             {
                 name: 'Neomycin',
@@ -105,7 +105,8 @@
                    'staining bacteria',
             yaxis: {
                 title: 'Average Minimum Inhibitory Concentration (MIC)'
-            }
+            },
+            barmode: 'stack'
         };
 
         Plotly.newPlot('vis2-box-plot', stainingData, layout,
