@@ -1,5 +1,7 @@
 *.class
 
+info371/ps2/progresa_sample.csv
+
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
