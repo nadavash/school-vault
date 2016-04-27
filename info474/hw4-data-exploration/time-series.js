@@ -3,14 +3,15 @@
 // Returns a time series chart function that can be used to generate a reusable
 // time series svg visualization.
 function timeSeries() {
+    var TRANSITION_DURATION = 1500;
     var data = [];
     var width = 640;
     var height = 480;
     var backgroundColor = '#DDDDDD';
-    var margin = {
+    var padding = {
         top: 50,
-        bottom: 100,
-        left: 70,
+        bottom: 50,
+        left: 50,
         right: 50
     };
 
@@ -18,49 +19,67 @@ function timeSeries() {
 
     var updateData;
 
+    // Chart generation closure.
     var chart = function(selection) {
-        selection.each(function(data) {
+        selection.each(function() {
             var svg = d3.select(this).append('svg')
                 .attr('width', width)
                 .attr('height', height)
                 .style('background-color', backgroundColor);
 
-            var rectsContainer = svg.append('g')
-                .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+            var pointsContainer = svg.append('g')
+                .attr('transform', 'translate(' + padding.left + ',' + padding.top + ')');
 
             var xAxisLabel = svg.append('g')
                 .attr('class', 'axis')
-                .attr('transform', 'translate(' + margin.left + ',' + (height + margin.top) + ')');
+                .attr('transform', 'translate(' + padding.left + ',' + (height - padding.top) + ')');
 
             var yAxisLabel = svg.append('g')
                 .attr('class', 'axis')
-                .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+                .attr('transform', 'translate(' + padding.left + ',' + padding.top + ')');
 
             var xAxisText = svg.append('text')
-                .attr('transform', 'translate(' + (width/2) + ',' + (height - margin.top) + ')')
+                .attr('transform', 'translate(' + (padding.left + innerWidth()/2) + ',' + (innerHeight() + padding.top + 30) + ')')
                 .attr('class', 'title')
                 .text('time');
 
             var yAxisText = svg.append('text')
-                .attr('transform', 'translate(' + (margin.left - 30) + ',' + (margin.top + height/2) + ') rotate(-90)')
+                .attr('transform', 'translate(' + (padding.left - 30) + ',' + (height/2) + ') rotate(-90)')
                 .attr('class', 'title')
                 .text('counts');
 
             updateData = function() {
                 setScales(data);
+                setAxes(xAxisLabel, yAxisLabel);
+                var adjustedWidth = innerWidth();
+                var adjustedHeight = innerHeight();
+
+                var points = pointsContainer.selectAll('circle').data(data);
+                console.log(xScale(Date(data[0].date)))
+                points.enter().append('circle')
+                    .attr('r', 3)
+                    .attr('cx', function(d) { return xScale(Date.parse(d.date)); })
+                    .attr('cy', function(d) { return yScale(d.total); })
+                    .style('opacity', 0.7)
+                    .attr('title', function(d) { return d.time; });
+
+                points.exit().remove();
             };
+
+            updateData();
         });
     };
 
+    // Gets/sets the data associated with this chart.
     chart.data = function(val) {
         if (!arguments.length) return data;
         data = val;
         if (typeof updateData === 'function') {
-            updateData();
+            updateData(data);
         }
-
     };
 
+    // Gets/sets the width of this chart.
     chart.width = function(val) {
         if (!arguments.length) return width;
 
@@ -68,6 +87,7 @@ function timeSeries() {
         return this;
     };
 
+    // Gets/sets the height of this chart.
     chart.height = function(val) {
         if (!arguments.length) return height;
 
@@ -75,6 +95,7 @@ function timeSeries() {
         return this;
     };
 
+    // Gets/sets the background color of this chart.
     chart.backgroundColor = function(val) {
         if (!arguments.length) return backgroundColor;
 
@@ -82,20 +103,21 @@ function timeSeries() {
         return this;
     }
 
-    // Returns the width of the chart, excluding the margins.
+    // Returns the width of the chart, excluding the paddings.
     var innerWidth = function() {
-        return width - margin.left - margin.right;
+        return width - padding.left - padding.right;
     };
 
-    // Returns the height of the chart, excluding the margins.
+    // Returns the height of the chart, excluding the paddings.
     var innerHeight = function() {
-        return height - margin.top - margin.bottom;
+        return height - padding.top - padding.bottom;
     };
 
     var setScales = function(data) {
         xScale = d3.time.scale()
-            .domain([data[0].date, data[data.length - 1].date])
-            .range([0, width]);
+            .domain([Date.parse(data[0].date),
+                     Date.parse(data[data.length - 1].date)])
+            .range([0, innerWidth()]);
 
         var yMin = d3.min(data, function(d) {
             return Math.min(d.ped_north, d.ped_south,
@@ -107,7 +129,21 @@ function timeSeries() {
         });
         yScale = d3.scale.linear()
             .domain([yMin, yMax])
-            .range([height, 0]);
+            .range([innerHeight(), 0]);
+    };
+
+    var setAxes = function(xAxisLabel, yAxisLabel) {
+        var xAxis = d3.svg.axis()
+            .scale(xScale)
+            .orient('bottom');
+
+        var yAxis = d3.svg.axis()
+            .scale(yScale)
+            .orient('left');
+
+        xAxisLabel.transition().duration(TRANSITION_DURATION).call(xAxis);
+
+        yAxisLabel.transition().duration(TRANSITION_DURATION).call(yAxis);
     };
 
     return chart;
