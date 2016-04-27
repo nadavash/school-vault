@@ -7,7 +7,7 @@ function timeSeries() {
     var data = [];
     var width = 640;
     var height = 480;
-    var backgroundColor = '#DDDDDD';
+    var backgroundColor = 'white';
     var padding = {
         top: 50,
         bottom: 50,
@@ -29,6 +29,9 @@ function timeSeries() {
 
             var pointsContainer = svg.append('g')
                 .attr('transform', 'translate(' + padding.left + ',' + padding.top + ')');
+
+            var valueLinePath = pointsContainer.append('path')
+                .attr('class', 'line');
 
             var xAxisLabel = svg.append('g')
                 .attr('class', 'axis')
@@ -55,15 +58,24 @@ function timeSeries() {
                 var adjustedHeight = innerHeight();
 
                 var points = pointsContainer.selectAll('circle').data(data);
-                console.log(xScale(Date(data[0].date)))
                 points.enter().append('circle')
                     .attr('r', 3)
-                    .attr('cx', function(d) { return xScale(Date.parse(d.date)); })
+                    .attr('cx', function(d) { return xScale(d.date); })
                     .attr('cy', function(d) { return yScale(d.total); })
                     .style('opacity', 0.7)
                     .attr('title', function(d) { return d.time; });
 
                 points.exit().remove();
+
+                points.transition()
+                    .attr('cx', function(d) { return xScale(d.date); })
+                    .attr('cy', function(d) { return yScale(d.total); })
+                    .style('opacity', 0.7)
+                    .attr('title', function(d) { return d.time; });
+
+                valueLinePath
+                    .transition()
+                    .attr('d', valueLine(data));
             };
 
             updateData();
@@ -75,7 +87,7 @@ function timeSeries() {
         if (!arguments.length) return data;
         data = val;
         if (typeof updateData === 'function') {
-            updateData(data);
+            updateData();
         }
     };
 
@@ -115,17 +127,18 @@ function timeSeries() {
 
     var setScales = function(data) {
         xScale = d3.time.scale()
-            .domain([Date.parse(data[0].date),
-                     Date.parse(data[data.length - 1].date)])
+            .domain([data[0].date, data[data.length - 1].date])
             .range([0, innerWidth()]);
 
         var yMin = d3.min(data, function(d) {
-            return Math.min(d.ped_north, d.ped_south,
-                            d.bike_north, d.bike_south);
+            return +d.total;
+            // return Math.min(d.ped_north, d.ped_south,
+            //                 d.bike_north, d.bike_south);
         });
         var yMax = d3.max(data, function(d) {
-            return Math.max(d.ped_north, d.ped_south,
-                            d.bike_north, d.bike_south);
+            return +d.total;
+            // return Math.max(d.ped_north, d.ped_south,
+            //                 d.bike_north, d.bike_south);
         });
         yScale = d3.scale.linear()
             .domain([yMin, yMax])
@@ -145,6 +158,10 @@ function timeSeries() {
 
         yAxisLabel.transition().duration(TRANSITION_DURATION).call(yAxis);
     };
+
+    var valueLine = d3.svg.line()
+        .x(function (d) { return xScale(d.date); })
+        .y(function (d) { return yScale(d.total); });
 
     return chart;
 }

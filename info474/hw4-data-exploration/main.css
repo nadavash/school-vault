@@ -54,3 +54,9 @@ h2 {
   fill:green;
   opacity:.4;
 }
+
+path {
+    stroke: steelblue;
+    stroke-width: 2;
+    fill: none;
+}
