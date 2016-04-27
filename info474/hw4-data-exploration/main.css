@@ -1,0 +1,38 @@
+body {
+    background-color: rgb(245,245,245);
+}
+
+#vis3 div {
+    width: 480px;
+    height: 400px;
+    display: inline-block;
+}
+
+.ribbon {
+    width: 100%;
+    height: 80vh;
+    background-image: url('https://www.lonelyplanet.com/travel-blog/tip-article/wordpress_uploads/2011/01/113223047_full_CS.jpg');
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+.vis-main {
+    margin-top: -75vh;
+    flex-shrink: 0;
+}
+
+.vis-container {
+    width: calc(100% - 16px);
+    margin: auto;
+}
+
+.vis-content {
+    border-radius: 2px;
+    padding: 20px 56px;
+    margin-bottom: 40px;
+}
+
+h2 {
+    font-size: 20pt;
+}
