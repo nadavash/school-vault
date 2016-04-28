@@ -73,11 +73,11 @@ path {
 }
 
 #ped_north {
-    color: red;
+    color: green;
 }
 
 #ped_south {
-    color: green;
+    color: red;
 }
 
 #bk_north {
