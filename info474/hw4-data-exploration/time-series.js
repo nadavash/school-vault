@@ -27,11 +27,22 @@ function timeSeries() {
                 .attr('height', height)
                 .style('background-color', backgroundColor);
 
-            var pointsContainer = svg.append('g')
-                .attr('transform', 'translate(' + padding.left + ',' + padding.top + ')');
+            var data_names = ['ped_south','ped_north','bike_north','bike_south'];
+            var colors = ['red', 'green', 'blue', 'orange'];
+            var pointsContainers = data_names.map(function (name, index) {
+                var pointsContainer = svg.append('g')
+                    .attr('transform', 'translate(' + padding.left + ',' + padding.top + ')');
 
-            var valueLinePath = pointsContainer.append('path')
-                .attr('class', 'line');
+                var valueLinePath = pointsContainer.append('path')
+                    .attr('class', 'line');
+
+                return {
+                    name: name,
+                    color: colors[index],
+                    container: pointsContainer,
+                    valueLinePath: valueLinePath
+                };
+            });
 
             var xAxisLabel = svg.append('g')
                 .attr('class', 'axis')
@@ -57,25 +68,34 @@ function timeSeries() {
                 var adjustedWidth = innerWidth();
                 var adjustedHeight = innerHeight();
 
-                var points = pointsContainer.selectAll('circle').data(data);
-                points.enter().append('circle')
-                    .attr('r', 3)
-                    .attr('cx', function(d) { return xScale(d.date); })
-                    .attr('cy', function(d) { return yScale(d.total); })
-                    .style('opacity', 0.7)
-                    .attr('title', function(d) { return d.time; });
+                pointsContainers.forEach(function(dataPoints) {
+                    var points = dataPoints.container.selectAll('circle').data(data);
+                    points.enter().append('circle')
+                        .attr('r', 3)
+                        .attr('cx', function(d) { return xScale(d.date); })
+                        .attr('cy', function(d) { return yScale(d[dataPoints.name]); })
+                        .style('opacity', 0.7)
+                        .attr('fill', dataPoints.color)
+                        .attr('title', function(d) { return d[dataPoints.name]; });
 
-                points.exit().remove();
+                    points.exit().remove();
 
-                points.transition()
-                    .attr('cx', function(d) { return xScale(d.date); })
-                    .attr('cy', function(d) { return yScale(d.total); })
-                    .style('opacity', 0.7)
-                    .attr('title', function(d) { return d.time; });
+                    points.transition()
+                        .attr('cx', function(d) { return xScale(d.date); })
+                        .attr('cy', function(d) { return yScale(d[dataPoints.name]); })
+                        .attr('title', function(d) { return d[dataPoints.name]; });
 
-                valueLinePath
-                    .transition()
-                    .attr('d', valueLine(data));
+                    var localData = data.map(function (d) {
+                       return {
+                           date: d.date,
+                           count: d[dataPoints.name]
+                       };
+                    });
+                    dataPoints.valueLinePath
+                        .transition()
+                        .attr('d', valueLine(localData))
+                        .attr('stroke', dataPoints.color);
+                });
             };
 
             updateData();
@@ -131,14 +151,12 @@ function timeSeries() {
             .range([0, innerWidth()]);
 
         var yMin = d3.min(data, function(d) {
-            return +d.total;
-            // return Math.min(d.ped_north, d.ped_south,
-            //                 d.bike_north, d.bike_south);
+            return Math.min(d.ped_north, d.ped_south,
+                            d.bike_north, d.bike_south);
         });
         var yMax = d3.max(data, function(d) {
-            return +d.total;
-            // return Math.max(d.ped_north, d.ped_south,
-            //                 d.bike_north, d.bike_south);
+            return Math.max(d.ped_north, d.ped_south,
+                            d.bike_north, d.bike_south);
         });
         yScale = d3.scale.linear()
             .domain([yMin, yMax])
@@ -161,7 +179,7 @@ function timeSeries() {
 
     var valueLine = d3.svg.line()
         .x(function (d) { return xScale(d.date); })
-        .y(function (d) { return yScale(d.total); });
+        .y(function (d) { return yScale(d.count); });
 
     return chart;
 }

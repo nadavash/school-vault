@@ -1,5 +1,10 @@
 body {
     background-color: rgb(245,245,245);
+    font-family: 'Roboto', sans-serif;
+}
+
+body, p {
+    font-size: 12pt;
 }
 
 #vis3 div {
@@ -43,7 +48,7 @@ h2 {
 }
 
 .title {
-	text-anchor:middle;
+	text-anchor: middle;
 }
 
 .axis text {
@@ -56,7 +61,29 @@ h2 {
 }
 
 path {
-    stroke: steelblue;
     stroke-width: 2;
     fill: none;
+}
+
+#ped_north,
+#ped_south,
+#bk_north,
+#bk_south {
+    font-size: 20pt;
+}
+
+#ped_north {
+    color: red;
+}
+
+#ped_south {
+    color: green;
+}
+
+#bk_north {
+    color: blue;
+}
+
+#bk_south {
+    color: orange;
 }
