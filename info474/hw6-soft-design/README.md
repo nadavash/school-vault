@@ -5,6 +5,29 @@ represent their values as a colored table. The module exposes a completely
 reusable d3 chart with user-editable properties, and it can handle two different
 data formats.
 
+## Public methods:
+
+`width([val: Number])` - Gets/sets the width of the chart.
+
+`height([val: Number])` - Gets/sets the height of the chart.
+
+`minColor([val: String])` - Gets/sets the minimum color for the lowest value in
+the heatmap. Accepts an rgb, hex, or color name.
+
+`maxColor([val: String])` - Gets/sets the maximum color for the highest value in
+the heatmap. Accepts an rgb, hex, or color name.
+
+`xLabels([val: Array])` - Gets/sets the labels for the horizontal axis of this
+heatmap. Accepts an array of labels as the label values. The number of elements
+in the array should match the number of columns in the dataset.
+
+`yLabels([val: Array])` - Gets/sets the labels for the vertical axis of this
+heatmap. Accepts an array of labels as the label values. The number of elements
+in the array should match the number of rows in the dataset.
+
+`transitionDuration([val: Number])` - Gets/sets the transition duration for this
+chart's animations.
+
 ## Creating & configuring a heatmap
 
 Creating a heatmap works the same way as any other D3 reusable chart. You can
@@ -69,7 +92,3 @@ var dataframe = [
 The chart will use the first element from each object as the vertical axis
 labels for the heatmap, and use all of the other properties as the horizontal
 axis labels.
-
-## Further help
-For further information about using specific methods from the heatmap module,
-refer to the `heatmap.js` file.

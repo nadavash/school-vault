@@ -75,6 +75,8 @@ function heatmap() {
             tilesContainer.enter().append('rect')
                 .attr('x', function(_, index) { return (index % dim.x) * tileWidth + tileWidth / 2; })
                 .attr('y', function(_, index) { return Math.floor(index / dim.x) * tileHeight + tileHeight / 2; })
+                .attr('rx', 4)
+                .attr('ry', 4)
                 .attr('width', 0)
                 .attr('height', 0)
                 .style('fill', function(d) { return colorScale(d) });
@@ -189,7 +191,7 @@ function heatmap() {
         return this;
     };
 
-    // Extracts the data and labels from the given dataframe. Returns xlabels,
+    // Extracts the data and labels from the given dataframe.
     function extractDataLabels(data) {
         var rowLabelName = Object.keys(data[0])[0];
         var dataLabels = {
