@@ -46,6 +46,8 @@ var table = [
     ...
 ];
 ```
+![data table example](./datatable.png "Data Table Example")
+
 The chart will place each element from the same array horizontally and on the
 same vertical position. If the user does not specify the x and y labels to use
 with this table, the chart will automatically place numbered ticks.
@@ -62,6 +64,12 @@ var dataframe = [
     ...
 ];
 ```
+![data frame example](./dataframe.png "Data Frame Example")
+
 The chart will use the first element from each object as the vertical axis
 labels for the heatmap, and use all of the other properties as the horizontal
 axis labels.
+
+## Further help
+For further information about using specific methods from the heatmap module,
+refer to the `heatmap.js` file.
