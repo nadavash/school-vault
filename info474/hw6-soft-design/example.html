@@ -16,18 +16,23 @@
 
   <script src="./heatmap.js"></script>
   <script>
-      var myHeatmap = heatmap()
-        .width(800)
-        .height(1200);
+      var myHeatmap = heatmap();
 
+      var table = [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]
+      ]
       d3.select('#vis')
-        .datum([[1,2,3],[4,5,6],[7,8,9],[1,2,3],[4,5,6],[7,8,9]])
+        .datum(table)
         .call(myHeatmap);
 
       d3.csv('ppg2008.csv', function(data) {
 
         setTimeout(function() {
-            myHeatmap.minColor('yellow')
+            myHeatmap.width(800)
+                .height(1200)
+                .minColor('yellow')
                 .maxColor('red');
             d3.select('#vis')
                 .datum(data)
