@@ -10,8 +10,7 @@ function heatmap() {
         maxColor = d3.rgb('red'),
         xLabels = null,
         yLabels = null,
-        transitionDuration = 750,
-        rowLabelName = 'Name';
+        transitionDuration = 750;
 
     // Positioning/space attributes
     var margin = {
@@ -167,14 +166,16 @@ function heatmap() {
         return this;
     };
 
-    // Gets/sets the labels for the horizontal axis of this heatmap.
+    // Gets/sets the labels for the horizontal axis of this heatmap. Accepts
+    // an array of labels as the label values.
     chart.xLabels = function(val) {
         if (!arguments.length) return xLabels;
         xLabels = val;
         return this;
     };
 
-    // Gets/sets the labels for the vertical axis of this heatmap.
+    // Gets/sets the labels for the vertical axis of this heatmap. Accepts an
+    // array of labels as the label values.
     chart.yLabels = function(val) {
         if (!arguments.length) return yLabels;
         yLabels = val;
@@ -188,18 +189,12 @@ function heatmap() {
         return this;
     };
 
-    // Gets/sets the element from the data to extract as the y labels for the
-    // vertical axis.
-    chart.rowLabelName = function(val) {
-        if (!arguments.length) return rowLabelName;
-        rowLabelName = val;
-        return this;
-    };
-
+    // Extracts the data and labels from the given dataframe. Returns xlabels,
     function extractDataLabels(data) {
+        var rowLabelName = Object.keys(data[0])[0];
         var dataLabels = {
             xLabels: Object.keys(data[0]).slice(1),
-            yLabels: data.map(function(row) { return row.Name; }),
+            yLabels: data.map(function(row) { return row[rowLabelName]; }),
         };
 
         dataLabels.data = data.map(function(row) {
@@ -211,6 +206,8 @@ function heatmap() {
         return dataLabels;
     };
 
+    // Normalizes that table data by column. Each column is normalized
+    // separately to values between 0 and 1 based on its min/max values.
     function normalize(data) {
         var mins = data[0].map(function(_, index) {
             return d3.min(data, function(d) { return +d[index] });
@@ -226,14 +223,17 @@ function heatmap() {
         });
     }
 
+    // Returns the chart width adjusted for the margins.
     function chartWidth() {
         return width - margin.left - margin.right;
     }
 
+    // Returns the chart height adjusted for the margins.
     function chartHeight() {
         return height - margin.top - margin.bottom;
     }
 
+    // Helper method that builds an array from the give range bounds.
     function range(start, stop, step) {
         if (typeof stop == 'undefined') {
             // one param defined
