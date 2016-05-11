@@ -1,0 +1,39 @@
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Heatmap Example</title>
+
+  <!-- Includes D3.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.16/d3.js"></script>
+  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.16/d3.min.js"></script>-->
+
+  <link rel="stylesheet" href="./main.css">
+</head>
+<body>
+  <div id='vis'></div>
+
+  <script src="./heatmap.js"></script>
+  <script>
+      var myHeatmap = heatmap()
+        .width(800)
+        .height(1200);
+
+      d3.select('#vis')
+        .datum([[1,2,3],[4,5,6],[7,8,9],[1,2,3],[4,5,6],[7,8,9]])
+        .call(myHeatmap);
+
+      d3.csv('ppg2008.csv', function(data) {
+
+        setTimeout(function() {
+            myHeatmap.minColor('yellow')
+                .maxColor('red');
+            d3.select('#vis')
+                .datum(data)
+                .call(myHeatmap);
+        }, 3000);
+      });
+  </script>
+</body>
+</html>
